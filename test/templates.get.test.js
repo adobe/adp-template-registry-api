@@ -29,7 +29,9 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-process.env = {};
+process.env = {
+  TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'
+};
 dotenv.config({ path: './.env.test' });
 
 const HTTP_METHOD = 'get';

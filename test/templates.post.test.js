@@ -27,7 +27,9 @@ jest.mock('@adobe/aio-sdk', () => ({
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
 
-process.env = {};
+process.env = {
+  TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'
+};
 dotenv.config({ path: './.env.test' });
 
 beforeEach(() => {

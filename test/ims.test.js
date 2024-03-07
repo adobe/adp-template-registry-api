@@ -14,7 +14,9 @@ const nock = require('nock');
 const dotenv = require('dotenv');
 const { validateAccessToken, isAdmin } = require('../actions/ims');
 
-process.env = {};
+process.env = {
+  IMS_URL: 'https://ims-na1-stg1.adobelogin.com',
+};
 dotenv.config({ path: './.env.test' });
 
 describe('Verify communication with IMS', () => {

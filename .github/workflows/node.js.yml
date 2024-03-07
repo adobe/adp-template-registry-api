@@ -11,8 +11,4 @@ on:
 
 jobs:
   build:
-    if: github.repository == 'adobe/adp-template-registry-api'
     uses: adobe/aio-reusable-workflows/.github/workflows/node.js.yml@main
-    secrets:
-      IMS_URL: ${{ secrets.TEST_IMS_URL }}
-      TEMPLATE_REGISTRY_API_URL: ${{ secrets.TEST_TEMPLATE_REGISTRY_API_URL }}
