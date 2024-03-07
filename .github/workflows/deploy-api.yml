@@ -1,0 +1,52 @@
+name: Deploy API
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  release: # Prod
+    types: [released]
+  push: # Stage
+    branches:
+      - main
+
+jobs:
+  deploy:
+    environment: ${{ github.event_name == 'release' && 'Production' || github.event_name == 'push' && 'Stage' }}
+    name: Deploy to ${{ github.event_name == 'release' && 'Production' || github.event_name == 'push' && 'Stage' }}
+    # we would like to avoid running this workflow in forked repos
+    if: github.repository == 'adobe/adp-template-registry-api'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 1
+      matrix:
+        node-version: ['20']
+        os: [ubuntu-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: npm install
+      - name: Setup Adobe AIO CLI
+        uses: adobe/aio-cli-setup-action@1.3.0
+        with:
+          os: ${{ matrix.os }}
+          version: 10.x.x
+      - name: Deploy
+        env:
+          AIO_runtime_auth: ${{ vars.AIO_RUNTIME_AUTH }}
+          AIO_runtime_namespace: ${{ vars.AIO_RUNTIME_NAMESPACE }}
+          AIO_runtime_apihost: ${{ vars.AIO_RUNTIME_APIHOST }}
+          TEMPLATE_REGISTRY_ORG: ${{ vars.TEMPLATE_REGISTRY_ORG }}
+          TEMPLATE_REGISTRY_REPOSITORY: ${{ vars.TEMPLATE_REGISTRY_REPOSITORY }}
+          ACCESS_TOKEN_GITHUB: ${{ vars.ACCESS_TOKEN_GITHUB }}
+          IMS_URL: ${{ vars.IMS_URL }}
+          IMS_CLIENT_ID: ${{ vars.IMS_CLIENT_ID }}
+          ADMIN_IMS_ORGANIZATIONS: ${{ vars.ADMIN_IMS_ORGANIZATIONS }}
+          TEMPLATE_REGISTRY_API_URL: ${{ vars.TEMPLATE_REGISTRY_API_URL }}
+        run: aio app deploy
