@@ -29,14 +29,9 @@ $ cd aio-template-registry-api
 $ npm install
 ```
 
-### Tests
+## Run Tests
 
-To run tests:
-
-1. Create a new file named `.env.test` in the root folder of the project. This new file should based off `.env.test.sample` (i.e. it should contain all keys mentioned in this file and corresponsing suitable values)
-
-2. Run command `npm test` to run all test suites.
-
+`npm test`
 
 ## Contributing
 
