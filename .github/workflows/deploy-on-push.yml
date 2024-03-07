@@ -1,0 +1,49 @@
+name: Deploy API Stage CI
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: Deploy to Stage
+    # we would like to avoid running this workflow in forked repos
+    if: github.repository == 'magento-eqp/aio-template-registry-api'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 1
+      matrix:
+        node-version: ['14']
+        os: [ubuntu-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: npm install
+      - name: Setup Adobe AIO CLI
+        uses: adobe/aio-cli-setup-action@1.1.0
+        with:
+          os: ${{ matrix.os }}
+          version: 8.x.x
+      - name: Deploy
+        env:
+          AIO_runtime_auth: ${{ secrets.AIO_RUNTIME_AUTH_STAGE }}
+          AIO_runtime_namespace: ${{ secrets.AIO_RUNTIME_NAMESPACE_STAGE }}
+          AIO_runtime_apihost: ${{ secrets.AIO_RUNTIME_APIHOST_STAGE }}
+          TEMPLATE_REGISTRY_ORG: ${{ secrets.TEMPLATE_REGISTRY_ORG_STAGE }}
+          TEMPLATE_REGISTRY_REPOSITORY: ${{ secrets.TEMPLATE_REGISTRY_REPOSITORY_STAGE }}
+          ACCESS_TOKEN_GITHUB: ${{ secrets.ACCESS_TOKEN_GITHUB_STAGE }}
+          IMS_URL: ${{ secrets.IMS_URL_STAGE }}
+          IMS_CLIENT_ID: ${{ secrets.IMS_CLIENT_ID_STAGE }}
+          ADMIN_IMS_ORGANIZATIONS: ${{ secrets.ADMIN_IMS_ORGANIZATIONS_STAGE }}
+          TEMPLATE_REGISTRY_API_URL: ${{ secrets.TEMPLATE_REGISTRY_API_URL_STAGE }}
+        run: aio app deploy
