@@ -14,7 +14,6 @@ const { Core } = require('@adobe/aio-sdk');
 const { validateAccessToken, isAdmin } = require('../actions/ims');
 const utils = require('../actions/utils');
 const action = require('../actions/templates/delete/index');
-const dotenv = require('dotenv');
 const { fetchUrl, findTemplateByName, removeTemplateByName } = require('../actions/templateRegistry');
 
 const mockLoggerInstance = { 'info': jest.fn(), 'debug': jest.fn(), 'error': jest.fn() };
@@ -33,8 +32,9 @@ beforeEach(() => {
   isAdmin.mockReset();
 });
 
-process.env = {};
-dotenv.config({ path: './.env.test' });
+process.env = {
+  ADMIN_IMS_ORGANIZATIONS: 'adminOrg@AdobeOrg, adminOrg2@AdobeOrg',
+};
 
 const HTTP_METHOD = 'delete';
 const IMS_ACCESS_TOKEN = 'fake';

@@ -11,11 +11,9 @@ governing permissions and limitations under the License.
 
 const { expect, describe, test } = require('@jest/globals');
 const nock = require('nock');
-const dotenv = require('dotenv');
 const { findTemplateByName, getReviewIssueByTemplateName } = require('../actions/templateRegistry');
 
 process.env = {};
-dotenv.config({ path: './.env.test' });
 
 describe('Verify communication with Template Registry', () => {
   test('Verify finding a template by a template name', async () => {
