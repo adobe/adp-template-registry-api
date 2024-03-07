@@ -1,0 +1,108 @@
+application:
+  actions: actions
+  runtimeManifest:
+    packages:
+      template-registry-api:
+        version: 1.0
+        license: Apache-2.0
+        actions:
+          templates-post:
+            function: actions/templates/post/index.js
+            web: "yes"
+            runtime: "nodejs:14"
+            include:
+              - ["openapi.yaml"]
+            inputs:
+              LOG_LEVEL: debug
+              IMS_URL: $IMS_URL
+              IMS_CLIENT_ID: $IMS_CLIENT_ID
+              ACCESS_TOKEN_GITHUB: $ACCESS_TOKEN_GITHUB
+              TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
+              TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
+              TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+            annotations:
+              require-adobe-auth: false
+              final: true
+          templates-get:
+            function: actions/templates/get/index.js
+            web: "yes"
+            runtime: "nodejs:14"
+            include:
+              - ["openapi.yaml"]
+            inputs:
+              LOG_LEVEL: debug
+              TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
+              TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
+              TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+            annotations:
+              require-adobe-auth: false
+              final: true
+          templates-delete:
+            function: actions/templates/delete/index.js
+            web: "yes"
+            runtime: "nodejs:14"
+            include:
+              - ["openapi.yaml"]
+            inputs:
+              LOG_LEVEL: debug
+              IMS_URL: $IMS_URL
+              IMS_CLIENT_ID: $IMS_CLIENT_ID
+              ADMIN_IMS_ORGANIZATIONS: $ADMIN_IMS_ORGANIZATIONS
+              ACCESS_TOKEN_GITHUB: $ACCESS_TOKEN_GITHUB
+              TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
+              TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
+              TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+            annotations:
+              require-adobe-auth: false
+              final: true
+          templates-list:
+            function: actions/templates/list/index.js
+            web: "yes"
+            runtime: "nodejs:14"
+            include:
+              - ["openapi.yaml"]
+            inputs:
+              LOG_LEVEL: debug
+              TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
+              TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
+              TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+            annotations:
+              require-adobe-auth: false
+              final: true
+        apis:
+          templates-post:
+            v1:
+              templates:
+                templates-post:
+                  method: post
+                  response: http
+          templates-get-by-org-name-template-name:
+            v1:
+              templates/{orgName}/{templateName}:
+                templates-get:
+                  method: get
+                  response: http
+          templates-get-by-template-name:
+            v1:
+              templates/{templateName}:
+                templates-get:
+                  method: get
+                  response: http
+          templates-delete-by-org-name-template-name:
+            v1:
+              templates/{orgName}/{templateName}:
+                templates-delete:
+                  method: delete
+                  response: http
+          templates-delete-by-template-name:
+            v1:
+              templates/{templateName}:
+                templates-delete:
+                  method: delete
+                  response: http
+          templates-list:
+            v1:
+              templates:
+                templates-list:
+                  method: get
+                  response: http

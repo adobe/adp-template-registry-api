@@ -1,0 +1,83 @@
+{
+    "statusCode": 200,
+    "body": {
+        "_links": {
+            "self": {
+                "href": "https://template-registry-api.tbd/apis/v1/templates?extensions="
+            }
+        },
+        "items": [
+            {
+                "_links": {
+                    "self": {
+                        "href": "https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-3"
+                    }
+                },
+                "id": "d1dc1000-f32e-4172-a0ec-9b2f3ef6ac48",
+                "author": "Adobe Inc.",
+                "name": "@author/app-builder-template-3",
+                "description": "A template for testing purposes",
+                "latestVersion": "1.0.1",
+                "publishDate": "2022-05-01T03:50:39.658Z",
+                "apis": [
+                    {
+                        "code": "CampaignStandard"
+                    }
+                ],
+                "adobeRecommended": true,
+                "keywords": [
+                    "aio",
+                    "adobeio",
+                    "app",
+                    "templates",
+                    "aio-app-builder-template"
+                ],
+                "status": "Approved",
+                "links": {
+                    "npm": "https://www.npmjs.com/package/@author/app-builder-template-3",
+                    "github": "https://github.com/author/app-builder-template-3"
+                },
+                "categories": [
+                    "ui"
+                ],
+                "runtime": false
+            },
+            {
+                "_links": {
+                    "review": {
+                        "description": "A link to the \"Template Review Request\" Github issue.",
+                        "href": "https://github.com/adobe/aio-template-submission/issues/4"
+                    },
+                    "self": {
+                        "href": "https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-4"
+                    }
+                },
+                "id": "d1dc1000-f32e-4172-a0ec-9b2f4ef6cc48",
+                "name": "@author/app-builder-template-4",
+                "status": "InVerification",
+                "links": {
+                    "npm": "https://www.npmjs.com/package/@author/app-builder-template-4",
+                    "github": "https://github.com/author/app-builder-template-4"
+                }
+            },
+            {
+                "_links": {
+                    "review": {
+                        "description": "A link to the \"Template Review Request\" Github issue.",
+                        "href": "https://github.com/adobe/aio-template-submission/issues/5"
+                    },
+                    "self": {
+                        "href": "https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-5"
+                    }
+                },
+                "id": "d1dc1000-f32e-4172-a0ac-9b2f3ef6ac48",
+                "name": "@author/app-builder-template-5",
+                "status": "Rejected",
+                "links": {
+                    "npm": "https://www.npmjs.com/package/@author/app-builder-template-5",
+                    "github": "https://github.com/author/app-builder-template-5"
+                }
+            }
+        ]
+    }
+}

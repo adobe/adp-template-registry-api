@@ -1,0 +1,12 @@
+{
+    "statusCode": 200,
+    "body": {
+        "_links": {
+            "self": {
+                "href": "https://template-registry-api.tbd/apis/v1/templates?names=@author/app-builder-template-2&categories=!events,ui,action&apis=Events&adobeRecommended=true"
+            }
+        },
+        "items": [
+        ]
+    }
+}
