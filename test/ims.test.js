@@ -11,11 +11,12 @@ governing permissions and limitations under the License.
 
 const { expect, describe, test } = require('@jest/globals');
 const nock = require('nock');
-const dotenv = require('dotenv');
 const { validateAccessToken, isAdmin } = require('../actions/ims');
 
-process.env = {};
-dotenv.config({ path: './.env.test' });
+process.env = {
+  IMS_URL: 'https://ims-na1-stg1.adobelogin.com',
+  IMS_CLIENT_ID: 'test'
+};
 
 describe('Verify communication with IMS', () => {
   test('Verify checking that provided IMS access token is valid', async () => {

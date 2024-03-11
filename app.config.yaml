@@ -9,7 +9,7 @@ application:
           templates-post:
             function: actions/templates/post/index.js
             web: "yes"
-            runtime: "nodejs:14"
+            runtime: "nodejs:18"
             include:
               - ["openapi.yaml"]
             inputs:
@@ -26,7 +26,7 @@ application:
           templates-get:
             function: actions/templates/get/index.js
             web: "yes"
-            runtime: "nodejs:14"
+            runtime: "nodejs:18"
             include:
               - ["openapi.yaml"]
             inputs:
@@ -40,7 +40,7 @@ application:
           templates-delete:
             function: actions/templates/delete/index.js
             web: "yes"
-            runtime: "nodejs:14"
+            runtime: "nodejs:18"
             include:
               - ["openapi.yaml"]
             inputs:
@@ -58,7 +58,7 @@ application:
           templates-list:
             function: actions/templates/list/index.js
             web: "yes"
-            runtime: "nodejs:14"
+            runtime: "nodejs:18"
             include:
               - ["openapi.yaml"]
             inputs:

@@ -14,10 +14,10 @@ const { Core } = require('@adobe/aio-sdk');
 const action = require('../actions/templates/list/index');
 const utils = require('../actions/utils');
 const nock = require('nock');
-const dotenv = require('dotenv');
 
-process.env = {};
-dotenv.config({ path: './.env.test' });
+process.env = {
+  TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'
+};
 
 const mockLoggerInstance = { 'info': jest.fn(), 'debug': jest.fn(), 'error': jest.fn() };
 

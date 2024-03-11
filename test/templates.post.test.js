@@ -13,7 +13,6 @@ const { expect, describe, test, beforeEach } = require('@jest/globals');
 const { Core } = require('@adobe/aio-sdk');
 const { validateAccessToken } = require('../actions/ims');
 const utils = require('../actions/utils');
-const dotenv = require('dotenv');
 const { fetchUrl, findTemplateByName, addTemplate, createReviewIssue } = require('../actions/templateRegistry');
 const action = require('../actions/templates/post/index');
 
@@ -27,8 +26,9 @@ jest.mock('@adobe/aio-sdk', () => ({
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
 
-process.env = {};
-dotenv.config({ path: './.env.test' });
+process.env = {
+  TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
