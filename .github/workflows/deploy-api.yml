@@ -39,14 +39,14 @@ jobs:
           version: 10.x.x
       - name: Deploy
         env:
-          AIO_runtime_auth: ${{ vars.AIO_RUNTIME_AUTH }}
-          AIO_runtime_namespace: ${{ vars.AIO_RUNTIME_NAMESPACE }}
-          AIO_runtime_apihost: ${{ vars.AIO_RUNTIME_APIHOST }}
-          TEMPLATE_REGISTRY_ORG: ${{ vars.TEMPLATE_REGISTRY_ORG }}
-          TEMPLATE_REGISTRY_REPOSITORY: ${{ vars.TEMPLATE_REGISTRY_REPOSITORY }}
-          ACCESS_TOKEN_GITHUB: ${{ vars.ACCESS_TOKEN_GITHUB }}
-          IMS_URL: ${{ vars.IMS_URL }}
-          IMS_CLIENT_ID: ${{ vars.IMS_CLIENT_ID }}
-          ADMIN_IMS_ORGANIZATIONS: ${{ vars.ADMIN_IMS_ORGANIZATIONS }}
-          TEMPLATE_REGISTRY_API_URL: ${{ vars.TEMPLATE_REGISTRY_API_URL }}
+          AIO_runtime_auth: ${{ secrets.AIO_RUNTIME_AUTH }}
+          AIO_runtime_namespace: ${{ secrets.AIO_RUNTIME_NAMESPACE }}
+          AIO_runtime_apihost: ${{ secrets.AIO_RUNTIME_APIHOST }}
+          TEMPLATE_REGISTRY_ORG: ${{ secrets.TEMPLATE_REGISTRY_ORG }}
+          TEMPLATE_REGISTRY_REPOSITORY: ${{ secrets.TEMPLATE_REGISTRY_REPOSITORY }}
+          ACCESS_TOKEN_GITHUB: ${{ secrets.ACCESS_TOKEN_GITHUB }}
+          IMS_URL: ${{ secrets.IMS_URL }}
+          IMS_CLIENT_ID: ${{ secrets.IMS_CLIENT_ID }}
+          ADMIN_IMS_ORGANIZATIONS: ${{ secrets.ADMIN_IMS_ORGANIZATIONS }}
+          TEMPLATE_REGISTRY_API_URL: ${{ secrets.TEMPLATE_REGISTRY_API_URL }}
         run: aio app deploy
