@@ -24,8 +24,8 @@ See [Template Registry API Schema](./openapi.yaml) for more details on this REST
 ## Installation
 
 ```bash
-$ git clone git@github.com:magento-eqp/aio-template-registry-api.git
-$ cd aio-template-registry-api
+$ git clone git@github.com:adobe/adp-template-registry-api.git
+$ cd adp-template-registry-api
 $ npm install
 ```
 
