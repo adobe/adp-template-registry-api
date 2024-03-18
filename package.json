@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@adobe/aio-sdk": "^3.0.0",
+    "@adobe/aio-sdk": "^5.0.1",
     "@octokit/rest": "^20.0.2",
     "axios": "^0.27.2",
     "lodash.orderby": "^4.6.0",
