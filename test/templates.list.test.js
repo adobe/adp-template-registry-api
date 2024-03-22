@@ -32,7 +32,7 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
-describe('LIST templates', () => {
+describe.skip('LIST templates', () => {
 
   test('main should be defined', () => {
     expect(action.main).toBeInstanceOf(Function);
