@@ -6,6 +6,7 @@ application:
         version: 1.0
         license: Apache-2.0
         inputs: 
+          MONGODB_NAME: $MONGODB_NAME
           MONGODB_URI: $MONGODB_URI
         actions:
           templates-post:
