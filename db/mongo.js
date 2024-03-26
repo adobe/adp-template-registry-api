@@ -11,12 +11,12 @@ governing permissions and limitations under the License.
 
 const { MongoClient } = require('mongodb');
 
-const dbName = params.MONGODB_NAME || 'abstgtplregistryva6';
-const url = params.MONGODB_URI || 'mongodb://localhost:27017';
 let db = null;
 
-async function connectToMongoDB() {
+async function connectToMongoDB(params) {
   try {
+    const dbName = params.MONGODB_NAME || 'abstgtplregistryva6';
+    const url = params.MONGODB_URI || 'mongodb://localhost:27017';
     const client = new MongoClient(url);
     await client.connect();
     console.log('Connected to MongoDB');
@@ -27,11 +27,11 @@ async function connectToMongoDB() {
   }
 }
 
-async function mongoConnection(collectionName) {
+async function mongoConnection(params, collectionName) {
   if (!db || db === null) {
-    await connectToMongoDB();
+    await connectToMongoDB(params);
   }
   return db.collection(collectionName); // returns a collection
 }
 
-module.exports = { connectToMongoDB, mongoConnection };
+module.exports = { mongoConnection };

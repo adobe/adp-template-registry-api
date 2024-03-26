@@ -26,25 +26,26 @@ const { mongoConnection } = require('../db/mongo');
 /**
  * Returns a template record from Template Registry by a template name.
  *
+ * @param {object} dbParams database connection parameters
  * @param {string} templateName template name
  * @returns {Promise<object|null>} an existing template record or null
  */
-async function findTemplateByName(templateName) {
-  const collection = await mongoConnection(collectionName);
-  const cursor = await collection.find({ 'name': templateName });
-  const results = await cursor.toArray();
+async function findTemplateByName(dbParams, templateName) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const results = await collection.find({ 'name': templateName }).toArray();
   return results.length ? results[0] : null;
 }
 
 /**
  * Adds a template to Template Registry.
  *
+ * @param {object} dbParams database connection parameters
  * @param {string} templateName template name
  * @param {string} githubRepoUrl Github repo URL
  * @returns {object} a newly created template
  */
-async function addTemplate(templateName, githubRepoUrl) {
-  const collection = await mongoConnection(collectionName);
+async function addTemplate(dbParams, templateName, githubRepoUrl) {
+  const collection = await mongoConnection(dbParams, collectionName);
   const template = {
     'id': uuidv4(),
     'name': templateName,
@@ -61,11 +62,12 @@ async function addTemplate(templateName, githubRepoUrl) {
 /**
  * Removes a template from Template Registry.
  *
+ * @param {object} dbParams database connection parameters
  * @param {string} templateName template name
  * @returns {void}
  */
-async function removeTemplateByName(templateName) {
-  const collection = await mongoConnection(collectionName);
+async function removeTemplateByName(dbParams, templateName) {
+  const collection = await mongoConnection(dbParams, collectionName);
   await collection.deleteOne({ 'name': templateName });
 }
 
@@ -127,13 +129,13 @@ async function getOpenReviewIssues(templateRegistryOrg, templateRegistryReposito
 /**
  * Returns Template Registry records.
  *
- * @returns {Array<object>} existing Template Registry records
+ * @param {object} dbParams database connection parameters
+ * @returns {promise<Array|[]>} existing Template Registry records
  */
-async function getTemplates() {
-  const collection = await mongoConnection(collectionName);
-  const cursor = collection.find({});
-  const results = await cursor.toArray();
-  return results;
+async function getTemplates(dbParams) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const results = await collection.find({}).toArray();
+  return results.length ? results : [];
 }
 
 /**

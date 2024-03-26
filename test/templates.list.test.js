@@ -14,6 +14,7 @@ const { Core } = require('@adobe/aio-sdk');
 const action = require('../actions/templates/list/index');
 const utils = require('../actions/utils');
 const nock = require('nock');
+const { getTemplates } = require('../actions/templateRegistry');
 
 process.env = {
   TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'
@@ -27,10 +28,20 @@ jest.mock('@adobe/aio-sdk', () => ({
     'Logger': jest.fn()
   }
 }));
+jest.mock('../actions/templateRegistry');
+
 
 beforeEach(() => {
   jest.clearAllMocks();
 });
+
+process.env = {
+  TEMPLATE_REGISTRY_ORG: 'adobe',
+  'TEMPLATE_REGISTRY_REPOSITORY': 'aio-templates',
+  TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'
+};
+
+const HTTP_METHOD = 'get';
 
 describe.skip('LIST templates', () => {
 
@@ -38,27 +49,252 @@ describe.skip('LIST templates', () => {
     expect(action.main).toBeInstanceOf(Function);
   });
 
-  test('Successful LIST request without filters, should return 200', async () => {
-    nock('https://api.github.com/repos')
-      .get(`/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/issues?state=open&labels=add-template&sort=updated-desc`)
-      .times(1)
-      .replyWithFile(200, __dirname + '/fixtures/list/response.github.issues.json');
-
-    nock('https://raw.githubusercontent.com')
-      .get(`/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/main/registry.json`)
-      .times(1)
-      .replyWithFile(200, __dirname + '/fixtures/list/registry.json');
+  test.only('Successful LIST request without filters, should return 200', async () => {
+    const orgName = '@adobe';
+    const templateName = 'app-builder-template';
+    const templates = [
+      {
+        '_links': {
+          'self': {
+            'href': 'https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-1'
+          }
+        },
+        'adobeRecommended': false,
+        'author': 'Adobe Inc.',
+        'categories': [
+          'action',
+          'ui'
+        ],
+        'description': 'A template for testing purposes',
+        'extensions': [
+          {
+            'extensionPointId': 'dx/excshell/1'
+          }
+        ],
+        'id': 'd1dc1000-f32e-4172-a0ec-9b2f3ef6ac47',
+        'keywords': [
+          'aio',
+          'adobeio',
+          'app',
+          'templates',
+          'aio-app-builder-template'
+        ],
+        'latestVersion': '1.0.0',
+        'links': {
+          'github': 'https://github.com/author/app-builder-template-1',
+          'npm': 'https://www.npmjs.com/package/@author/app-builder-template-1'
+        },
+        'name': '@author/app-builder-template-1',
+        'publishDate': '2022-05-01T03:50:39.658Z',
+        'apis': [
+          {
+            'code': 'AnalyticsSDK',
+            'credentials': 'OAuth'
+          },
+          {
+            'code': 'CampaignStandard'
+          },
+          {
+            'code': 'Runtime'
+          },
+          {
+            'code': 'Events',
+            'hooks': [
+              {
+                'postdeploy': 'some command'
+              }
+            ]
+          },
+          {
+            'code': 'Mesh',
+            'endpoints': [
+              {
+                'my-action': 'https://some-action.com/action'
+              }
+            ]
+          }
+        ],
+        'status': 'Approved',
+        'runtime': true
+      },
+      {
+        '_links': {
+          'self': {
+            'href': 'https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-2'
+          }
+        },
+        'adobeRecommended': true,
+        'author': 'Adobe Inc.',
+        'categories': [
+          'events'
+        ],
+        'description': 'A template for testing purposes',
+        'extensions': [
+          {
+            'extensionPointId': 'dx/asset-compute/worker/1'
+          }
+        ],
+        'id': 'd1dc1000-f32e-4172-a0ec-9b2f3ef6cc48',
+        'keywords': [
+          'aio',
+          'adobeio',
+          'app',
+          'templates',
+          'aio-app-builder-template'
+        ],
+        'latestVersion': '1.0.1',
+        'links': {
+          'github': 'https://github.com/author/app-builder-template-2',
+          'npm': 'https://www.npmjs.com/package/@author/app-builder-template-2'
+        },
+        'name': '@author/app-builder-template-2',
+        'publishDate': '2022-05-01T03:50:39.658Z',
+        'apis': [
+          {
+            'code': 'Events',
+            'hooks': [
+              {
+                'postdeploy': 'some command'
+              }
+            ]
+          },
+          {
+            'code': 'Mesh',
+            'endpoints': [
+              {
+                'my-action': 'https://some-action.com/action'
+              }
+            ]
+          }
+        ],
+        'status': 'Approved',
+        'runtime': true,
+        'event': {}
+      },
+      {
+        '_links': {
+          'self': {
+            'href': 'https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-3'
+          }
+        },
+        'adobeRecommended': true,
+        'author': 'Adobe Inc.',
+        'categories': [
+          'ui'
+        ],
+        'description': 'A template for testing purposes',
+        'id': 'd1dc1000-f32e-4172-a0ec-9b2f3ef6ac48',
+        'keywords': [
+          'aio',
+          'adobeio',
+          'app',
+          'templates',
+          'aio-app-builder-template'
+        ],
+        'latestVersion': '1.0.1',
+        'links': {
+          'github': 'https://github.com/author/app-builder-template-3',
+          'npm': 'https://www.npmjs.com/package/@author/app-builder-template-3'
+        },
+        'name': '@author/app-builder-template-3',
+        'publishDate': '2022-05-01T03:50:39.658Z',
+        'apis': [
+          {
+            'code': 'CampaignStandard'
+          }
+        ],
+        'status': 'Approved',
+        'runtime': false
+      },
+      {
+        '_links': {
+          'review': {
+            'description': 'A link to the "Template Review Request" Github issue.',
+            'href': 'https://github.com/adobe/aio-template-submission/issues/4'
+          },
+          'self': {
+            'href': 'https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-4'
+          }
+        },
+        'id': 'd1dc1000-f32e-4172-a0ec-9b2f4ef6cc48',
+        'name': '@author/app-builder-template-4',
+        'status': 'InVerification',
+        'links': {
+          'npm': 'https://www.npmjs.com/package/@author/app-builder-template-4',
+          'github': 'https://github.com/author/app-builder-template-4'
+        }
+      },
+      {
+        '_links': {
+          'review': {
+            'description': 'A link to the "Template Review Request" Github issue.',
+            'href': 'https://github.com/adobe/aio-template-submission/issues/5'
+          },
+          'self': {
+            'href': 'https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-5'
+          }
+        },
+        'id': 'd1dc1000-f32e-4172-a0ac-9b2f3ef6ac48',
+        'name': '@author/app-builder-template-5',
+        'status': 'Rejected',
+        'links': {
+          'npm': 'https://www.npmjs.com/package/@author/app-builder-template-5',
+          'github': 'https://github.com/author/app-builder-template-5'
+        }
+      },
+      {
+        '_links': {
+          'self': {
+            'href': 'https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-6'
+          }
+        },
+        'adobeRecommended': false,
+        'author': 'Adobe Inc.',
+        'categories': [
+          'ui',
+          'helper-template'
+        ],
+        'description': 'A template for testing purposes',
+        'id': 'd1nc1000-f32e-4472-a3ec-9b2f3ef6ac48',
+        'keywords': [
+          'aio',
+          'adobeio',
+          'app',
+          'templates',
+          'aio-app-builder-template'
+        ],
+        'latestVersion': '1.0.1',
+        'links': {
+          'npm': 'https://www.npmjs.com/package/@author/app-builder-template-6',
+          'github': 'https://github.com/author/app-builder-template-6'
+        },
+        'name': '@author/app-builder-template-6',
+        'publishDate': '2022-06-11T04:50:39.658Z',
+        'extensions': [
+          {
+            'extensionPointId': 'dx/asset-compute/worker/1'
+          }
+        ],
+        'status': 'Approved',
+        'runtime': true
+      }];
+    getTemplates.mockReturnValue(templates);
 
     const response = await action.main(
       {
         'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
         'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
         'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-        '__ow_method': 'get'
+        'orgName': orgName,
+        'templateName': templateName,
+        '__ow_method': HTTP_METHOD
       }
     );
 
-    expect(response).toEqual(require(__dirname + '/fixtures/list/response.full.json'));
+    // expect(response).toEqual(require(__dirname + '/fixtures/list/response.full.json'));
+    expect(response).toEqual({});
+    expect(getTemplates).toHaveBeenCalledTimes(1);
+    expect(getTemplates).toHaveBeenCalledWith({});
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });

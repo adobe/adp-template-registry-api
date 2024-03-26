@@ -203,7 +203,7 @@ describe('POST templates', () => {
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
-    expect(findTemplateByName).toHaveBeenCalledWith(TEMPLATE_NAME, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
+    expect(findTemplateByName).toHaveBeenCalledWith({}, TEMPLATE_NAME);
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 
@@ -254,8 +254,8 @@ describe('POST templates', () => {
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
-    expect(findTemplateByName).toHaveBeenCalledWith(TEMPLATE_NAME, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(addTemplate).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY, `Add "${TEMPLATE_NAME}" via API`);
+    expect(findTemplateByName).toHaveBeenCalledWith({},TEMPLATE_NAME);
+    expect(addTemplate).toHaveBeenCalledWith({}, TEMPLATE_NAME, TEMPLATE_GITHUB_REPO);
     expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
   });

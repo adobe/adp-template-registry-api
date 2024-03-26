@@ -40,7 +40,7 @@ describe('mongoConnection', () => {
 
   it('should connect to MongoDB and return a collection', async () => {
     const collectionName = 'testCollection';
-    await mongoConnection(collectionName);
+    await mongoConnection({}, collectionName);
 
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(clientDbMock).toHaveBeenCalledWith('abstgtplregistryva6');
@@ -48,8 +48,8 @@ describe('mongoConnection', () => {
   });
 
   it('should return the existing collection if already connected', async () => {
-    await mongoConnection('existingCollection');
-    await mongoConnection('existingCollection');
+    await mongoConnection({}, 'existingCollection');
+    await mongoConnection({}, 'existingCollection');
 
     expect(clientConnectSpy).not.toHaveBeenCalled();
     expect(clientDbMock).not.toHaveBeenCalled();

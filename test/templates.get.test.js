@@ -122,7 +122,7 @@ describe('GET templates', () => {
       }
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
-    expect(findTemplateByName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
+    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
   });
 
@@ -164,7 +164,7 @@ describe('GET templates', () => {
       }
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
-    expect(findTemplateByName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
+    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(getReviewIssueByTemplateName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
   });
@@ -185,7 +185,7 @@ describe('GET templates', () => {
       'statusCode': 404
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
-    expect(findTemplateByName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
+    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
   });
 
@@ -252,7 +252,7 @@ describe('GET templates', () => {
       }
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
-    expect(findTemplateByName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
+    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
     expect(mockLoggerInstance.error).toHaveBeenCalledWith(new Error('Response invalid\n  at: body\n    One or more required properties missing: status'));
   });

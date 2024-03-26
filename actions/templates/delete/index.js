@@ -26,6 +26,11 @@ async function main(params) {
   const imsClientId = params.IMS_CLIENT_ID;
   const adminImsOrganizations = params.ADMIN_IMS_ORGANIZATIONS.split(',');
 
+  const dbParams = {
+    'MONGODB_URI': params.MONGODB_URI,
+    'MONGODB_NAME': params.MONGODB_NAME
+  };
+
   try {
     // 'info' is the default level if not set
     logger.info('Calling "DELETE templates"');
@@ -70,7 +75,7 @@ async function main(params) {
       };
     }
     const fullTemplateName = (orgName !== undefined) ? orgName + '/' + templateName : templateName;
-    const template = await findTemplateByName(fullTemplateName, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
+    const template = await findTemplateByName(dbParams, fullTemplateName);
     if (null === template) {
       return {
         'statusCode': 404
@@ -84,7 +89,7 @@ async function main(params) {
       };
     }
 
-    await removeTemplateByName(fullTemplateName, params.ACCESS_TOKEN_GITHUB, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY, `Remove "${fullTemplateName}" via API`);
+    await removeTemplateByName(dbParams, fullTemplateName);
     const response = {
       'statusCode': 200
     };

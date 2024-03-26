@@ -29,6 +29,11 @@ async function main(params) {
   const imsUrl = params.IMS_URL;
   const imsClientId = params.IMS_CLIENT_ID;
 
+  const dbParams = {
+    'MONGODB_URI': params.MONGODB_URI,
+    'MONGODB_NAME': params.MONGODB_NAME
+  };
+
   try {
     // 'info' is the default level if not set
     logger.info('Calling "POST templates"');
@@ -84,7 +89,8 @@ async function main(params) {
 
     const templateName = params[POST_PARAM_NAME];
     const githubRepoUrl = params[POST_PARAM_LINKS][POST_PARAM_LINKS_GITHUB];
-    const result = await findTemplateByName(templateName, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
+
+    const result = await findTemplateByName(dbParams, templateName);
     if (null !== result) {
       return {
         'statusCode': 409
@@ -98,7 +104,7 @@ async function main(params) {
       };
     }
 
-    const template = await addTemplate(templateName, githubRepoUrl, params.ACCESS_TOKEN_GITHUB, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY, `Add "${templateName}" via API`);
+    const template = await addTemplate(dbParams, templateName, githubRepoUrl);
     const issueNumber = await createReviewIssue(templateName, githubRepoUrl, params.ACCESS_TOKEN_GITHUB, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
     const response = {
       ...template,

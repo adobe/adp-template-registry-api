@@ -89,7 +89,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
 
   test('should add a template to the collection', async () => {
 
-    const templateResponse = await addTemplate(templateName, githubRepoUrl);
+    const templateResponse = await addTemplate({}, templateName, githubRepoUrl);
 
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(clientDbMock).toHaveBeenCalledWith(expect.any(String)); // Ensure db is called with a string
@@ -116,7 +116,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   test('should remove template from the collection', async () => {
     const templateName = 'my-template';
 
-    await removeTemplateByName(templateName);
+    await removeTemplateByName({}, templateName);
 
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(clientDbMock).toHaveBeenCalledWith(expect.any(String));
@@ -126,7 +126,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   });
 
   test('should get all templates from the collection', async () => {
-    const templatesResult = await getTemplates();
+    const templatesResult = await getTemplates({});
     expect(collectionMock.find).toHaveBeenCalledWith({});
     expect(collectionMock.find().toArray).toHaveBeenCalled();
     expect(templatesResult).toEqual(templates);
@@ -134,7 +134,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
 
   test('should get template by name from the collection', async () => {
     const templateName = 'my-template';
-    const templatesResult = await findTemplateByName(templateName);
+    const templatesResult = await findTemplateByName({}, templateName);
     expect(collectionMock.find).toHaveBeenCalledWith({});
     expect(collectionMock.find().toArray).toHaveBeenCalled();
     expect(templatesResult).toEqual(templates[0]);
