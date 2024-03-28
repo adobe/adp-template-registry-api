@@ -87,14 +87,19 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     clientDbMock.mockRestore();
   });
 
-  test('should add a template to the collection', async () => {
+  test('should add an app builder template to the collection', async () => {
 
-    const templateResponse = await addTemplate({}, templateName, githubRepoUrl);
+    const templateResponse = await addTemplate({}, {
+      name: templateName,
+      links: {
+        github: githubRepoUrl
+      }
+    });
 
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(clientDbMock).toHaveBeenCalledWith(expect.any(String)); // Ensure db is called with a string
     expect(collectionMock.insertOne).toHaveBeenCalledWith({
-      id: expect.any(String),
+      id: undefined,
       name: templateName,
       status: 'InVerification',
       links: {
@@ -103,13 +108,37 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       }
     });
     expect(templateResponse).toEqual({
-      id: expect.any(String),
       name: templateName,
       status: 'InVerification',
       links: {
         npm: `https://www.npmjs.com/package/${templateName}`,
         github: githubRepoUrl
       }
+    });
+  });
+
+  test('should add a developer console template to the collection', async () => {
+    const consoleTemplate = {
+      name: templateName,
+      description: 'My template description',
+      version: '1.0.0',
+      links: {
+        consoleProject: 'https://developer-stage.adobe.com/console/projects/123',
+      }
+    };
+
+    const templateResponse = await addTemplate({}, consoleTemplate);
+
+    expect(clientConnectSpy).toHaveBeenCalled();
+    expect(clientDbMock).toHaveBeenCalledWith(expect.any(String)); // Ensure db is called with a string
+    expect(collectionMock.insertOne).toHaveBeenCalledWith({
+      id: undefined,
+      status: 'InVerification',
+      ...consoleTemplate
+    });
+    expect(templateResponse).toEqual({
+      status: 'InVerification',
+      ...consoleTemplate
     });
   });
 

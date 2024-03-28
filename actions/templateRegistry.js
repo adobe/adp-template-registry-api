@@ -11,7 +11,6 @@ governing permissions and limitations under the License.
 
 const axios = require('axios').default;
 const { Octokit } = require('@octokit/rest');
-const { v4: uuidv4 } = require('uuid');
 
 const collectionName = 'templates';
 
@@ -44,17 +43,18 @@ async function findTemplateByName(dbParams, templateName) {
  * @param {string} githubRepoUrl Github repo URL
  * @returns {object} a newly created template
  */
-async function addTemplate(dbParams, templateName, githubRepoUrl) {
+async function addTemplate(dbParams, body) {
   const collection = await mongoConnection(dbParams, collectionName);
-  const template = {
-    'id': uuidv4(),
-    'name': templateName,
-    'status': 'InVerification',
-    'links': {
-      'npm': `https://www.npmjs.com/package/${templateName}`,
-      'github': githubRepoUrl
-    }
+  let template = {
+    ...body,
+    status: 'InVerification'
   };
+
+  // Only add npm link if github link is provided
+  if (template.links?.github) {
+    template.links.npm = `https://www.npmjs.com/package/${body.name}`;
+  }
+
   await collection.insertOne(template);
   return template;
 }

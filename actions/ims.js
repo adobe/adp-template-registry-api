@@ -10,6 +10,10 @@ governing permissions and limitations under the License.
 */
 
 const axios = require('axios').default;
+const { Ims } = require('@adobe/aio-lib-ims');
+const Kvjs = require('@heyputer/kv.js');
+const kv = new Kvjs();
+const CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
 
 /**
  * Checks that the provided token is a valid IMS access token.
@@ -88,7 +92,28 @@ async function requestImsResource(url, accessToken, headers = {}, params = {}) {
   });
 }
 
+async function generateAccessToken(imsAuthCode, imsClientId, imsClientSecret, imsScopes) {
+  // Check if we have a cached access token
+  const cachedAccessToken = kv.get('authorization');
+  if (cachedAccessToken) {
+    return cachedAccessToken;
+  }
+
+  // If not, generate a new one and cache it
+  const ims = new Ims('stage');
+
+  const { payload } = await ims.getAccessToken(
+    imsAuthCode,
+    imsClientId,
+    imsClientSecret,
+    imsScopes
+  );
+  kv.set('authorization', payload.access_token, { PX: CACHE_MAX_AGE });
+  return payload.access_token;
+}
+
 module.exports = {
   validateAccessToken,
-  isAdmin
+  isAdmin,
+  generateAccessToken
 };

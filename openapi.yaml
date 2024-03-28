@@ -29,24 +29,27 @@ paths:
               type: object
               required:
                 - name
-                - links
-              additionalProperties: false
               properties:
                 name:
                   type: string
                   description: The name of the package implementing the template on npmjs.com
                   example: '@adobe/app-builder-template'
+                description: 
+                  type: string
+                  description: A description of the template
+                  example: 'This is a template for Adobe App Builder'
+                version: 
+                  type: string
+                  description: The version of the template in the semver format
+                  example: '1.0.0'
                 links:
                   type: object
                   description: A link to the Github repository containing the package's source code
-                  required:
-                    - github
-                  additionalProperties: false
                   properties:
                     github:
                       $ref: "#/components/schemas/GithubUrl"
-              example:
-                {"name":"@adobe/app-builder-template","links":{"github":"https://github.com/adobe/app-builder-template"}}
+                    consoleProject: 
+                      $ref: "#/components/schemas/DeveloperConsoleUrl"
       responses:
         "200":
           description: Information about a newly added template.
@@ -338,6 +341,10 @@ components:
           type: string
           description: The name of the template on npmjs.com
           example: '@adobe/app-builder-template'
+        version: 
+          type: string
+          description: The version of the template in the semver format
+          example: '1.0.0'
         description:
           type: string
           description: A description of the template
@@ -390,6 +397,25 @@ components:
                 type: string
                 description: The sdk code of the service
                 example: AdobeAnalyticsSDK
+        credentials: 
+          type: array 
+          description: A list of credentials required by the template
+          minItems: 1
+          items: 
+            type: object
+            required: 
+              - type
+              - flowType
+            additionalProperties: true
+            properties: 
+              type: 
+                type: string
+                description: The type of the credential
+                example: 'OAUTH_SERVER_TO_SERVER'
+              flowType: 
+                type: string
+                description: The flow type of the credential
+                example: 'ENTP'
         runtime:
           type: boolean
           description: Whether to add Runtime to App Builder application or not.
@@ -419,9 +445,6 @@ components:
         links:
           type: object
           description: A list of locations where the package's code can be found
-          required:
-            - npm
-            - github
           additionalProperties: false
           properties:
             npm:
@@ -432,6 +455,8 @@ components:
               example: 'https://www.npmjs.com/package/@adobe/app-builder-template'
             github:
               $ref: "#/components/schemas/GithubUrl"
+            consoleProject: 
+              $ref: "#/components/schemas/DeveloperConsoleUrl"
         _links:
           $ref: "#/components/schemas/Links"
     GithubUrl:
@@ -440,6 +465,12 @@ components:
       pattern: ^https://github\.com/
       description: A link to the Github repository containing the package's source code
       example: 'https://github.com/adobe/app-builder-template'
+    DeveloperConsoleUrl: 
+      type: string
+      format: uri
+      pattern: ^https://developer-stage\.adobe\.com/console/projects
+      description: A link to the console project
+      example: 'https://developer-stage.adobe.com/console/projects/<project-id>'
     Links:
       type: object
       description: |
