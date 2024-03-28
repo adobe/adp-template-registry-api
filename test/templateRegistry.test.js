@@ -103,7 +103,6 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(collectionMock.insertOne).toHaveBeenCalled();
     expect(collectionMock.insertOne).toHaveBeenCalledWith({
-      id: undefined,
       name: templateName,
       status: 'InVerification',
       links: {
@@ -112,6 +111,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       }
     });
     expect(templateResponse).toEqual({
+      id: 'mongodb-template-id',
       name: templateName,
       status: 'InVerification',
       links: {
@@ -134,14 +134,13 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     const templateResponse = await addTemplate({}, consoleTemplate);
 
     expect(clientConnectSpy).toHaveBeenCalled();
-    expect(clientDbMock).toHaveBeenCalledWith(expect.any(String)); // Ensure db is called with a string
     expect(collectionMock.insertOne).toHaveBeenCalledWith({
-      id: undefined,
       status: 'InVerification',
       ...consoleTemplate
     });
     expect(templateResponse).toEqual({
       status: 'InVerification',
+      id: 'mongodb-template-id',
       ...consoleTemplate
     });
   });

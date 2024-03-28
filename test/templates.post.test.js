@@ -25,11 +25,11 @@ jest.mock('@adobe/aio-sdk', () => ({
     'Logger': jest.fn()
   }
 }));
-jest.mock('@adobe/aio-lib-console')
+jest.mock('@adobe/aio-lib-console');
 const mockConsoleSDKInstance = {
   getProjectInstallConfig: jest.fn()
-}
-consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance)
+};
+consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance);
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
 
@@ -231,8 +231,8 @@ describe('POST templates', () => {
       'foo': 'bar'
     };
     addTemplate.mockReturnValue(template);
-    const issueNumber = 1001;
-    createReviewIssue.mockReturnValue(issueNumber);
+    // const issueNumber = 1001;
+    // createReviewIssue.mockReturnValue(issueNumber);
     const response = await action.main({
       'IMS_URL': process.env.IMS_URL,
       'IMS_CLIENT_ID': process.env.IMS_URL,
@@ -353,7 +353,7 @@ describe('POST templates', () => {
     addTemplate.mockReturnValue(template);
     const response = await action.main({
       'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': IMS_CLIENT_ID, 
+      'IMS_CLIENT_ID': IMS_CLIENT_ID,
       'IMS_CLIENT_SECRET': IMS_CLIENT_SECRET,
       'IMS_AUTH_CODE': IMS_AUTH_CODE,
       'IMS_SCOPES': IMS_SCOPES,
@@ -440,7 +440,7 @@ describe('POST templates', () => {
     addTemplate.mockReturnValue(template);
     const response = await action.main({
       'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': IMS_CLIENT_ID, 
+      'IMS_CLIENT_ID': IMS_CLIENT_ID,
       'IMS_CLIENT_SECRET': IMS_CLIENT_SECRET,
       'IMS_AUTH_CODE': IMS_AUTH_CODE,
       'IMS_SCOPES': IMS_SCOPES,

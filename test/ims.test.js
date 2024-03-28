@@ -16,7 +16,7 @@ const { Ims } = require('@adobe/aio-lib-ims');
 const { validateAccessToken, isAdmin, generateAccessToken } = require('../actions/ims');
 
 jest.mock('@heyputer/kv.js');
-jest.mock("@adobe/aio-lib-ims");
+jest.mock('@adobe/aio-lib-ims');
 
 process.env = {
   IMS_URL: 'https://ims-na1-stg1.adobelogin.com',
@@ -136,5 +136,5 @@ describe('Verify communication with IMS', () => {
     jest.spyOn(Kvjs.prototype, 'get').mockImplementation(() => 'cached-access--token');
     await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid'))
       .resolves.toBe('cached-access--token');
-  })
+  });
 });
