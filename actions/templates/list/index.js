@@ -28,6 +28,10 @@ const FILTER_TYPE_STUB = 'stub';
 async function main(params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
+  const dbParams = {
+    'MONGODB_URI': params.MONGODB_URI,
+    'MONGODB_NAME': params.MONGODB_NAME
+  };
 
   try {
     // 'info' is the default level if not set
@@ -89,7 +93,7 @@ async function main(params) {
         'filterType': 'boolean'
       }
     ];
-    let templates = await getTemplates(params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
+    let templates = await getTemplates(dbParams);
     let queryParams = {};
     filterConfig.forEach(config => {
       if (config.queryParam in params) {

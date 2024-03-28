@@ -158,3 +158,41 @@ describe('getBearerToken', () => {
     expect(utils.getBearerToken({ __ow_headers: { authorization: 'Bearer fake Bearer fake' } })).toEqual('fake Bearer fake');
   });
 });
+
+describe('convertMongoIdToString', () => {
+  test('should convert _id field to string for single object', () => {
+    const input = { _id: 123, name: 'Test' };
+    const expectedOutput = { id: '123', name: 'Test' };
+    expect(utils.convertMongoIdToString(input)).toEqual(expectedOutput);
+  });
+
+  test('should convert _id field to string for array of objects', () => {
+    const input = [{ _id: 123, name: 'Test1' }, { _id: 456, name: 'Test2' }];
+    const expectedOutput = [{ id: '123', name: 'Test1' }, { id: '456', name: 'Test2' }];
+    expect(utils.convertMongoIdToString(input)).toEqual(expectedOutput);
+  });
+
+  test('should handle input with no _id field', () => {
+    const input = { name: 'Test' };
+    const expectedOutput = { name: 'Test' };
+    expect(utils.convertMongoIdToString(input)).toEqual(expectedOutput);
+  });
+
+  test('should handle empty array input', () => {
+    const input = [];
+    const expectedOutput = [];
+    expect(utils.convertMongoIdToString(input)).toEqual(expectedOutput);
+  });
+
+  test('should handle null input', () => {
+    const input = null;
+    const expectedOutput = null;
+    expect(utils.convertMongoIdToString(input)).toEqual(expectedOutput);
+  });
+
+  test('should handle undefined input', () => {
+    const input = undefined;
+    const expectedOutput = undefined;
+    expect(utils.convertMongoIdToString(input)).toEqual(expectedOutput);
+  });
+});

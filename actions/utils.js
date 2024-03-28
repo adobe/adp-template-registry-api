@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Adobe. All rights reserved.
+Copyright 2024 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License. You may obtain a copy
 of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -164,12 +164,34 @@ function errorMessage(code, message) {
   };
 }
 
+/**
+ * Converts MongoDB ObjectId(s) within an object or an array of objects to strings.
+ * @param {Object|Array} input - The input object or array of objects containing MongoDB ObjectId(s).
+ * @returns {Object|Array} - Returns the input object or array of objects with MongoDB ObjectId(s) converted to strings.
+ */
+
+function convertMongoIdToString(input) {
+  if (Array.isArray(input)) {
+    input.forEach(obj => {
+      if (obj._id) {
+        obj.id = obj._id.toString();
+        delete obj._id;
+      }
+    });
+  } else if (input && typeof input === 'object' && input._id) {
+    input.id = input._id.toString();
+    delete input._id;
+  }
+  return input;
+}
+
 module.exports = {
   errorResponse,
   getBearerToken,
   stringParameters,
   checkMissingRequestInputs,
   errorMessage,
+  convertMongoIdToString,
   ERR_RC_SERVER_ERROR,
   ERR_RC_HTTP_METHOD_NOT_ALLOWED,
   ERR_RC_MISSING_REQUIRED_HEADER,

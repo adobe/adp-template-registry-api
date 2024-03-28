@@ -162,7 +162,7 @@ describe('DELETE templates', () => {
       'statusCode': 404
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
-    expect(findTemplateByName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
+    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 
@@ -223,8 +223,8 @@ describe('DELETE templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
     expect(isAdmin).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.ADMIN_IMS_ORGANIZATIONS.split(','));
-    expect(findTemplateByName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(removeTemplateByName).toHaveBeenCalledWith(fullTemplateName, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY, `Remove "${fullTemplateName}" via API`);
+    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
+    expect(removeTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 });

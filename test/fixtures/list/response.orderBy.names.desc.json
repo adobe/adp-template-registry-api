@@ -43,10 +43,6 @@
             "runtime": true
         }, {
             "_links": {
-                "review": {
-                    "description": "A link to the \"Template Review Request\" Github issue.",
-                    "href": "https://github.com/adobe/aio-template-submission/issues/5"
-                },
                 "self": {
                     "href": "https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-5"
                 }
@@ -60,10 +56,6 @@
             }
         }, {
             "_links": {
-                "review": {
-                    "description": "A link to the \"Template Review Request\" Github issue.",
-                    "href": "https://github.com/adobe/aio-template-submission/issues/4"
-                },
                 "self": {
                     "href": "https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-4"
                 }
