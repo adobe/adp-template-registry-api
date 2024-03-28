@@ -38,6 +38,10 @@ paths:
                   type: string
                   description: A description of the template
                   example: 'This is a template for Adobe App Builder'
+                createdBy: 
+                  type: string
+                  description: The name of the user who created the template
+                  example: 'Lazarus'
                 version: 
                   type: string
                   description: The version of the template in the semver format
@@ -341,6 +345,10 @@ components:
           type: string
           description: The name of the template on npmjs.com
           example: '@adobe/app-builder-template'
+        createdBy: 
+          type: string
+          description: The name of the user who created the template
+          example: 'Lazarus'
         version: 
           type: string
           description: The version of the template in the semver format

@@ -76,6 +76,7 @@ async function main(params) {
       name: params.name,
       ...(params.description && {description: params.description}), // developer console only
       ...(params.version && {version: params.version}), // developer console only
+      createdBy: params.createdBy,
       links: {
         ...(params.links.consoleProject && {consoleProject: params.links.consoleProject}), // developer console only
         ...(params.links.github && {github: params.links.github}) // app builder only
