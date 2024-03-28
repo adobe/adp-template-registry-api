@@ -81,13 +81,6 @@ async function main(params) {
         'statusCode': 404
       };
     }
-    // a workaround that helps to overcome https://raw.githubusercontent.com/ caching issues (Cache-Control: max-age=300)
-    // const content = await fetchUrl(`https://github.com/${params.TEMPLATE_REGISTRY_ORG}/${params.TEMPLATE_REGISTRY_REPOSITORY}/blob/main/registry.json?timestamp=${new Date().getTime()}`);
-    // if (!content.includes(`>${fullTemplateName}<`)) {
-    //   return {
-    //     'statusCode': 404
-    //   };
-    // }
 
     await removeTemplateByName(dbParams, fullTemplateName);
     const response = {

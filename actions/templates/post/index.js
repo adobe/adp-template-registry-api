@@ -139,6 +139,7 @@ async function main(params) {
     }
 
     const template = await addTemplate(dbParams, body);
+    // TODO: Uncomment this when we support App Builder templates again
     // const issueNumber = await createReviewIssue(templateName, githubRepoUrl, params.ACCESS_TOKEN_GITHUB, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
     const response = {
       ...template,
@@ -146,6 +147,7 @@ async function main(params) {
         'self': {
           'href': `${params.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
         },
+        // TODO: Uncomment this when we support App Builder templates again
         // 'review': {
         //   'href': `https://github.com/${params.TEMPLATE_REGISTRY_ORG}/${params.TEMPLATE_REGISTRY_REPOSITORY}/issues/${issueNumber}`,
         //   'description': 'A link to the "Template Review Request" Github issue.'
