@@ -33,7 +33,7 @@ const { convertMongoIdToString } = require('./utils');
 async function findTemplateByName(dbParams, templateName) {
   const collection = await mongoConnection(dbParams, collectionName);
   const results = await collection.find({ 'name': templateName }).toArray();
-  return results?.length ? convertMongoIdToString(results[0]) : {};
+  return results?.length ? convertMongoIdToString(results[0]) : null;
 }
 
 /**

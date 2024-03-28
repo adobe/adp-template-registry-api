@@ -16,6 +16,11 @@ describe('mongoConnection', () => {
   let clientConnectSpy;
   let clientDbMock;
 
+  const params = {
+    MONGODB_URI: 'mongodb://localhost:27017',
+    MONGODB_NAME: 'testDb'
+  };
+
   beforeAll(() => {
     clientConnectSpy = jest.spyOn(MongoClient.prototype, 'connect').mockResolvedValue();
     clientDbMock = jest.spyOn(MongoClient.prototype, 'db').mockReturnValue({
@@ -33,11 +38,16 @@ describe('mongoConnection', () => {
   afterAll(() => {
     clientConnectSpy.mockRestore();
     clientDbMock.mockRestore();
+    jest.clearAllMocks();
+  });
+
+  it('should return connection error', async () => {
+    await expect(mongoConnection({}, 'existingCollection')).rejects.toThrow('Error connecting to MongoDB');
   });
 
   it('should connect to MongoDB and return a collection', async () => {
     const collectionName = 'testCollection';
-    await mongoConnection({}, collectionName);
+    await mongoConnection(params, collectionName);
 
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(clientDbMock).toHaveBeenCalled();
@@ -45,8 +55,8 @@ describe('mongoConnection', () => {
   });
 
   it('should return the existing collection if already connected', async () => {
-    await mongoConnection({}, 'existingCollection');
-    await mongoConnection({}, 'existingCollection');
+    await mongoConnection(params, 'existingCollection');
+    await mongoConnection(params, 'existingCollection');
 
     expect(clientConnectSpy).not.toHaveBeenCalled();
     expect(clientDbMock).not.toHaveBeenCalled();

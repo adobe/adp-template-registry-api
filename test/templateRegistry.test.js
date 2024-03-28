@@ -14,7 +14,10 @@ const { expect, describe, test } = require('@jest/globals');
 const nock = require('nock');
 const { getReviewIssueByTemplateName, findTemplateByName, getTemplates, addTemplate, removeTemplateByName } = require('../actions/templateRegistry');
 
-process.env = {};
+const dbParams = {
+  MONGODB_URI: 'mongodb://localhost:27017',
+  MONGODB_NAME: 'testDb'
+};
 
 describe('Verify communication with Template Registry', () => {
 
@@ -93,7 +96,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
 
   test('should add a template to the collection', async () => {
 
-    const templateResponse = await addTemplate({}, templateName, githubRepoUrl);
+    const templateResponse = await addTemplate(dbParams, templateName, githubRepoUrl);
 
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(collectionMock.insertOne).toHaveBeenCalled();
@@ -119,7 +122,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   test('should remove template from the collection', async () => {
     const templateName = 'my-template';
 
-    await removeTemplateByName({}, templateName);
+    await removeTemplateByName(dbParams, templateName);
 
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(collectionMock.deleteOne).toHaveBeenCalledWith({
@@ -128,7 +131,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   });
 
   test('should get all templates from the collection', async () => {
-    const templatesResult = await getTemplates({});
+    const templatesResult = await getTemplates(dbParams);
     expect(collectionMock.find).toHaveBeenCalledWith({});
     expect(collectionMock.find().toArray).toHaveBeenCalled();
     expect(templatesResult).toEqual(templates);
@@ -136,7 +139,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
 
   test('should get template by name from the collection', async () => {
     const templateName = 'my-template';
-    const templatesResult = await findTemplateByName({}, templateName);
+    const templatesResult = await findTemplateByName(dbParams, templateName);
     expect(collectionMock.find).toHaveBeenCalledWith({});
     expect(collectionMock.find().toArray).toHaveBeenCalled();
     expect(templatesResult).toEqual(templates[0]);
