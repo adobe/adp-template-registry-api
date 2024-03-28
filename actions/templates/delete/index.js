@@ -13,7 +13,7 @@ const { Core } = require('@adobe/aio-sdk');
 const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_PERMISSION_DENIED }
   = require('../../utils');
 const { validateAccessToken, isAdmin } = require('../../ims');
-const { fetchUrl, findTemplateByName, removeTemplateByName } = require('../../templateRegistry');
+const { findTemplateByName, removeTemplateByName } = require('../../templateRegistry');
 
 const HTTP_METHOD = 'delete';
 

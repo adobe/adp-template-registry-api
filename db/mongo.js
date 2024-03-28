@@ -16,14 +16,14 @@ let db = null;
 async function connectToMongoDB(params) {
   try {
     const dbName = params.MONGODB_NAME;
-    const url = params.MONGODB_URI || 'mongodb://localhost:27017';
+    const url = params.MONGODB_URI;
     const client = new MongoClient(url);
     await client.connect();
-    console.log('Connected to MongoDB');
+    console.log('Connected to MongoDB.');
     db = client.db(dbName);
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
-    throw error;
+    throw new Error('Error connecting to MongoDB');
   }
 }
 
