@@ -67,9 +67,12 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   beforeAll(() => {
     clientConnectSpy = jest.spyOn(MongoClient.prototype, 'connect').mockResolvedValue();
     collectionMock = {
-      insertOne: jest.fn().mockResolvedValue(),
+      insertOne: jest.fn().mockResolvedValue({
+        acknowledged: true,
+        insertedId: 'mongodb-template-id'
+      }),
       deleteOne: jest.fn().mockResolvedValue(),
-      find: jest.fn().mockReturnThis  (),
+      find: jest.fn().mockReturnThis(),
       toArray: jest.fn().mockResolvedValue(templates)
     };
     clientDbMock = jest.spyOn(MongoClient.prototype, 'db').mockReturnValue({
@@ -85,6 +88,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   afterAll(() => {
     clientConnectSpy.mockRestore();
     clientDbMock.mockRestore();
+    jest.clearAllMocks();
   });
 
   test('should add an app builder template to the collection', async () => {
@@ -97,7 +101,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     });
 
     expect(clientConnectSpy).toHaveBeenCalled();
-    expect(clientDbMock).toHaveBeenCalledWith(expect.any(String)); // Ensure db is called with a string
+    expect(collectionMock.insertOne).toHaveBeenCalled();
     expect(collectionMock.insertOne).toHaveBeenCalledWith({
       id: undefined,
       name: templateName,
@@ -148,7 +152,6 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     await removeTemplateByName({}, templateName);
 
     expect(clientConnectSpy).toHaveBeenCalled();
-    expect(clientDbMock).toHaveBeenCalledWith(expect.any(String));
     expect(collectionMock.deleteOne).toHaveBeenCalledWith({
       name: templateName,
     });

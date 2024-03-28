@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Adobe. All rights reserved.
+Copyright 2024 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License. You may obtain a copy
 of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -21,6 +21,7 @@ const TEMPLATE_STATUS_REJECTED = 'Rejected';
 let openReviewIssues = null;
 
 const { mongoConnection } = require('../db/mongo');
+const { convertMongoIdToString } = require('./utils');
 
 /**
  * Returns a template record from Template Registry by a template name.
@@ -32,7 +33,7 @@ const { mongoConnection } = require('../db/mongo');
 async function findTemplateByName(dbParams, templateName) {
   const collection = await mongoConnection(dbParams, collectionName);
   const results = await collection.find({ 'name': templateName }).toArray();
-  return results.length ? results[0] : null;
+  return results?.length ? convertMongoIdToString(results[0]) : {};
 }
 
 /**
@@ -55,8 +56,9 @@ async function addTemplate(dbParams, body) {
     template.links.npm = `https://www.npmjs.com/package/${body.name}`;
   }
 
-  await collection.insertOne(template);
-  return template;
+  const result = await collection.insertOne(template);
+  const output = { ...template, id: result?.insertedId?.toString() };
+  return convertMongoIdToString(output);
 }
 
 /**
@@ -135,7 +137,8 @@ async function getOpenReviewIssues(templateRegistryOrg, templateRegistryReposito
 async function getTemplates(dbParams) {
   const collection = await mongoConnection(dbParams, collectionName);
   const results = await collection.find({}).toArray();
-  return results.length ? results : [];
+  const result = results?.length ? convertMongoIdToString(results) : [];
+  return result;
 }
 
 /**

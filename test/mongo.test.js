@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Adobe. All rights reserved.
+Copyright 2024 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License. You may obtain a copy
 of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -20,11 +20,8 @@ describe('mongoConnection', () => {
     clientConnectSpy = jest.spyOn(MongoClient.prototype, 'connect').mockResolvedValue();
     clientDbMock = jest.spyOn(MongoClient.prototype, 'db').mockReturnValue({
       collection: jest.fn().mockReturnValue({
-        // Mock any methods you might use on the collection
-        // For example:
         insertOne: jest.fn(),
         find: jest.fn(),
-        // Add more as needed
       })
     });
   });
@@ -43,7 +40,7 @@ describe('mongoConnection', () => {
     await mongoConnection({}, collectionName);
 
     expect(clientConnectSpy).toHaveBeenCalled();
-    expect(clientDbMock).toHaveBeenCalledWith('abstgtplregistryva6');
+    expect(clientDbMock).toHaveBeenCalled();
     expect(clientDbMock().collection).toHaveBeenCalledWith(collectionName);
   });
 

@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Adobe. All rights reserved.
+Copyright 2024 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License. You may obtain a copy
 of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -15,7 +15,7 @@ let db = null;
 
 async function connectToMongoDB(params) {
   try {
-    const dbName = params.MONGODB_NAME || 'abstgtplregistryva6';
+    const dbName = params.MONGODB_NAME;
     const url = params.MONGODB_URI || 'mongodb://localhost:27017';
     const client = new MongoClient(url);
     await client.connect();

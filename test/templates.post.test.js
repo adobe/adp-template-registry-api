@@ -12,8 +12,9 @@ governing permissions and limitations under the License.
 const { expect, describe, test, beforeEach } = require('@jest/globals');
 const { Core } = require('@adobe/aio-sdk');
 const { validateAccessToken, generateAccessToken } = require('../actions/ims');
+const { ObjectId } = require('mongodb');
 const utils = require('../actions/utils');
-const { fetchUrl, findTemplateByName, addTemplate, createReviewIssue } = require('../actions/templateRegistry');
+const { fetchUrl, findTemplateByName, addTemplate } = require('../actions/templateRegistry');
 const action = require('../actions/templates/post/index');
 const consoleSDK = require('@adobe/aio-lib-console');
 
@@ -268,7 +269,7 @@ describe('POST templates', () => {
     fetchUrl.mockReturnValue('');
     const templateName = '@adobe/app-builder-template';
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      '_id': new ObjectId(),
       'name': templateName,
       'status': 'InVerification',
       'links': {
@@ -276,9 +277,10 @@ describe('POST templates', () => {
         'github': 'https://github.com/adobe/app-builder-template'
       }
     };
-    addTemplate.mockReturnValue(template);
-    const issueNumber = 1001;
-    createReviewIssue.mockReturnValue(issueNumber);
+    const convertedTemplate = utils.convertMongoIdToString(template);
+    addTemplate.mockReturnValue({
+      ...convertedTemplate,
+    });
     const response = await action.main({
       'IMS_URL': process.env.IMS_URL,
       'IMS_CLIENT_ID': process.env.IMS_URL,

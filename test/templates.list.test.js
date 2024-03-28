@@ -283,7 +283,7 @@ describe('LIST templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
-  test.skip('Successful sorting by names in descending order, should return 200', async () => {
+  test('Successful sorting by names in descending order, should return 200', async () => {
     getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry.json'));
 
     const response = await action.main(
@@ -304,6 +304,8 @@ describe('LIST templates', () => {
   });
 
   test.skip('Successful sorting by multiple properties, should return 200', async () => {
+    getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry2.json'));
+
     nock('https://raw.githubusercontent.com')
       .get(`/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/main/registry.json`)
       .times(1)
@@ -318,7 +320,6 @@ describe('LIST templates', () => {
         'orderBy': 'statuses, adobeRecommended, publishDate desc'
       }
     );
-
     expect(response).toEqual(require(__dirname + '/fixtures/list/response.orderBy.multiple.json'));
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
@@ -364,7 +365,7 @@ describe('LIST templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
-  test.skip('Empty filters (?extensions=), should return templates that do not have a query param property set', async () => {
+  test('Empty filters (?extensions=), should return templates that do not have a query param property set', async () => {
     getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry.json'));
 
     const response = await action.main(
@@ -378,13 +379,12 @@ describe('LIST templates', () => {
         'extensions': ''
       }
     );
-
     expect(response).toEqual(require(__dirname + '/fixtures/list/response.filter-value-none-extensions.json'));
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
-  test.skip('Empty filters (?runtime=), should return templates that do not have a query param property set', async () => {
+  test('Empty filters (?runtime=), should return templates that do not have a query param property set', async () => {
     getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry.json'));
 
     const response = await action.main(
@@ -396,7 +396,6 @@ describe('LIST templates', () => {
         'runtime': ''
       }
     );
-
     expect(response).toEqual(require(__dirname + '/fixtures/list/response.filter-value-none-runtime.json'));
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
