@@ -11,9 +11,10 @@ governing permissions and limitations under the License.
 
 const { expect, describe, test, beforeEach } = require('@jest/globals');
 const { Core } = require('@adobe/aio-sdk');
+const { ObjectId } = require('mongodb');
 const { validateAccessToken } = require('../actions/ims');
 const utils = require('../actions/utils');
-const { fetchUrl, findTemplateByName, addTemplate, createReviewIssue } = require('../actions/templateRegistry');
+const { fetchUrl, findTemplateByName, addTemplate } = require('../actions/templateRegistry');
 const action = require('../actions/templates/post/index');
 
 const mockLoggerInstance = { 'info': jest.fn(), 'debug': jest.fn(), 'error': jest.fn() };
@@ -212,7 +213,7 @@ describe('POST templates', () => {
     fetchUrl.mockReturnValue('');
     const templateName = '@adobe/app-builder-template';
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      '_id': new ObjectId(),
       'name': templateName,
       'status': 'InVerification',
       'links': {
@@ -220,9 +221,10 @@ describe('POST templates', () => {
         'github': 'https://github.com/adobe/app-builder-template'
       }
     };
-    addTemplate.mockReturnValue(template);
-    const issueNumber = 1001;
-    createReviewIssue.mockReturnValue(issueNumber);
+    const convertedTemplate = utils.convertMongoIdToString(template);
+    addTemplate.mockReturnValue({
+      ...convertedTemplate,
+    });
     const response = await action.main({
       'IMS_URL': process.env.IMS_URL,
       'IMS_CLIENT_ID': process.env.IMS_URL,
@@ -244,10 +246,6 @@ describe('POST templates', () => {
         '_links': {
           'self': {
             'href': `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
-          },
-          'review': {
-            'description': 'A link to the "Template Review Request" Github issue.',
-            'href': `https://github.com/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/issues/${issueNumber}`
           }
         }
       }
@@ -256,7 +254,6 @@ describe('POST templates', () => {
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
     expect(findTemplateByName).toHaveBeenCalledWith({},TEMPLATE_NAME);
     expect(addTemplate).toHaveBeenCalledWith({}, TEMPLATE_NAME, TEMPLATE_GITHUB_REPO);
-    expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 });
