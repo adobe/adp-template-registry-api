@@ -3,18 +3,18 @@
     "body": {
         "_links": {
             "self": {
-                "href": "https://template-registry-api.tbd/apis/v1/templates?runtime="
+                "href": "https://template-registry-api.tbd/apis/v1/templates?statuses=!Approved"
             }
         },
         "items": [
             {
                 "_links": {
+                    "review": {
+                        "description": "A link to the \"Template Review Request\" Github issue.",
+                        "href": "https://github.com/adobe/aio-templates/issues/100"
+                    },
                     "self": {
                         "href": "https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-4"
-                    },
-                    "review": {
-                        "href": "https://github.com/adobe/aio-templates/issues/100",
-                        "description": "A link to the \"Template Review Request\" Github issue."
                     }
                 },
                 "id": "d1dc1000-f32e-4172-a0ec-9b2f4ef6cc48",
@@ -27,12 +27,12 @@
             },
             {
                 "_links": {
+                    "review": {
+                        "description": "A link to the \"Template Review Request\" Github issue.",
+                        "href": "https://github.com/adobe/aio-templates/issues/100"
+                    },
                     "self": {
                         "href": "https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-5"
-                    },
-                    "review": {
-                        "href": "https://github.com/adobe/aio-templates/issues/100",
-                        "description": "A link to the \"Template Review Request\" Github issue."
                     }
                 },
                 "id": "d1dc1000-f32e-4172-a0ac-9b2f3ef6ac48",
