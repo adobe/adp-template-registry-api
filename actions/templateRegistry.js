@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Adobe. All rights reserved.
+Copyright 2024 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License. You may obtain a copy
 of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -11,7 +11,8 @@ governing permissions and limitations under the License.
 
 const axios = require('axios').default;
 const { Octokit } = require('@octokit/rest');
-const { v4: uuidv4 } = require('uuid');
+
+const collectionName = 'templates';
 
 const TEMPLATE_STATUS_IN_VERIFICATION = 'InVerification';
 const TEMPLATE_STATUS_APPROVED = 'Approved';
@@ -19,35 +20,33 @@ const TEMPLATE_STATUS_REJECTED = 'Rejected';
 
 let openReviewIssues = null;
 
+const { mongoConnection } = require('../db/mongo');
+const { convertMongoIdToString } = require('./utils');
+
 /**
  * Returns a template record from Template Registry by a template name.
  *
+ * @param {object} dbParams database connection parameters
  * @param {string} templateName template name
- * @param {string} templateRegistryOrg Template Registry organization name
- * @param {string} templateRegistryRepository Template Registry repository name
  * @returns {Promise<object|null>} an existing template record or null
  */
-async function findTemplateByName(templateName, templateRegistryOrg, templateRegistryRepository) {
-  const templates = await getTemplates(templateRegistryOrg, templateRegistryRepository);
-  const template = templates.find(item => item.name === templateName);
-  return (template !== undefined) ? template : null;
+async function findTemplateByName(dbParams, templateName) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const results = await collection.find({ 'name': templateName }).toArray();
+  return results?.length ? convertMongoIdToString(results[0]) : null;
 }
 
 /**
  * Adds a template to Template Registry.
  *
+ * @param {object} dbParams database connection parameters
  * @param {string} templateName template name
  * @param {string} githubRepoUrl Github repo URL
- * @param {string} githubAccessToken Github access token
- * @param {string} templateRegistryOrg Template Registry organization name
- * @param {string} templateRegistryRepository Template Registry repository name
- * @param {string} commitMessage commit message
  * @returns {object} a newly created template
  */
-async function addTemplate(templateName, githubRepoUrl, githubAccessToken, templateRegistryOrg, templateRegistryRepository, commitMessage) {
-  const templates = await getTemplates(templateRegistryOrg, templateRegistryRepository, true);
+async function addTemplate(dbParams, templateName, githubRepoUrl) {
+  const collection = await mongoConnection(dbParams, collectionName);
   const template = {
-    'id': uuidv4(),
     'name': templateName,
     'status': 'InVerification',
     'links': {
@@ -55,28 +54,21 @@ async function addTemplate(templateName, githubRepoUrl, githubAccessToken, templ
       'github': githubRepoUrl
     }
   };
-  templates.push(template);
-  await saveRegistry(templates, githubAccessToken, templateRegistryOrg, templateRegistryRepository, commitMessage);
-  return template;
+  const result = await collection.insertOne(template);
+  const output = { ...template, id: result?.insertedId?.toString() };
+  return convertMongoIdToString(output);
 }
 
 /**
  * Removes a template from Template Registry.
  *
+ * @param {object} dbParams database connection parameters
  * @param {string} templateName template name
- * @param {string} githubAccessToken Github access token
- * @param {string} templateRegistryOrg Template Registry organization name
- * @param {string} templateRegistryRepository Template Registry repository name
- * @param {string} commitMessage commit message
  * @returns {void}
  */
-async function removeTemplateByName(templateName, githubAccessToken, templateRegistryOrg, templateRegistryRepository, commitMessage) {
-  const templates = await getTemplates(templateRegistryOrg, templateRegistryRepository, true);
-  let index = templates.findIndex(item => item.name === templateName);
-  if (index !== -1) {
-    templates.splice(index, 1);
-    await saveRegistry(templates, githubAccessToken, templateRegistryOrg, templateRegistryRepository, commitMessage);
-  }
+async function removeTemplateByName(dbParams, templateName) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  await collection.deleteOne({ 'name': templateName });
 }
 
 /**
@@ -137,62 +129,14 @@ async function getOpenReviewIssues(templateRegistryOrg, templateRegistryReposito
 /**
  * Returns Template Registry records.
  *
- * @param {string} templateRegistryOrg Template Registry organization name
- * @param {string} templateRegistryRepository Template Registry repository name
- * @param {boolean} avoidCache (Optional) If it is set, registry.json will be fetched in another way to overcome Github caching.
- * @returns {Promise<object>} existing Template Registry records
+ * @param {object} dbParams database connection parameters
+ * @returns {promise<Array|[]>} existing Template Registry records
  */
-async function getTemplates(templateRegistryOrg, templateRegistryRepository, avoidCache = false) {
-  if (avoidCache === true) {
-    // a workaround that partially helps to overcome https://raw.githubusercontent.com/ caching issues (Cache-Control: max-age=300)
-    // todo: there is still a short delay when a new commit starts to be visible
-    const lastCommitHash = await fetchUrl(
-      `https://api.github.com/repos/${templateRegistryOrg}/${templateRegistryRepository}/commits/main`,
-      {
-        'Accept': 'application/vnd.github.VERSION.sha'
-      }
-    );
-    return await fetchUrl(
-      `https://raw.githubusercontent.com/${templateRegistryOrg}/${templateRegistryRepository}/${lastCommitHash}/registry.json`
-    );
-  } else {
-    return await fetchUrl(
-      `https://raw.githubusercontent.com/${templateRegistryOrg}/${templateRegistryRepository}/main/registry.json`
-    );
-  }
-}
-
-/**
- * Saves the registry json object to registry.json
- *
- * @param {object} registry registry json object
- * @param {string} githubAccessToken Github access token
- * @param {string} templateRegistryOrg Template Registry organization name
- * @param {string} templateRegistryRepository Template Registry repository name
- * @param {string} commitMessage commit message
- * @returns {void}
- * @private
- */
-async function saveRegistry(registry, githubAccessToken, templateRegistryOrg, templateRegistryRepository, commitMessage) {
-  const data = JSON.stringify(registry, null, 4);
-  const octokit = new Octokit({
-    'auth': githubAccessToken
-  });
-  const fileMetadata = await octokit.request(`GET /repos/${templateRegistryOrg}/${templateRegistryRepository}/contents/registry.json`, {
-    'owner': templateRegistryOrg,
-    'repo': templateRegistryRepository,
-    'branch': 'main',
-    'path': 'registry.json'
-  });
-  await octokit.request(`PUT /repos/${templateRegistryOrg}/${templateRegistryRepository}/contents/registry.json`, {
-    'owner': templateRegistryOrg,
-    'repo': templateRegistryRepository,
-    'branch': 'main',
-    'path': 'registry.json',
-    'message': commitMessage,
-    'content': Buffer.from(data).toString('base64'),
-    'sha': fileMetadata['data']['sha']
-  });
+async function getTemplates(dbParams) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const results = await collection.find({}).toArray();
+  const result = results?.length ? convertMongoIdToString(results) : [];
+  return result;
 }
 
 /**
