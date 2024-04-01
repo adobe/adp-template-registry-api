@@ -547,5 +547,5 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(__dirname + '/fixtures/list/response.full.no-review-issues.json'));
-  })
+  });
 });

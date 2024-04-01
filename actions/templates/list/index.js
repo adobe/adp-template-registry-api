@@ -276,7 +276,7 @@ function filter(templates, filterValues, field, filterType, subfield) {
       case 'array': {
         let templateFieldValues = template[field];
         if (subfield) {
-          templateFieldValues = template[field].map(item => item[subfield])
+          templateFieldValues = template[field].map(item => item[subfield]);
         }
 
         if (Array.isArray(templateFieldValues)) {
