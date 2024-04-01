@@ -169,6 +169,44 @@ describe('GET templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
   });
 
+  test('Successful request for "InVerification" template, should return 200, but no link to github Review issue', async () => {
+    const templateName = 'app-builder-template';
+    const fullTemplateName = templateName;
+    const template = {
+      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d2',
+      'name': fullTemplateName,
+      'status': TEMPLATE_STATUS_IN_VERIFICATION,
+      'links': {
+        'npm': 'https://www.npmjs.com/package/@adobe/app-builder-template',
+        'github': 'https://github.com/adobe/app-builder-template'
+      }
+    };
+    findTemplateByName.mockReturnValue(template);
+    getReviewIssueByTemplateName.mockReturnValue(null);
+    const response = await action.main({
+      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
+      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
+      'templateName': templateName,
+      '__ow_method': HTTP_METHOD
+    });
+    expect(response).toEqual({
+      'statusCode': 200,
+      'body': {
+        ...template,
+        '_links': {
+          'self': {
+            'href': `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
+          }
+        }
+      }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
+    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
+    expect(getReviewIssueByTemplateName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
+  });
+
   test('Template does not exist, should return 404', async () => {
     const orgName = '@adobe';
     const templateName = 'app-builder-template-none';
@@ -187,6 +225,19 @@ describe('GET templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
+  });
+
+  test('Org name and template name ommitted, should return 404', async () => {
+    findTemplateByName.mockReturnValue(null);
+    const response = await action.main({
+      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
+      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      '__ow_method': HTTP_METHOD
+    });
+    expect(response).toEqual({
+      'statusCode': 404
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
   });
 
   test('Unsupported HTTP method, should return 405', async () => {
