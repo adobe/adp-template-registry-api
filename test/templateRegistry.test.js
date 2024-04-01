@@ -96,7 +96,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
 
   test('should add an app builder template to the collection', async () => {
 
-    const templateResponse = await addTemplate({}, {
+    const templateResponse = await addTemplate(dbParams, {
       name: templateName,
       links: {
         github: githubRepoUrl
@@ -114,7 +114,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       }
     });
     expect(templateResponse).toEqual({
-      id: 'mongodb-template-id',
+      id: expect.any(String),
       name: templateName,
       status: 'InVerification',
       links: {
@@ -134,7 +134,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       }
     };
 
-    const templateResponse = await addTemplate({}, consoleTemplate);
+    const templateResponse = await addTemplate(dbParams, consoleTemplate);
 
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(collectionMock.insertOne).toHaveBeenCalledWith({

@@ -221,7 +221,7 @@ describe('POST templates', () => {
     fetchUrl.mockReturnValue('');
     const templateName = '@adobe/app-builder-template';
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      '_id': new ObjectId(),
       'name': templateName,
       'status': 'InVerification',
       'links': {
