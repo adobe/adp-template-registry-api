@@ -1,4 +1,4 @@
-{
+{   "openapi": "3.0.3",
     "basePath": "/v1",
     "info": {
         "title": "Template Registry API",
@@ -8,7 +8,7 @@
       "/templates": {
         "post": {
           "summary": "Add a template to Template Registry for a further verification.",
-          "operationId": "addTemplate",
+          "operationId": "template-registry-api/templates-post.http",
           "tags": [
             "templates"
           ],
@@ -120,7 +120,7 @@
         },
         "get": {
           "summary": "Return a list of templates matching a specified criteria.",
-          "operationId": "getTemplates",
+          "operationId": "template-registry-api/templates-list.http",
           "tags": [
             "templates"
           ],
@@ -273,7 +273,7 @@
       "/templates/{templateName}": {
         "get": {
           "summary": "Get information about a template.",
-          "operationId": "getTemplateByTemplateName",
+          "operationId": "template-registry-api/templates-get.http",
           "tags": [
             "templates"
           ],
@@ -351,7 +351,7 @@
         },
         "delete": {
           "summary": "Delete a template from Template Registry.",
-          "operationId": "deleteTemplateByTemplateName",
+          "operationId": "template-registry-api/templates-delete.http",
           "tags": [
             "templates"
           ],
@@ -363,6 +363,143 @@
           "parameters": [
             {
               "$ref": "#/components/parameters/TemplateName"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "A template was deleted from Template Registry."
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "404": {
+              "$ref": "#/components/responses/NotFound"
+            },
+            "405": {
+              "$ref": "#/components/responses/HttpMethodNotAllowed"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalServerError"
+            },
+            "503": {
+              "$ref": "#/components/responses/ServiceUnavailable"
+            },
+            "504": {
+              "$ref": "#/components/responses/GatewayTimeout"
+            }
+          },
+          "x-openwhisk": {
+            "action": "templates-delete.http",
+            "package": "template-registry-api",
+            "url": "not-used"
+          }
+        }
+      },
+      "/templates/{orgName}/{templateName}": {
+        "get": {
+          "summary": "Get information about a template.",
+          "operationId": "template-registry-api/templates-get.http",
+          "tags": [
+            "templates"
+          ],
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/TemplateName"
+            },
+            {
+              "$ref": "#/components/parameters/OrgName"
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Information about a template.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Template",
+                    "example": {
+                      "id": "4bfdb3ef-b84c-4a74-b9fc-39657ed1aaf8",
+                      "author": "Adobe Inc.",
+                      "name": "@adobe/app-builder-template",
+                      "description": "AppBuilder template",
+                      "adobeRecommended": true,
+                      "latestVersion": "1.0.10",
+                      "publishDate": "2022-04-22T04:21:26.922Z",
+                      "categories": [
+                        "graphql-mesh"
+                      ],
+                      "apis": [
+                        {
+                          "code": "Runtime"
+                        }
+                      ],
+                      "keywords": [
+                        "aio-app-builder-template",
+                        "aio"
+                      ],
+                      "status": "Approved",
+                      "links": {
+                        "npm": "https://www.npmjs.com/package/@adobe/app-builder-template",
+                        "github": "https://github.com/adobe/app-builder-template"
+                      },
+                      "_links": {
+                        "self": {
+                          "href": "https://template-registry-api.tbd/apis/v1/templates/@adobe/app-builder-template"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "404": {
+              "$ref": "#/components/responses/NotFound"
+            },
+            "405": {
+              "$ref": "#/components/responses/HttpMethodNotAllowed"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalServerError"
+            },
+            "503": {
+              "$ref": "#/components/responses/ServiceUnavailable"
+            },
+            "504": {
+              "$ref": "#/components/responses/GatewayTimeout"
+            }
+          },
+          "x-openwhisk": {
+            "action": "templates-get.http",
+            "package": "template-registry-api",
+            "url": "not-used"
+          }
+        },
+        "delete": {
+          "summary": "Delete a template from Template Registry.",
+          "operationId": "template-registry-api/templates-delete.http",
+          "tags": [
+            "templates"
+          ],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/TemplateName"
+            },
+            {
+                "$ref": "#/components/parameters/OrgName"
             }
           ],
           "responses": {
@@ -420,6 +557,15 @@
             "type": "string"
           }
         },
+        "OrgName": {
+            "name": "orgName",
+            "in": "path",
+            "required": true,
+            "description": "Organisation name on npmjs.com",
+            "schema": {
+              "type": "string"
+            }
+          },
         "NamesParam": {
           "name": "names",
           "in": "query",
@@ -831,6 +977,5 @@
           "description": "The underlying service did not respond on time. Try again later."
         }
       }
-    },
-    "swagger": "2.0"
+    }
   }
