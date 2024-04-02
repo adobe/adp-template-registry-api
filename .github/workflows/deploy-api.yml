@@ -37,6 +37,8 @@ jobs:
         with:
           os: ${{ matrix.os }}
           version: 10.x.x
+      - name: Generate Template Registry APIs
+        run: aio runtime api create --config-file=template-registry-api.json
       - name: Deploy
         env:
           AIO_runtime_auth: ${{ secrets.AIO_RUNTIME_AUTH }}
