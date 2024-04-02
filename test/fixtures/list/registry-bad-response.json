@@ -1,0 +1,56 @@
+[
+    {
+        "id": "d1dc1000-f32e-4172-a0ec-9b2f3ef6ac47",
+        "author": "Adobe Inc.",
+        "name": "@author/app-builder-template-1",
+        "publishDate": "2022-05-01T03:50:39.658Z",
+        "status": "Approved",
+        "links": {
+            "npm": "https://www.npmjs.com/package/@author/app-builder-template-1",
+            "github": "https://github.com/author/app-builder-template-1"
+        },
+        "fake": "param"
+    },
+    {
+        "id": "d1dc1000-f32e-4172-a0ec-9b2f3ef6cc48",
+        "author": "Adobe Inc.",
+        "name": "@author/app-builder-template-4",
+        "publishDate": "2020-05-01T03:50:39.658Z",
+        "adobeRecommended": true,
+        "status": "Approved",
+        "links": {
+            "npm": "https://www.npmjs.com/package/@author/app-builder-template-4",
+            "github": "https://github.com/author/app-builder-template-4"
+        }
+    },
+    {
+        "id": "d1dc1000-f32e-4172-a0ec-9b2f3ef6ac48",
+        "author": "Adobe Inc.",
+        "name": "@author/app-builder-template-3",
+        "publishDate": "2023-05-01T03:50:39.658Z",
+        "adobeRecommended": true,
+        "status": "Approved",
+        "links": {
+            "npm": "https://www.npmjs.com/package/@author/app-builder-template-3",
+            "github": "https://github.com/author/app-builder-template-3"
+        }
+    },
+    {
+        "id": "d1dc1000-f32e-4172-a0ec-9b2f4ef6cc48",
+        "name": "@author/app-builder-template-2",
+        "status": "Rejected",
+        "links": {
+            "npm": "https://www.npmjs.com/package/@author/app-builder-template-2",
+            "github": "https://github.com/author/app-builder-template-2"
+        }
+    },
+    {
+        "id": "d1dc1000-f32e-4172-a0ac-9b2f3ef6ac48",
+        "name": "@author/app-builder-template-6",
+        "status": "Rejected",
+        "links": {
+            "npm": "https://www.npmjs.com/package/@author/app-builder-template-6",
+            "github": "https://github.com/author/app-builder-template-6"
+        }
+    }
+]

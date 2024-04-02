@@ -1,0 +1,13 @@
+{
+    "statusCode": 200,
+    "body": {
+        "_links": {
+            "self": {
+                "href": "https://template-registry-api.tbd/apis/v1/templates?events=test"
+            }
+        },
+        "items": [
+            
+        ]
+    }
+}

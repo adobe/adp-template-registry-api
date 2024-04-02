@@ -12,12 +12,34 @@ governing permissions and limitations under the License.
 const { MongoClient } = require('mongodb');
 const { expect, describe, test } = require('@jest/globals');
 const nock = require('nock');
-const { getReviewIssueByTemplateName, findTemplateByName, getTemplates, addTemplate, removeTemplateByName } = require('../actions/templateRegistry');
+const {
+  fetchUrl,
+  createReviewIssue,
+  getReviewIssueByTemplateName,
+  findTemplateByName,
+  getTemplates,
+  addTemplate,
+  removeTemplateByName
+} = require('../actions/templateRegistry');
 
 const dbParams = {
   MONGODB_URI: 'mongodb://localhost:27017',
   MONGODB_NAME: 'testDb'
 };
+
+jest.mock('@octokit/rest', () => {
+  return {
+    Octokit: jest.fn(() => {
+      return {
+        rest: {
+          issues: {
+            create: jest.fn(() => ({ data: { number: 1 }}))
+          }
+        }
+      };
+    })
+  };
+});
 
 describe('Verify communication with Template Registry', () => {
 
@@ -166,11 +188,83 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     expect(templatesResult).toEqual(templates);
   });
 
+  test('should get all templates from the collection, none', async () => {
+    collectionMock.toArray.mockResolvedValueOnce([]);
+    const templatesResult = await getTemplates(dbParams);
+    expect(collectionMock.find).toHaveBeenCalledWith({});
+    expect(collectionMock.find().toArray).toHaveBeenCalled();
+    expect(templatesResult).toEqual([]);
+  });
+
   test('should get template by name from the collection', async () => {
     const templateName = 'my-template';
     const templatesResult = await findTemplateByName(dbParams, templateName);
     expect(collectionMock.find).toHaveBeenCalledWith({});
     expect(collectionMock.find().toArray).toHaveBeenCalled();
     expect(templatesResult).toEqual(templates[0]);
+  });
+
+  test('should get template by name from the collection, not found', async () => {
+    collectionMock.toArray.mockResolvedValueOnce(null);
+    const templateName = 'my-template';
+    const templatesResult = await findTemplateByName(dbParams, templateName);
+    expect(collectionMock.find).toHaveBeenCalledWith({ 'name': templateName });
+    expect(collectionMock.find().toArray).toHaveBeenCalled();
+    expect(templatesResult).toEqual(null);
+  });
+
+  test('axios fetchUrl should return the response body', async () => {
+    nock('https://jsonplaceholder.typicode.com')
+      .get('/posts/1')
+      .reply(200, {
+        userId: 1,
+        id: 1,
+        title: 'title',
+        body: 'body'
+      });
+
+    const url = 'https://jsonplaceholder.typicode.com/posts/1';
+    const response = await fetchUrl(url);
+    expect(response).toEqual({
+      userId: 1,
+      id: 1,
+      title: 'title',
+      body: 'body'
+    });
+  });
+
+  test('axios fetchUrl returns non-200 status code', async () => {
+    nock('https://jsonplaceholder.typicode.com')
+      .get('/posts/1')
+      .reply(201, {
+        userId: 1,
+        id: 1,
+        title: 'title',
+        body: 'body'
+      });
+
+    const url = 'https://jsonplaceholder.typicode.com/posts/1';
+    await expect(fetchUrl(url)).rejects.toThrow('Error fetching "https://jsonplaceholder.typicode.com/posts/1". Response code is 201');
+  });
+
+  test('axios fetchUrl returns 400 status code', async () => {
+    nock('https://jsonplaceholder.typicode.com')
+      .get('/posts/1')
+      .reply(400, {
+        userId: 1,
+        id: 1,
+        title: 'title',
+        body: 'body'
+      });
+
+    const url = 'https://jsonplaceholder.typicode.com/posts/1';
+    await expect(fetchUrl(url)).rejects.toThrow('Error fetching "https://jsonplaceholder.typicode.com/posts/1". AxiosError: Request failed with status code 400');
+  });
+
+  test('create issue for a template', async () => {
+    const templateName = 'my-template';
+    const githubRepoUrl = 'https://github.com/my-org/my-template';
+    const issueNumber = await createReviewIssue(templateName, githubRepoUrl, process.env.GITHUB_ACCESS_TOKEN, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
+    expect(issueNumber).toBe(1);
   });
 });
