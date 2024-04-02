@@ -51,4 +51,6 @@ jobs:
           IMS_CLIENT_ID: ${{ secrets.IMS_CLIENT_ID }}
           ADMIN_IMS_ORGANIZATIONS: ${{ secrets.ADMIN_IMS_ORGANIZATIONS }}
           TEMPLATE_REGISTRY_API_URL: ${{ secrets.TEMPLATE_REGISTRY_API_URL }}
+          MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
+          MONGODB_URI: ${{ secrets.MONGODB_URI }}
         run: aio app deploy

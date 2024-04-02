@@ -23,6 +23,10 @@ const HTTP_METHOD = 'get';
 async function main(params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
+  const dbParams = {
+    'MONGODB_URI': params.MONGODB_URI,
+    'MONGODB_NAME': params.MONGODB_NAME
+  };
 
   try {
     // 'info' is the default level if not set
@@ -51,7 +55,7 @@ async function main(params) {
       };
     }
     const fullTemplateName = (orgName !== undefined) ? orgName + '/' + templateName : templateName;
-    const template = await findTemplateByName(fullTemplateName, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
+    const template = await findTemplateByName(dbParams, fullTemplateName);
     if (null === template) {
       return {
         'statusCode': 404
