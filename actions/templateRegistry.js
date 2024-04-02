@@ -44,16 +44,18 @@ async function findTemplateByName(dbParams, templateName) {
  * @param {string} githubRepoUrl Github repo URL
  * @returns {object} a newly created template
  */
-async function addTemplate(dbParams, templateName, githubRepoUrl) {
+async function addTemplate(dbParams, body) {
   const collection = await mongoConnection(dbParams, collectionName);
-  const template = {
-    'name': templateName,
-    'status': 'InVerification',
-    'links': {
-      'npm': `https://www.npmjs.com/package/${templateName}`,
-      'github': githubRepoUrl
-    }
+  let template = {
+    ...body,
+    status: 'InVerification'
   };
+
+  // Only add npm link if github link is provided
+  if (template.links?.github) {
+    template.links.npm = `https://www.npmjs.com/package/${body.name}`;
+  }
+
   const result = await collection.insertOne(template);
   const output = { ...template, id: result?.insertedId?.toString() };
   return convertMongoIdToString(output);

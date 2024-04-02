@@ -94,9 +94,14 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     jest.clearAllMocks();
   });
 
-  test('should add a template to the collection', async () => {
+  test('should add an app builder template to the collection', async () => {
 
-    const templateResponse = await addTemplate(dbParams, templateName, githubRepoUrl);
+    const templateResponse = await addTemplate(dbParams, {
+      name: templateName,
+      links: {
+        github: githubRepoUrl
+      }
+    });
 
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(collectionMock.insertOne).toHaveBeenCalled();
@@ -116,6 +121,30 @@ describe('Template Registry Mongodb CRUD Actions', () => {
         npm: `https://www.npmjs.com/package/${templateName}`,
         github: githubRepoUrl
       }
+    });
+  });
+
+  test('should add a developer console template to the collection', async () => {
+    const consoleTemplate = {
+      name: templateName,
+      description: 'My template description',
+      version: '1.0.0',
+      links: {
+        consoleProject: 'https://developer-stage.adobe.com/console/projects/123',
+      }
+    };
+
+    const templateResponse = await addTemplate(dbParams, consoleTemplate);
+
+    expect(clientConnectSpy).toHaveBeenCalled();
+    expect(collectionMock.insertOne).toHaveBeenCalledWith({
+      status: 'InVerification',
+      ...consoleTemplate
+    });
+    expect(templateResponse).toEqual({
+      status: 'InVerification',
+      id: 'mongodb-template-id',
+      ...consoleTemplate
     });
   });
 

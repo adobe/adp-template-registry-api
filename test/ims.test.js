@@ -11,7 +11,12 @@ governing permissions and limitations under the License.
 
 const { expect, describe, test } = require('@jest/globals');
 const nock = require('nock');
-const { validateAccessToken, isAdmin } = require('../actions/ims');
+const Kvjs = require('@heyputer/kv.js');
+const { Ims } = require('@adobe/aio-lib-ims');
+const { validateAccessToken, isAdmin, generateAccessToken } = require('../actions/ims');
+
+jest.mock('@heyputer/kv.js');
+jest.mock('@adobe/aio-lib-ims');
 
 process.env = {
   IMS_URL: 'https://ims-na1-stg1.adobelogin.com',
@@ -100,5 +105,36 @@ describe('Verify communication with IMS', () => {
 
     await expect(isAdmin('<access-token>', process.env.IMS_URL, []))
       .rejects.toThrow(`Error fetching "${process.env.IMS_URL}/ims/organizations/v6". AxiosError: Request failed with status code 400`);
+  });
+
+  test('Verify that exception is thrown for non-successful IMS communication, non-error code', async () => {
+    nock(process.env.IMS_URL)
+      .get('/ims/organizations/v6')
+      .times(1)
+      .reply(201);
+
+    await expect(isAdmin('<access-token>', process.env.IMS_URL, []))
+      .rejects.toThrow(`Error fetching "${process.env.IMS_URL}/ims/organizations/v6". Response code is 201`);
+  });
+
+  test('Verify generate access token', async () => {
+    Ims.mockImplementation(() => ({
+      validateTokenAllowList: jest.fn(() => ({ valid: true })),
+      getAccessToken: jest.fn(() => ({
+        payload: {
+          access_token: 'my-access-token',
+          refresh_token: 'my-refresh-token'
+        }
+      }))
+    }));
+
+    await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid'))
+      .resolves.toBe('my-access-token');
+  });
+
+  test('Verify generate access token with a cached token', async () => {
+    jest.spyOn(Kvjs.prototype, 'get').mockImplementation(() => 'cached-access--token');
+    await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid'))
+      .resolves.toBe('cached-access--token');
   });
 });

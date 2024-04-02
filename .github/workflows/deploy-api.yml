@@ -47,6 +47,9 @@ jobs:
           ACCESS_TOKEN_GITHUB: ${{ secrets.ACCESS_TOKEN_GITHUB }}
           IMS_URL: ${{ secrets.IMS_URL }}
           IMS_CLIENT_ID: ${{ secrets.IMS_CLIENT_ID }}
+          IMS_CLIENT_SECRET: ${{ secrets.IMS_CLIENT_SECRET }}
+          IMS_AUTH_CODE: ${{ secrets.IMS_AUTH_CODE }}
+          IMS_SCOPES: ${{ secrets.IMS_SCOPES }}
           ADMIN_IMS_ORGANIZATIONS: ${{ secrets.ADMIN_IMS_ORGANIZATIONS }}
           TEMPLATE_REGISTRY_API_URL: ${{ secrets.TEMPLATE_REGISTRY_API_URL }}
           MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
