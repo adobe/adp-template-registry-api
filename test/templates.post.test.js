@@ -231,6 +231,8 @@ describe('POST templates', () => {
       'foo': 'bar'
     };
     addTemplate.mockReturnValue(template);
+    // TODO: Uncomment the following after integrating with App Builder templates again
+    //       Dev Console templates don't have review issues
     // const issueNumber = 1001;
     // createReviewIssue.mockReturnValue(issueNumber);
     const response = await action.main({
