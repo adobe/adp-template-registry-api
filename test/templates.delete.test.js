@@ -139,6 +139,51 @@ describe('DELETE templates', () => {
     expect(isAdmin).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.ADMIN_IMS_ORGANIZATIONS.split(','));
   });
 
+  test('Should return a 404 with no orgName or templateName', async () => {
+    isAdmin.mockReturnValue(true);
+
+    const response = await action.main({
+      'IMS_URL': process.env.IMS_URL,
+      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
+      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
+      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
+      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      'ACCESS_TOKEN_GITHUB': process.env.ACCESS_TOKEN_GITHUB,
+      '__ow_method': HTTP_METHOD,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      'statusCode': 404
+    });
+  });
+
+  test('Should handle errors and return 500', async () => {
+    const orgName = '@adobe';
+    const templateName = 'app-builder-template-none';
+    isAdmin.mockReturnValue(true);
+
+    const err = 'Error connecting to MongoDB';
+    findTemplateByName.mockImplementation(() => {
+      throw new Error(err);
+    });
+
+    const response = await action.main({
+      'IMS_URL': process.env.IMS_URL,
+      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
+      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
+      '__ow_method': HTTP_METHOD,
+      'orgName': orgName,
+      'templateName': templateName,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      'error': {
+        'statusCode': 500,
+        'body': { 'errors': [utils.errorMessage(utils.ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.')] }
+      }
+    });
+  });
+
   test('Template does not exist, should return 404', async () => {
     isAdmin.mockReturnValue(true);
 

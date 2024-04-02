@@ -22,3 +22,13 @@ afterEach(() => {
   nock.cleanAll();
   expect(activeMocks).toStrictEqual([]);
 });
+
+global.console = {
+  ...console,
+  // comment to enable a specific log level
+  log: jest.fn(),
+  debug: jest.fn(),
+  info: jest.fn(),
+  warn: jest.fn(),
+  error: jest.fn(),
+};

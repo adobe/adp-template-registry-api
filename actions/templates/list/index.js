@@ -142,9 +142,6 @@ async function main(params) {
       orderByArray.forEach(item => {
         let field = orderByFields[item[0]].field;
         let dir = item[1];
-        if (orderByFields[item[0]].subfield) {
-          field += '.' + orderByFields[item[0]].subfield;
-        }
         sortFields.push(field);
         sortOrders.push(dir);
       });
@@ -279,7 +276,7 @@ function filter(templates, filterValues, field, filterType, subfield) {
       case 'array': {
         let templateFieldValues = template[field];
         if (subfield) {
-          templateFieldValues = Array.isArray(template[field]) ? template[field].map(item => item[subfield]) : template[field][subfield];
+          templateFieldValues = template[field].map(item => item[subfield]);
         }
 
         if (Array.isArray(templateFieldValues)) {

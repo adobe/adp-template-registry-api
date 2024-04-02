@@ -14,11 +14,15 @@ const { Core } = require('@adobe/aio-sdk');
 const action = require('../actions/templates/list/index');
 const utils = require('../actions/utils');
 const nock = require('nock');
-const { getTemplates } = require('../actions/templateRegistry');
+const { getTemplates, getReviewIssueByTemplateName } = require('../actions/templateRegistry');
 
 process.env = {
+  TEMPLATE_REGISTRY_ORG: 'adobe',
+  TEMPLATE_REGISTRY_REPOSITORY: 'aio-templates',
   TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'
 };
+
+var reviewIssue = `https://github.com/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/issues/100`;
 
 const mockLoggerInstance = { 'info': jest.fn(), 'debug': jest.fn(), 'error': jest.fn() };
 
@@ -31,7 +35,8 @@ jest.mock('@adobe/aio-sdk', () => ({
 jest.mock('../actions/templateRegistry', () => {
   const originalModule = jest.requireActual('../actions/templateRegistry');
   return {
-    originalModule,
+    ...originalModule,
+    getReviewIssueByTemplateName: jest.fn(),
     getTemplates: jest.fn()
   };
 });
@@ -39,13 +44,8 @@ jest.mock('../actions/templateRegistry', () => {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  getReviewIssueByTemplateName.mockReturnValue(reviewIssue);
 });
-
-process.env = {
-  TEMPLATE_REGISTRY_ORG: 'adobe',
-  TEMPLATE_REGISTRY_REPOSITORY: 'aio-templates',
-  TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'
-};
 
 const orgName = '@adobe';
 const templateName = 'app-builder-template';
@@ -283,6 +283,26 @@ describe('LIST templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
+  test('Successful sorting by names in ascending order (Default), should return 200', async () => {
+    getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry.json'));
+
+    const response = await action.main(
+      {
+        'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
+        'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
+        'orgName': orgName,
+        'templateName': templateName,
+        '__ow_method': HTTP_METHOD,
+        'orderBy': 'names'
+      }
+    );
+
+    expect(response).toEqual(require(__dirname + '/fixtures/list/response.orderBy.names.asc.json'));
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
+  });
+
   test('Successful sorting by names in descending order, should return 200', async () => {
     getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry.json'));
 
@@ -417,5 +437,115 @@ describe('LIST templates', () => {
     expect(response).toEqual(require(__dirname + '/fixtures/list/response.filter-value-any-events.json'));
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
+  });
+
+  test('Support of the "events" filtering, not empty or any filters', async () => {
+    getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry.json'));
+
+    const response = await action.main(
+      {
+        'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
+        'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
+        '__ow_method': 'get',
+        'events': 'test'
+      }
+    );
+
+    expect(response).toEqual(require(__dirname + '/fixtures/list/response.filter-value-test-events.json'));
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
+  });
+
+  test('Openapi schema validation fails on empty names param', async () => {
+    getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry.json'));
+
+    const response = await action.main(
+      {
+        'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
+        'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
+        '__ow_method': 'get',
+        'names': ''
+      }
+    );
+
+    expect(response).toEqual({
+      'error': {
+        'statusCode': 400,
+        'body': {
+          'errors': [
+            {
+              'code': utils.ERR_RC_INCORRECT_REQUEST,
+              'message': 'Request has one or more errors => In query parameters => at: names => Unable to parse value => Empty value not allowed'
+            }
+          ]
+        }
+      }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
+  });
+
+  test('Openapi schema response validation fails on bad response', async () => {
+    getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry-bad-response.json'));
+
+    const response = await action.main(
+      {
+        'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
+        'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
+        '__ow_method': 'get',
+      }
+    );
+
+    expect(response).toEqual({
+      'error': {
+        'statusCode': 500,
+        'body': {
+          'errors': [
+            {
+              'code': utils.ERR_RC_SERVER_ERROR,
+              'message': 'An error occurred, please try again later.'
+            }
+          ]
+        }
+      }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
+  });
+
+  test('Using the not operator with non-array field', async () => {
+    getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry.json'));
+
+    const response = await action.main(
+      {
+        'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
+        'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
+        '__ow_method': 'get',
+        'statuses': '!Approved'
+      }
+    );
+
+    expect(response).toEqual(require(__dirname + '/fixtures/list/response.not-approved.json'));
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
+  });
+
+  test('Get review issues but no issue exists', async () => {
+    getReviewIssueByTemplateName.mockReturnValue(null);
+
+    getTemplates.mockReturnValue(require(__dirname + '/fixtures/list/registry.json'));
+    const response = await action.main(
+      {
+        'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
+        'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
+        'orgName': orgName,
+        'templateName': templateName,
+        '__ow_method': HTTP_METHOD
+      }
+    );
+
+    expect(response).toEqual(require(__dirname + '/fixtures/list/response.full.no-review-issues.json'));
   });
 });

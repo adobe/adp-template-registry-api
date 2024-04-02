@@ -3,7 +3,10 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
+    "@adobe/aio-lib-console": "^5.0.1",
+    "@adobe/aio-lib-ims": "^7.0.1",
     "@adobe/aio-sdk": "^3.0.0",
+    "@heyputer/kv.js": "^0.1.6",
     "@octokit/rest": "^20.0.2",
     "axios": "^0.27.2",
     "lodash.orderby": "^4.6.0",
@@ -48,9 +51,10 @@
     ],
     "coverageThreshold": {
       "global": {
-        "branches": 85,
-        "lines": 85,
-        "statements": 85
+        "branches": 100,
+        "lines": 100,
+        "statements": 100,
+        "functions": 100
       }
     }
   }
