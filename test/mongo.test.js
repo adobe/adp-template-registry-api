@@ -26,7 +26,7 @@ describe('mongoConnection', () => {
     clientDbMock = jest.spyOn(MongoClient.prototype, 'db').mockReturnValue({
       collection: jest.fn().mockReturnValue({
         insertOne: jest.fn(),
-        find: jest.fn(),
+        find: jest.fn()
       })
     });
   });
@@ -63,4 +63,3 @@ describe('mongoConnection', () => {
     expect(clientDbMock().collection).toHaveBeenCalledWith('existingCollection');
   });
 });
-

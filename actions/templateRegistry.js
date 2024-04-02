@@ -30,9 +30,9 @@ const { convertMongoIdToString } = require('./utils');
  * @param {string} templateName template name
  * @returns {Promise<object|null>} an existing template record or null
  */
-async function findTemplateByName(dbParams, templateName) {
+async function findTemplateByName (dbParams, templateName) {
   const collection = await mongoConnection(dbParams, collectionName);
-  const results = await collection.find({ 'name': templateName }).toArray();
+  const results = await collection.find({ name: templateName }).toArray();
   return results?.length ? convertMongoIdToString(results[0]) : null;
 }
 
@@ -40,13 +40,12 @@ async function findTemplateByName(dbParams, templateName) {
  * Adds a template to Template Registry.
  *
  * @param {object} dbParams database connection parameters
- * @param {string} templateName template name
- * @param {string} githubRepoUrl Github repo URL
+ * @param {object} body template data
  * @returns {object} a newly created template
  */
-async function addTemplate(dbParams, body) {
+async function addTemplate (dbParams, body) {
   const collection = await mongoConnection(dbParams, collectionName);
-  let template = {
+  const template = {
     ...body,
     status: 'InVerification'
   };
@@ -68,9 +67,9 @@ async function addTemplate(dbParams, body) {
  * @param {string} templateName template name
  * @returns {void}
  */
-async function removeTemplateByName(dbParams, templateName) {
+async function removeTemplateByName (dbParams, templateName) {
   const collection = await mongoConnection(dbParams, collectionName);
-  await collection.deleteOne({ 'name': templateName });
+  await collection.deleteOne({ name: templateName });
 }
 
 /**
@@ -83,16 +82,16 @@ async function removeTemplateByName(dbParams, templateName) {
  * @param {string} templateRegistryRepository Template Registry repository name
  * @returns {Promise<number>} created issue number
  */
-async function createReviewIssue(templateName, githubRepoUrl, githubAccessToken, templateRegistryOrg, templateRegistryRepository) {
+async function createReviewIssue (templateName, githubRepoUrl, githubAccessToken, templateRegistryOrg, templateRegistryRepository) {
   const octokit = new Octokit({
-    'auth': githubAccessToken
+    auth: githubAccessToken
   });
   const response = await octokit.rest.issues.create({
-    'owner': templateRegistryOrg,
-    'repo': templateRegistryRepository,
-    'title': `Add ${templateName}`,
-    'labels': ['add-template', 'template-registry-api'],
-    'body': `### Link to GitHub repo\n${githubRepoUrl}\n### npm package name\n${templateName}`
+    owner: templateRegistryOrg,
+    repo: templateRegistryRepository,
+    title: `Add ${templateName}`,
+    labels: ['add-template', 'template-registry-api'],
+    body: `### Link to GitHub repo\n${githubRepoUrl}\n### npm package name\n${templateName}`
   });
   return response.data.number;
 }
@@ -105,10 +104,10 @@ async function createReviewIssue(templateName, githubRepoUrl, githubAccessToken,
  * @param {string} templateRegistryRepository Template Registry repository name
  * @returns {Promise<object|null>} an open "Template Review Request" issue or null
  */
-async function getReviewIssueByTemplateName(templateName, templateRegistryOrg, templateRegistryRepository) {
+async function getReviewIssueByTemplateName (templateName, templateRegistryOrg, templateRegistryRepository) {
   const issues = await getOpenReviewIssues(templateRegistryOrg, templateRegistryRepository);
   const reviewIssue = issues.find(item => item.body.endsWith(templateName));
-  return (reviewIssue !== undefined) ? reviewIssue['html_url'] : null;
+  return (reviewIssue !== undefined) ? reviewIssue.html_url : null;
 }
 
 /**
@@ -119,7 +118,7 @@ async function getReviewIssueByTemplateName(templateName, templateRegistryOrg, t
  * @returns {Array} An array of open "Template Review Request" issues
  * @private
  */
-async function getOpenReviewIssues(templateRegistryOrg, templateRegistryRepository) {
+async function getOpenReviewIssues (templateRegistryOrg, templateRegistryRepository) {
   if (openReviewIssues === null) {
     openReviewIssues = await fetchUrl(
       `https://api.github.com/repos/${templateRegistryOrg}/${templateRegistryRepository}/issues?state=open&labels=add-template&sort=updated-desc`
@@ -132,9 +131,9 @@ async function getOpenReviewIssues(templateRegistryOrg, templateRegistryReposito
  * Returns Template Registry records.
  *
  * @param {object} dbParams database connection parameters
- * @returns {promise<Array|[]>} existing Template Registry records
+ * @returns {Promise<Array|[]>} existing Template Registry records
  */
-async function getTemplates(dbParams) {
+async function getTemplates (dbParams) {
   const collection = await mongoConnection(dbParams, collectionName);
   const results = await collection.find({}).toArray();
   const result = results?.length ? convertMongoIdToString(results) : [];
@@ -145,15 +144,15 @@ async function getTemplates(dbParams) {
  * @param {string} url URL of a resource to fetch
  * @param {object} headers headers to be set if any
  * @param {object} params params to be set if any
- * @returns {Promise}
+ * @returns {Promise} response data
  */
-async function fetchUrl(url, headers = {}, params = {}) {
+async function fetchUrl (url, headers = {}, params = {}) {
   return new Promise((resolve, reject) => {
     axios({
-      'method': 'get',
-      'url': url,
-      'headers': headers,
-      'params': params
+      method: 'get',
+      url,
+      headers,
+      params
     })
       .then(response => {
         if (response.status === 200) {
