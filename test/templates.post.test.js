@@ -370,6 +370,7 @@ describe('POST templates', () => {
       },
       description: 'Developer Console template',
       version: '1.0.0',
+      createdBy: 'Capernicus',
       ...fakeParams
     });
     expect(response).toEqual({
@@ -407,7 +408,8 @@ describe('POST templates', () => {
         'consoleProject': DEVELOPER_CONSOLE_PROJECT
       },
       'description': 'Developer Console template',
-      'version': '1.0.0'
+      'version': '1.0.0',
+      'createdBy': 'Capernicus'
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
