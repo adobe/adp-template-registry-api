@@ -21,14 +21,14 @@ test('interface', () => {
 describe('errorResponse', () => {
   test('(400, errorMessages)', () => {
     const errors = [{
-      'code': utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
-      'message': 'The "a" parameter is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+      message: 'The "a" parameter is not set.'
     }];
     const res = utils.errorResponse(400, errors);
     expect(res).toEqual({
       error: {
         statusCode: 400,
-        body: { errors: errors }
+        body: { errors }
       }
     });
   });
@@ -38,8 +38,8 @@ describe('errorResponse', () => {
       info: jest.fn()
     };
     const errors = [{
-      'code': utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
-      'message': 'The "a" parameter is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+      message: 'The "a" parameter is not set.'
     }];
     const res = utils.errorResponse(400, errors, logger);
     expect(logger.info).toHaveBeenCalledWith('Status code: 400');
@@ -47,7 +47,7 @@ describe('errorResponse', () => {
     expect(res).toEqual({
       error: {
         statusCode: 400,
-        body: { errors: errors }
+        body: { errors }
       }
     });
   });
@@ -75,14 +75,14 @@ describe('checkMissingRequestInputs', () => {
   });
   test('({ a: 1 }, [a, b])', () => {
     expect(utils.checkMissingRequestInputs({ a: 1 }, ['a', 'b'])).toEqual([{
-      'code': utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
-      'message': 'The "b" parameter is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+      message: 'The "b" parameter is not set.'
     }]);
   });
   test('({ a: { b: { c: 1 } }, f: { g: 2 } }, [a.b.c, f.g.h.i])', () => {
     expect(utils.checkMissingRequestInputs({ a: { b: { c: 1 } }, f: { g: 2 } }, ['a.b.c', 'f.g.h.i'])).toEqual([{
-      'code': utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
-      'message': 'The "f.g.h.i" parameter is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+      message: 'The "f.g.h.i" parameter is not set.'
     }]);
   });
   test('({ a: { b: { c: 1 } }, f: { g: 2 } }, [a.b.c, f.g.h])', () => {
@@ -93,29 +93,29 @@ describe('checkMissingRequestInputs', () => {
   });
   test('({ a: 1, __ow_headers: { f: 2 } }, [a], [h, i])', () => {
     expect(utils.checkMissingRequestInputs({ a: 1, __ow_headers: { f: 2 } }, ['a'], ['h', 'i'])).toEqual([{
-      'code': utils.ERR_RC_MISSING_REQUIRED_HEADER,
-      'message': 'The "h" header is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_HEADER,
+      message: 'The "h" header is not set.'
     },
     {
-      'code': utils.ERR_RC_MISSING_REQUIRED_HEADER,
-      'message': 'The "i" header is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_HEADER,
+      message: 'The "i" header is not set.'
     }]);
   });
   test('({ c: 1, __ow_headers: { f: 2 } }, [a, b], [h, i])', () => {
     expect(utils.checkMissingRequestInputs({ c: 1 }, ['a', 'b'], ['h', 'i'])).toEqual([{
-      'code': utils.ERR_RC_MISSING_REQUIRED_HEADER,
-      'message': 'The "h" header is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_HEADER,
+      message: 'The "h" header is not set.'
     },
     {
-      'code': utils.ERR_RC_MISSING_REQUIRED_HEADER,
-      'message': 'The "i" header is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_HEADER,
+      message: 'The "i" header is not set.'
     },
     {
-      'code': utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
-      'message': 'The "a" parameter is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+      message: 'The "a" parameter is not set.'
     }, {
-      'code': utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
-      'message': 'The "b" parameter is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+      message: 'The "b" parameter is not set.'
     }]);
   });
   test('({ a: 0 }, [a])', () => {
@@ -126,14 +126,14 @@ describe('checkMissingRequestInputs', () => {
   });
   test('({ a: \'\' }, [a])', () => {
     expect(utils.checkMissingRequestInputs({ a: '' }, ['a'])).toEqual([{
-      'code': utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
-      'message': 'The "a" parameter is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+      message: 'The "a" parameter is not set.'
     }]);
   });
   test('({ a: undefined }, [a])', () => {
     expect(utils.checkMissingRequestInputs({ a: undefined }, ['a'])).toEqual([{
-      'code': utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
-      'message': 'The "a" parameter is not set.'
+      code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+      message: 'The "a" parameter is not set.'
     }]);
   });
 });

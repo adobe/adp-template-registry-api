@@ -9,7 +9,6 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { expect, describe, test } = require('@jest/globals');
 const nock = require('nock');
 const Kvjs = require('@heyputer/kv.js');
 const { Ims } = require('@adobe/aio-lib-ims');
@@ -29,7 +28,7 @@ describe('Verify communication with IMS', () => {
       .get(`/ims/validate_token/v1?client_id=${process.env.IMS_CLIENT_ID}&type=access_token`)
       .times(1)
       .reply(200, {
-        'valid': true
+        valid: true
       });
 
     await expect(validateAccessToken('<access-token>', process.env.IMS_URL, process.env.IMS_CLIENT_ID))
@@ -41,8 +40,8 @@ describe('Verify communication with IMS', () => {
       .get(`/ims/validate_token/v1?client_id=${process.env.IMS_CLIENT_ID}&type=access_token`)
       .times(1)
       .reply(200, {
-        'valid': false,
-        'reason': 'bad_signature'
+        valid: false,
+        reason: 'bad_signature'
       });
 
     await expect(validateAccessToken('<access-token>', process.env.IMS_URL, process.env.IMS_CLIENT_ID))

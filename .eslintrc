@@ -5,14 +5,15 @@
       "sourceType": "module"
     },
     "extends": [
-      "eslint:recommended"
+      "@adobe/eslint-config-aio-lib-config"
     ],
     "plugins": ["jest"],
     "rules": {
       "indent": ["error", 2, { "SwitchCase": 1 }],
       "semi": ["error", "always"],
       "quotes": ["error", "single"],
-      "no-trailing-spaces": ["error"]
+      "no-trailing-spaces": ["error"],
+      "node/no-unpublished-require": 0
     },
     "env": {
       "es2021": true,

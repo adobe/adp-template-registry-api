@@ -11,21 +11,25 @@ governing permissions and limitations under the License.
 
 const { Core } = require('@adobe/aio-sdk');
 const { errorResponse, errorMessage, stringParameters, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED } = require('../../utils');
-const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED }
-  = require('../../templateRegistry');
+const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED } =
+  require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 
 // GET operation is available to everyone, no IMS access token is required
 
 const HTTP_METHOD = 'get';
 
-// main function that will be executed by Adobe I/O Runtime
-async function main(params) {
+/**
+ * Get a template from the Template Registry.
+ * @param {object} params request parameters
+ * @returns {object} response
+ */
+async function main (params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
   const dbParams = {
-    'MONGODB_URI': params.MONGODB_URI,
-    'MONGODB_NAME': params.MONGODB_NAME
+    MONGODB_URI: params.MONGODB_URI,
+    MONGODB_NAME: params.MONGODB_NAME
   };
 
   try {
@@ -43,39 +47,39 @@ async function main(params) {
     Enforcer.v3_0.Schema.defineDataTypeFormat('string', 'uri', null);
     const openapi = await Enforcer('./openapi.yaml', { componentOptions: { exceptionSkipCodes: ['WPAR002'] } });
     const [req] = openapi.request({
-      'method': HTTP_METHOD,
-      'path': '/templates/{templateName}'
+      method: HTTP_METHOD,
+      path: '/templates/{templateName}'
     });
 
     const orgName = params.orgName;
     const templateName = params.templateName;
     if ((orgName === undefined) && (templateName === undefined)) {
       return {
-        'statusCode': 404
+        statusCode: 404
       };
     }
     const fullTemplateName = (orgName !== undefined) ? orgName + '/' + templateName : templateName;
     const template = await findTemplateByName(dbParams, fullTemplateName);
-    if (null === template) {
+    if (template === null) {
       return {
-        'statusCode': 404
+        statusCode: 404
       };
     }
     const response = {
       ...template,
-      '_links': {
-        'self': {
-          'href': `${params.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
+      _links: {
+        self: {
+          href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
         }
       }
     };
     const templateStatuses = [TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED];
     if (templateStatuses.includes(template.status)) {
       const reviewIssue = await getReviewIssueByTemplateName(fullTemplateName, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
-      if (null !== reviewIssue) {
-        response['_links']['review'] = {
-          'href': reviewIssue,
-          'description': 'A link to the "Template Review Request" Github issue.'
+      if (reviewIssue !== null) {
+        response._links.review = {
+          href: reviewIssue,
+          description: 'A link to the "Template Review Request" Github issue.'
         };
       }
     }
@@ -88,8 +92,8 @@ async function main(params) {
 
     logger.info('"GET templates" executed successfully');
     return {
-      'statusCode': 200,
-      'body': res.body
+      statusCode: 200,
+      body: res.body
     };
   } catch (error) {
     // log any server errors

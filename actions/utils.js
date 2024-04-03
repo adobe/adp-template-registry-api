@@ -24,11 +24,9 @@ const ERR_RC_PERMISSION_DENIED = 'permission_denied';
  * The `Authorization` header content will be replaced by '<hidden>'.
  *
  * @param {object} params action input parameters.
- *
- * @returns {string}
- *
+ * @returns {string} a stringified version of the input parameters.
  */
-function stringParameters(params) {
+function stringParameters (params) {
   // hide authorization token without overriding params
   let headers = params.__ow_headers || {};
   if (headers.authorization) {
@@ -50,7 +48,7 @@ function stringParameters(params) {
  * @returns {array}
  * @private
  */
-function getMissingKeys(obj, required) {
+function getMissingKeys (obj, required) {
   return required.filter(r => {
     const splits = r.split('.');
     const last = splits[splits.length - 1];
@@ -66,15 +64,13 @@ function getMissingKeys(obj, required) {
  * A value of 0 or null is not considered as missing.
  *
  * @param {object} params action input parameters.
- * @param {array} requiredHeaders list of required input headers.
- * @param {array} requiredParams list of required input parameters.
+ * @param {Array} requiredParams list of required input parameters.
  *        Each element can be multi level deep using a '.' separator e.g. 'myRequiredObj.myRequiredKey'.
- *
- * @returns {array} if the return value is not null, then it holds an array of error object messages describing the missing inputs.
- *
+ * @param {Array} requiredHeaders list of required input headers.
+ * @returns {Array} if the return value is not null, then it holds an array of error object messages describing the missing inputs.
  */
-function checkMissingRequestInputs(params, requiredParams = [], requiredHeaders = []) {
-  let errorMessages = [];
+function checkMissingRequestInputs (params, requiredParams = [], requiredHeaders = []) {
+  const errorMessages = [];
 
   // input headers are always lowercase
   requiredHeaders = requiredHeaders.map(h => h.toLowerCase());
@@ -106,11 +102,9 @@ function checkMissingRequestInputs(params, requiredParams = [], requiredHeaders 
  * Extracts the bearer token string from the Authorization header in the request parameters.
  *
  * @param {object} params action input parameters.
- *
  * @returns {string|undefined} the token string or undefined if not set in request headers.
- *
  */
-function getBearerToken(params) {
+function getBearerToken (params) {
   if (params.__ow_headers &&
     params.__ow_headers.authorization &&
     params.__ow_headers.authorization.startsWith('Bearer ')) {
@@ -125,15 +119,13 @@ function getBearerToken(params) {
  *
  * @param {number} statusCode the error status code.
  *        e.g. 400
- * @param {array} messages an array of error object messages.
+ * @param {Array} messages an array of error object messages.
  *        e.g. [{"code":"missing_required_parameter","message":"The \"XXX\" parameter is not set."}]
  * @param {*} [logger] an optional logger instance object with an `info` method
  *        e.g. `new require('@adobe/aio-sdk').Core.Logger('name')`
- *
  * @returns {object} the error object, ready to be returned from the action main's function.
- *
  */
-function errorResponse(statusCode, messages, logger) {
+function errorResponse (statusCode, messages, logger) {
   if (logger && typeof logger.info === 'function') {
     logger.info(`Status code: ${statusCode}`);
     messages.forEach(
@@ -155,22 +147,21 @@ function errorResponse(statusCode, messages, logger) {
  *
  * @param {string} code error response code
  * @param {string} message error message
- * @returns {object<code: string, message: string>}
+ * @returns {object} error message object
  */
-function errorMessage(code, message) {
+function errorMessage (code, message) {
   return {
-    'code': code,
-    'message': message
+    code,
+    message
   };
 }
 
 /**
  * Converts MongoDB ObjectId(s) within an object or an array of objects to strings.
- * @param {Object|Array} input - The input object or array of objects containing MongoDB ObjectId(s).
- * @returns {Object|Array} - Returns the input object or array of objects with MongoDB ObjectId(s) converted to strings.
+ * @param {object | Array} input - The input object or array of objects containing MongoDB ObjectId(s).
+ * @returns {object | Array} - Returns the input object or array of objects with MongoDB ObjectId(s) converted to strings.
  */
-
-function convertMongoIdToString(input) {
+function convertMongoIdToString (input) {
   if (Array.isArray(input)) {
     input.forEach(obj => {
       if (obj._id) {

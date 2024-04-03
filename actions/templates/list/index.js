@@ -24,13 +24,17 @@ const FILTER_TYPE_STUB = 'stub';
 
 // LIST operation is available to everyone, no IMS access token is required
 
-// main function that will be executed by Adobe I/O Runtime
-async function main(params) {
+/**
+ * List templates from the Template Registry.
+ * @param {object} params request parameters
+ * @returns {object} response
+ */
+async function main (params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
   const dbParams = {
-    'MONGODB_URI': params.MONGODB_URI,
-    'MONGODB_NAME': params.MONGODB_NAME
+    MONGODB_URI: params.MONGODB_URI,
+    MONGODB_NAME: params.MONGODB_NAME
   };
 
   try {
@@ -51,50 +55,50 @@ async function main(params) {
     // "subfield" - needed if filtering is happening by a subfield under the hood
     const filterConfig = [
       {
-        'field': 'name',
-        'queryParam': 'names',
-        'filterType': 'array'
+        field: 'name',
+        queryParam: 'names',
+        filterType: 'array'
       },
       {
-        'field': 'categories',
-        'queryParam': 'categories',
-        'filterType': 'array'
+        field: 'categories',
+        queryParam: 'categories',
+        filterType: 'array'
       },
       {
-        'field': 'apis',
-        'queryParam': 'apis',
-        'filterType': 'array',
-        'subfield': 'code'
+        field: 'apis',
+        queryParam: 'apis',
+        filterType: 'array',
+        subfield: 'code'
       },
       {
-        'field': 'status',
-        'queryParam': 'statuses',
-        'filterType': 'array'
+        field: 'status',
+        queryParam: 'statuses',
+        filterType: 'array'
       },
       {
-        'field': 'adobeRecommended',
-        'queryParam': 'adobeRecommended',
-        'filterType': 'boolean'
+        field: 'adobeRecommended',
+        queryParam: 'adobeRecommended',
+        filterType: 'boolean'
       },
       {
-        'field': 'extensions',
-        'queryParam': 'extensions',
-        'filterType': 'array',
-        'subfield': 'extensionPointId'
+        field: 'extensions',
+        queryParam: 'extensions',
+        filterType: 'array',
+        subfield: 'extensionPointId'
       },
       {
-        'field': 'event',
-        'queryParam': 'events',
-        'filterType': FILTER_TYPE_STUB // we do not have the final structure for this field, so we support "empty" and "any" filters for now
+        field: 'event',
+        queryParam: 'events',
+        filterType: FILTER_TYPE_STUB // we do not have the final structure for this field, so we support "empty" and "any" filters for now
       },
       {
-        'field': 'runtime',
-        'queryParam': 'runtime',
-        'filterType': 'boolean'
+        field: 'runtime',
+        queryParam: 'runtime',
+        filterType: 'boolean'
       }
     ];
     let templates = await getTemplates(dbParams);
-    let queryParams = {};
+    const queryParams = {};
     filterConfig.forEach(config => {
       if (config.queryParam in params) {
         const queryParamValues = params[config.queryParam].split(',').map(item => item.trim());
@@ -107,24 +111,24 @@ async function main(params) {
     // query parameters mapped to their respective fields
     // and possibly nested fields in each template object for sorting
     const orderByFields = {
-      'names': {
-        'field': 'name'
+      names: {
+        field: 'name'
       },
-      'statuses': {
-        'field': 'status'
+      statuses: {
+        field: 'status'
       },
-      'adobeRecommended': {
-        'field': 'adobeRecommended'
+      adobeRecommended: {
+        field: 'adobeRecommended'
       },
-      'publishDate': {
-        'field': 'publishDate'
+      publishDate: {
+        field: 'publishDate'
       }
     };
 
-    let sortFields = [];
-    let sortOrders = [];
-    if (params['orderBy']) {
-      let orderByArray = params['orderBy']
+    const sortFields = [];
+    const sortOrders = [];
+    if (params.orderBy) {
+      const orderByArray = params.orderBy
         .split(',')
         // splitting on field/sorting direction pairs, and removing extra spaces
         .map(item => item.split(' ').filter(item => item !== ''))
@@ -140,12 +144,12 @@ async function main(params) {
           return item;
         });
       orderByArray.forEach(item => {
-        let field = orderByFields[item[0]].field;
-        let dir = item[1];
+        const field = orderByFields[item[0]].field;
+        const dir = item[1];
         sortFields.push(field);
         sortOrders.push(dir);
       });
-      queryParams['orderBy'] = params['orderBy'].split(',').map(item => item.split(' ').filter(item => item !== '').join(' ')).join(',');
+      queryParams.orderBy = params.orderBy.split(',').map(item => item.split(' ').filter(item => item !== '').join(' ')).join(',');
 
       templates = orderBy(templates, sortFields, sortOrders);
     }
@@ -163,8 +167,8 @@ async function main(params) {
     };
     const openapi = await Enforcer('./openapi.yaml', options);
     const [req, reqError] = openapi.request({
-      'method': HTTP_METHOD,
-      'path': `/templates${queryString}`
+      method: HTTP_METHOD,
+      path: `/templates${queryString}`
     });
     if (reqError) {
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, reqError.toString().split('\n').map(line => line.trim()).join(' => '))], logger);
@@ -173,29 +177,29 @@ async function main(params) {
     for (let i = 0; i < templates.length; i++) {
       templates[i] = {
         ...templates[i],
-        '_links': {
-          'self': {
-            'href': `${params.TEMPLATE_REGISTRY_API_URL}/templates/${templates[i].name}`
+        _links: {
+          self: {
+            href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${templates[i].name}`
           }
         }
       };
       const templateStatuses = [TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED];
       if (templateStatuses.includes(templates[i].status)) {
         const reviewIssue = await getReviewIssueByTemplateName(templates[i].name, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
-        if (null !== reviewIssue) {
-          templates[i]['_links']['review'] = {
-            'href': reviewIssue,
-            'description': 'A link to the "Template Review Request" Github issue.'
+        if (reviewIssue !== null) {
+          templates[i]._links.review = {
+            href: reviewIssue,
+            description: 'A link to the "Template Review Request" Github issue.'
           };
         }
       }
     }
 
     const items = {
-      'items': templates,
-      '_links': {
-        'self': {
-          'href': `${params.TEMPLATE_REGISTRY_API_URL}/templates${queryString}`
+      items: templates,
+      _links: {
+        self: {
+          href: `${params.TEMPLATE_REGISTRY_API_URL}/templates${queryString}`
         }
       }
     };
@@ -208,8 +212,8 @@ async function main(params) {
 
     logger.info('"LIST templates" executed successfully');
     return {
-      'statusCode': 200,
-      'body': res.body
+      statusCode: 200,
+      body: res.body
     };
   } catch (error) {
     // log any server errors
@@ -223,14 +227,14 @@ async function main(params) {
 /**
  * Apply filters to an array of templates
  *
- * @param {Array} templates
- * @param {Array} filterValues
- * @param {String} field
- * @param {String} filterType
- * @param {String} subfield
- * @returns {Array}
+ * @param {Array} templates array of templates
+ * @param {Array} filterValues array of filter values
+ * @param {string} field field to filter by
+ * @param {string} filterType type of the filter
+ * @param {string} subfield subfield to filter by
+ * @returns {Array} filtered array of templates
  */
-function filter(templates, filterValues, field, filterType, subfield) {
+function filter (templates, filterValues, field, filterType, subfield) {
   // From filterValues, extract values that start with "!" to be used as a negative filter
   const filterValuesToExclude = [];
   const filterOrValues = [];

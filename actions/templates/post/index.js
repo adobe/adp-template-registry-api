@@ -10,8 +10,8 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST }
-  = require('../../utils');
+const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST } =
+  require('../../utils');
 const { validateAccessToken, generateAccessToken } = require('../../ims');
 const { findTemplateByName, addTemplate } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
@@ -20,8 +20,12 @@ const consoleLib = require('@adobe/aio-lib-console');
 const HTTP_METHOD = 'post';
 const POST_PARAM_NAME = 'name';
 
-// main function that will be executed by Adobe I/O Runtime
-async function main(params) {
+/**
+ * Create a new template in the Template Registry.
+ * @param {object} params request parameters
+ * @returns {object} response
+ */
+async function main (params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
 
@@ -29,8 +33,8 @@ async function main(params) {
   const imsClientId = params.IMS_CLIENT_ID;
 
   const dbParams = {
-    'MONGODB_URI': params.MONGODB_URI,
-    'MONGODB_NAME': params.MONGODB_NAME
+    MONGODB_URI: params.MONGODB_URI,
+    MONGODB_NAME: params.MONGODB_NAME
   };
 
   try {
@@ -74,19 +78,19 @@ async function main(params) {
 
     let body = {
       name: params.name,
-      ...(params.description && {description: params.description}), // developer console only
-      ...(params.version && {version: params.version}), // developer console only
-      ...(params.createdBy && {createdBy: params.createdBy}),
+      ...(params.description && { description: params.description }), // developer console only
+      ...(params.version && { version: params.version }), // developer console only
+      ...(params.createdBy && { createdBy: params.createdBy }),
       links: {
-        ...(params.links.consoleProject && {consoleProject: params.links.consoleProject}), // developer console only
-        ...(params.links.github && {github: params.links.github}) // app builder only
+        ...(params.links.consoleProject && { consoleProject: params.links.consoleProject }), // developer console only
+        ...(params.links.github && { github: params.links.github }) // app builder only
       }
     };
 
     const [req, reqError] = openapi.request({
-      'method': HTTP_METHOD,
-      'path': '/templates',
-      'body': body
+      method: HTTP_METHOD,
+      path: '/templates',
+      body
     });
     if (reqError) {
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, reqError.toString().split('\n').map(line => line.trim()).join(' => '))], logger);
@@ -96,9 +100,9 @@ async function main(params) {
     const consoleProjectUrl = params?.links?.consoleProject;
 
     const result = await findTemplateByName(dbParams, templateName);
-    if (null !== result) {
+    if (result !== null) {
       return {
-        'statusCode': 409
+        statusCode: 409
       };
     }
 
@@ -116,7 +120,7 @@ async function main(params) {
       for (const credential of installConfig.credentials) {
         credentials.push({
           type: credential.type,
-          flowType: credential.flowType,
+          flowType: credential.flowType
         });
 
         if (credential.apis) {
@@ -143,10 +147,10 @@ async function main(params) {
     // const issueNumber = await createReviewIssue(templateName, githubRepoUrl, params.ACCESS_TOKEN_GITHUB, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
     const response = {
       ...template,
-      '_links': {
-        'self': {
-          'href': `${params.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
-        },
+      _links: {
+        self: {
+          href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+        }
         // TODO: Uncomment this when we support App Builder templates again
         // 'review': {
         //   'href': `https://github.com/${params.TEMPLATE_REGISTRY_ORG}/${params.TEMPLATE_REGISTRY_REPOSITORY}/issues/${issueNumber}`,
@@ -163,8 +167,8 @@ async function main(params) {
 
     logger.info('"POST templates" executed successfully');
     return {
-      'statusCode': 200,
-      'body': res.body
+      statusCode: 200,
+      body: res.body
     };
   } catch (error) {
     // log any server errors

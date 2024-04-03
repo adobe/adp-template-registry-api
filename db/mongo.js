@@ -9,11 +9,16 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { MongoClient } = require('mongodb');
+const { MongoClient, Collection } = require('mongodb');
 
 let db = null;
 
-async function connectToMongoDB(params) {
+/**
+ * Connects to MongoDB.
+ * @param {object} params MongoDB connection parameters
+ * @returns {Promise<void>}
+ */
+async function connectToMongoDB (params) {
   try {
     const dbName = params.MONGODB_NAME;
     const url = params.MONGODB_URI;
@@ -27,7 +32,13 @@ async function connectToMongoDB(params) {
   }
 }
 
-async function mongoConnection(params, collectionName) {
+/**
+ * Returns a collection to interact with from MongoDB.
+ * @param {object} params MongoDB connection parameters
+ * @param {string} collectionName Name of the collection
+ * @returns {Promise<Collection>} A collection
+ */
+async function mongoConnection (params, collectionName) {
   if (!db || db === null) {
     await connectToMongoDB(params);
   }
