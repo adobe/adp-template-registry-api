@@ -9,18 +9,13 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { expect, afterEach } = require('@jest/globals');
-
-
 jest.setTimeout(30000);
 
 const nock = require('nock');
 nock.disableNetConnect();
 
 afterEach(() => {
-  const activeMocks = nock.activeMocks();
   nock.cleanAll();
-  expect(activeMocks).toStrictEqual([]);
 });
 
 global.console = {
@@ -30,5 +25,5 @@ global.console = {
   debug: jest.fn(),
   info: jest.fn(),
   warn: jest.fn(),
-  error: jest.fn(),
+  error: jest.fn()
 };

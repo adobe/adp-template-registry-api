@@ -9,22 +9,22 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { expect, describe, test, beforeEach } = require('@jest/globals');
 const { Core } = require('@adobe/aio-sdk');
 const { validateAccessToken, isAdmin, isServiceToken } = require('../actions/ims');
 const utils = require('../actions/utils');
 const action = require('../actions/templates/delete/index');
 const { fetchUrl, findTemplateByName, removeTemplateByName } = require('../actions/templateRegistry');
 
-const mockLoggerInstance = { 'info': jest.fn(), 'debug': jest.fn(), 'error': jest.fn() };
+const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
 Core.Logger.mockReturnValue(mockLoggerInstance);
 jest.mock('@adobe/aio-sdk', () => ({
-  'Core': {
-    'Logger': jest.fn()
+  Core: {
+    Logger: jest.fn()
   }
 }));
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
+jest.mock('@heyputer/kv.js');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -33,14 +33,14 @@ beforeEach(() => {
 });
 
 process.env = {
-  ADMIN_IMS_ORGANIZATIONS: 'adminOrg@AdobeOrg, adminOrg2@AdobeOrg',
+  ADMIN_IMS_ORGANIZATIONS: 'adminOrg@AdobeOrg, adminOrg2@AdobeOrg'
 };
 
 const HTTP_METHOD = 'delete';
 const IMS_ACCESS_TOKEN = 'fake';
 const fakeParams = {
-  '__ow_headers': {
-    'authorization': `Bearer ${IMS_ACCESS_TOKEN}`
+  __ow_headers: {
+    authorization: `Bearer ${IMS_ACCESS_TOKEN}`
   }
 };
 
@@ -51,18 +51,18 @@ describe('DELETE templates', () => {
 
   test('Missing Authorization header, should return 401', async () => {
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
-      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
-      '__ow_method': HTTP_METHOD
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      __ow_method: HTTP_METHOD
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 401,
-        'body': {
-          'errors': [{
-            'code': utils.ERR_RC_MISSING_REQUIRED_HEADER,
-            'message': 'The "authorization" header is not set.'
+      error: {
+        statusCode: 401,
+        body: {
+          errors: [{
+            code: utils.ERR_RC_MISSING_REQUIRED_HEADER,
+            message: 'The "authorization" header is not set.'
           }]
         }
       }
@@ -73,19 +73,19 @@ describe('DELETE templates', () => {
 
   test('Unsupported HTTP method, should return 405', async () => {
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
-      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
-      '__ow_method': 'get'
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      __ow_method: 'get'
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 405,
-        'body': {
-          'errors': [
+      error: {
+        statusCode: 405,
+        body: {
+          errors: [
             {
-              'code': utils.ERR_RC_HTTP_METHOD_NOT_ALLOWED,
-              'message': 'HTTP "get" method is unsupported.'
+              code: utils.ERR_RC_HTTP_METHOD_NOT_ALLOWED,
+              message: 'HTTP "get" method is unsupported.'
             }
           ]
         }
@@ -102,16 +102,16 @@ describe('DELETE templates', () => {
     });
 
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
-      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      __ow_method: HTTP_METHOD,
       ...fakeParams
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 401,
-        'body': { 'errors': [utils.errorMessage(utils.ERR_RC_INVALID_IMS_ACCESS_TOKEN, err)] }
+      error: {
+        statusCode: 401,
+        body: { errors: [utils.errorMessage(utils.ERR_RC_INVALID_IMS_ACCESS_TOKEN, err)] }
       }
     });
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
@@ -123,16 +123,16 @@ describe('DELETE templates', () => {
     isAdmin.mockReturnValue(false);
 
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
-      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      __ow_method: HTTP_METHOD,
       ...fakeParams
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 403,
-        'body': { 'errors': [utils.errorMessage(utils.ERR_RC_PERMISSION_DENIED, err)] }
+      error: {
+        statusCode: 403,
+        body: { errors: [utils.errorMessage(utils.ERR_RC_PERMISSION_DENIED, err)] }
       }
     });
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
@@ -143,17 +143,17 @@ describe('DELETE templates', () => {
     isAdmin.mockReturnValue(true);
 
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
-      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'ACCESS_TOKEN_GITHUB': process.env.ACCESS_TOKEN_GITHUB,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      __ow_method: HTTP_METHOD,
       ...fakeParams
     });
     expect(response).toEqual({
-      'statusCode': 404
+      statusCode: 404
     });
   });
 
@@ -168,18 +168,18 @@ describe('DELETE templates', () => {
     });
 
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
-      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
-      '__ow_method': HTTP_METHOD,
-      'orgName': orgName,
-      'templateName': templateName,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      __ow_method: HTTP_METHOD,
+      orgName,
+      templateName,
       ...fakeParams
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 500,
-        'body': { 'errors': [utils.errorMessage(utils.ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.')] }
+      error: {
+        statusCode: 500,
+        body: { errors: [utils.errorMessage(utils.ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.')] }
       }
     });
   });
@@ -192,19 +192,19 @@ describe('DELETE templates', () => {
     const fullTemplateName = `${orgName}/${templateName}`;
     findTemplateByName.mockReturnValue(null);
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
-      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'ACCESS_TOKEN_GITHUB': process.env.ACCESS_TOKEN_GITHUB,
-      '__ow_method': HTTP_METHOD,
-      'orgName': orgName,
-      'templateName': templateName,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      __ow_method: HTTP_METHOD,
+      orgName,
+      templateName,
       ...fakeParams
     });
     expect(response).toEqual({
-      'statusCode': 404
+      statusCode: 404
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
@@ -217,34 +217,34 @@ describe('DELETE templates', () => {
     const templateName = 'app-builder-template';
     const fullTemplateName = templateName;
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
-      'author': 'Adobe Inc.',
-      'name': fullTemplateName,
-      'description': 'A template for testing purposes [1.0.9]',
-      'latestVersion': '1.0.9',
-      'publishDate': '2022-05-01T03:50:39.658Z',
-      'apis': [
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      author: 'Adobe Inc.',
+      name: fullTemplateName,
+      description: 'A template for testing purposes [1.0.9]',
+      latestVersion: '1.0.9',
+      publishDate: '2022-05-01T03:50:39.658Z',
+      apis: [
         {
-          'code': 'CampaignStandard'
+          code: 'CampaignStandard'
         },
         {
-          'code': 'Runtime'
+          code: 'Runtime'
         }
       ],
-      'adobeRecommended': false,
-      'keywords': [
+      adobeRecommended: false,
+      keywords: [
         'aio',
         'adobeio',
         'app',
         'templates',
         'aio-app-builder-template'
       ],
-      'status': 'Approved',
-      'links': {
-        'npm': 'https://www.npmjs.com/package/@adobe/app-builder-template',
-        'github': 'https://github.com/adobe/app-builder-template'
+      status: 'Approved',
+      links: {
+        npm: 'https://www.npmjs.com/package/@adobe/app-builder-template',
+        github: 'https://github.com/adobe/app-builder-template'
       },
-      'categories': [
+      categories: [
         'action',
         'ui'
       ]
@@ -252,18 +252,18 @@ describe('DELETE templates', () => {
     findTemplateByName.mockReturnValue(template);
     fetchUrl.mockReturnValue(`>${fullTemplateName}<`);
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
-      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'ACCESS_TOKEN_GITHUB': process.env.ACCESS_TOKEN_GITHUB,
-      '__ow_method': HTTP_METHOD,
-      'templateName': templateName,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      __ow_method: HTTP_METHOD,
+      templateName,
       ...fakeParams
     });
     expect(response).toEqual({
-      'statusCode': 200
+      statusCode: 200
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
@@ -279,34 +279,34 @@ describe('DELETE templates', () => {
     const templateName = 'app-builder-template';
     const fullTemplateName = templateName;
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
-      'author': 'Adobe Inc.',
-      'name': fullTemplateName,
-      'description': 'A template for testing purposes [1.0.9]',
-      'latestVersion': '1.0.9',
-      'publishDate': '2022-05-01T03:50:39.658Z',
-      'apis': [
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      author: 'Adobe Inc.',
+      name: fullTemplateName,
+      description: 'A template for testing purposes [1.0.9]',
+      latestVersion: '1.0.9',
+      publishDate: '2022-05-01T03:50:39.658Z',
+      apis: [
         {
-          'code': 'CampaignStandard'
+          code: 'CampaignStandard'
         },
         {
-          'code': 'Runtime'
+          code: 'Runtime'
         }
       ],
-      'adobeRecommended': false,
-      'keywords': [
+      adobeRecommended: false,
+      keywords: [
         'aio',
         'adobeio',
         'app',
         'templates',
         'aio-app-builder-template'
       ],
-      'status': 'Approved',
-      'links': {
-        'npm': 'https://www.npmjs.com/package/@adobe/app-builder-template',
-        'github': 'https://github.com/adobe/app-builder-template'
+      status: 'Approved',
+      links: {
+        npm: 'https://www.npmjs.com/package/@adobe/app-builder-template',
+        github: 'https://github.com/adobe/app-builder-template'
       },
-      'categories': [
+      categories: [
         'action',
         'ui'
       ]
@@ -314,18 +314,18 @@ describe('DELETE templates', () => {
     findTemplateByName.mockReturnValue(template);
     fetchUrl.mockReturnValue(`>${fullTemplateName}<`);
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
-      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'ACCESS_TOKEN_GITHUB': process.env.ACCESS_TOKEN_GITHUB,
-      '__ow_method': HTTP_METHOD,
-      'templateName': templateName,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      __ow_method: HTTP_METHOD,
+      templateName,
       ...fakeParams
     });
     expect(response).toEqual({
-      'statusCode': 200
+      statusCode: 200
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);

@@ -10,7 +10,6 @@ governing permissions and limitations under the License.
 */
 
 const { MongoClient } = require('mongodb');
-const { expect, describe, test } = require('@jest/globals');
 const nock = require('nock');
 const {
   fetchUrl,
@@ -33,7 +32,7 @@ jest.mock('@octokit/rest', () => {
       return {
         rest: {
           issues: {
-            create: jest.fn(() => ({ data: { number: 1 }}))
+            create: jest.fn(() => ({ data: { number: 1 } }))
           }
         }
       };
@@ -42,7 +41,6 @@ jest.mock('@octokit/rest', () => {
 });
 
 describe('Verify communication with Template Registry', () => {
-
   test('Returns an open "Template Review Request" issue', async () => {
     const templateName = '@adobe/app-builder-template';
     const issueUrl = `https://github.com/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/issues/2`;
@@ -51,12 +49,12 @@ describe('Verify communication with Template Registry', () => {
       .times(1)
       .reply(200, [
         {
-          'html_url': `https://github.com/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/issues/1`,
-          'body': '### Link to GitHub repo\nhttps://github.com/company1/app-builder-template\n### npm package name\n@company1/app-builder-template'
+          html_url: `https://github.com/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/issues/1`,
+          body: '### Link to GitHub repo\nhttps://github.com/company1/app-builder-template\n### npm package name\n@company1/app-builder-template'
         },
         {
-          'html_url': issueUrl,
-          'body': `### Link to GitHub repo\nhttps://github.com/adobe/app-builder-template\n### npm package name\n${templateName}`
+          html_url: issueUrl,
+          body: `### Link to GitHub repo\nhttps://github.com/adobe/app-builder-template\n### npm package name\n${templateName}`
         }
       ]);
 
@@ -117,7 +115,6 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   });
 
   test('should add an app builder template to the collection', async () => {
-
     const templateResponse = await addTemplate(dbParams, {
       name: templateName,
       links: {
@@ -152,7 +149,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       description: 'My template description',
       version: '1.0.0',
       links: {
-        consoleProject: 'https://developer-stage.adobe.com/console/projects/123',
+        consoleProject: 'https://developer-stage.adobe.com/console/projects/123'
       }
     };
 
@@ -177,7 +174,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
 
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(collectionMock.deleteOne).toHaveBeenCalledWith({
-      name: templateName,
+      name: templateName
     });
   });
 
@@ -208,7 +205,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     collectionMock.toArray.mockResolvedValueOnce(null);
     const templateName = 'my-template';
     const templatesResult = await findTemplateByName(dbParams, templateName);
-    expect(collectionMock.find).toHaveBeenCalledWith({ 'name': templateName });
+    expect(collectionMock.find).toHaveBeenCalledWith({ name: templateName });
     expect(collectionMock.find().toArray).toHaveBeenCalled();
     expect(templatesResult).toEqual(null);
   });

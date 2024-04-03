@@ -9,7 +9,6 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { expect, describe, test, beforeEach } = require('@jest/globals');
 const { Core } = require('@adobe/aio-sdk');
 const { validateAccessToken, generateAccessToken } = require('../actions/ims');
 const { ObjectId } = require('mongodb');
@@ -18,11 +17,11 @@ const { fetchUrl, findTemplateByName, addTemplate } = require('../actions/templa
 const action = require('../actions/templates/post/index');
 const consoleSDK = require('@adobe/aio-lib-console');
 
-const mockLoggerInstance = { 'info': jest.fn(), 'debug': jest.fn(), 'error': jest.fn() };
+const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
 Core.Logger.mockReturnValue(mockLoggerInstance);
 jest.mock('@adobe/aio-sdk', () => ({
-  'Core': {
-    'Logger': jest.fn()
+  Core: {
+    Logger: jest.fn()
   }
 }));
 jest.mock('@adobe/aio-lib-console');
@@ -32,6 +31,7 @@ const mockConsoleSDKInstance = {
 consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance);
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
+jest.mock('@heyputer/kv.js');
 
 process.env = {
   TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'
@@ -56,8 +56,8 @@ const IMS_CLIENT_SECRET = 'fake';
 const IMS_CLIENT_ID = 'fake';
 const IMS_SCOPES = 'openid service_sdk';
 const fakeParams = {
-  '__ow_headers': {
-    'authorization': `Bearer ${IMS_ACCESS_TOKEN}`
+  __ow_headers: {
+    authorization: `Bearer ${IMS_ACCESS_TOKEN}`
   }
 };
 
@@ -68,18 +68,18 @@ describe('POST templates', () => {
 
   test('Missing Authorization header, should return 401', async () => {
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_URL,
-      '__ow_method': HTTP_METHOD
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 401,
-        'body': {
-          'errors': [
+      error: {
+        statusCode: 401,
+        body: {
+          errors: [
             {
-              'code': utils.ERR_RC_MISSING_REQUIRED_HEADER,
-              'message': 'The "authorization" header is not set.'
+              code: utils.ERR_RC_MISSING_REQUIRED_HEADER,
+              message: 'The "authorization" header is not set.'
             }
           ]
         }
@@ -90,19 +90,19 @@ describe('POST templates', () => {
 
   test('Missing POST payload, should return 400', async () => {
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_URL,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
       ...fakeParams
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 400,
-        'body': {
-          'errors': [
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
             {
-              'code': utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
-              'message': 'The "name" parameter is not set.'
+              code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+              message: 'The "name" parameter is not set.'
             }
           ]
         }
@@ -118,9 +118,9 @@ describe('POST templates', () => {
     });
 
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_URL,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
       [POST_PARAM_NAME]: TEMPLATE_NAME,
       [POST_PARAM_LINKS]: {
         [POST_PARAM_LINKS_GITHUB]: TEMPLATE_GITHUB_REPO
@@ -128,9 +128,9 @@ describe('POST templates', () => {
       ...fakeParams
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 401,
-        'body': { 'errors': [utils.errorMessage(utils.ERR_RC_INVALID_IMS_ACCESS_TOKEN, err)] }
+      error: {
+        statusCode: 401,
+        body: { errors: [utils.errorMessage(utils.ERR_RC_INVALID_IMS_ACCESS_TOKEN, err)] }
       }
     });
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
@@ -138,19 +138,19 @@ describe('POST templates', () => {
 
   test('Unsupported HTTP method, should return 400', async () => {
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_URL,
-      '__ow_method': 'get',
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: 'get',
       ...fakeParams
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 405,
-        'body': {
-          'errors': [
+      error: {
+        statusCode: 405,
+        body: {
+          errors: [
             {
-              'code': utils.ERR_RC_HTTP_METHOD_NOT_ALLOWED,
-              'message': 'HTTP "get" method is unsupported.'
+              code: utils.ERR_RC_HTTP_METHOD_NOT_ALLOWED,
+              message: 'HTTP "get" method is unsupported.'
             }
           ]
         }
@@ -163,12 +163,12 @@ describe('POST templates', () => {
   test('Incorrect POST payload, should return 400', async () => {
     const nonGithubRepoLink = 'https://non-github.com/adobe/app-builder-template';
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_URL,
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
       [POST_PARAM_NAME]: TEMPLATE_NAME,
       [POST_PARAM_LINKS]: {
         [POST_PARAM_LINKS_GITHUB]: nonGithubRepoLink
@@ -176,13 +176,13 @@ describe('POST templates', () => {
       ...fakeParams
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 400,
-        'body': {
-          'errors': [
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
             {
-              'code': utils.ERR_RC_INCORRECT_REQUEST,
-              'message': `Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links > github => String does not match required pattern /^https:\\/\\/github\\.com\\// with value: "${nonGithubRepoLink}"`
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: `Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links > github => String does not match required pattern /^https:\\/\\/github\\.com\\// with value: "${nonGithubRepoLink}"`
             }
           ]
         }
@@ -192,15 +192,15 @@ describe('POST templates', () => {
 
   test('Template already exists, should return 409', async () => {
     findTemplateByName.mockReturnValue({
-      'name': TEMPLATE_NAME
+      name: TEMPLATE_NAME
     });
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_URL,
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
       [POST_PARAM_NAME]: TEMPLATE_NAME,
       [POST_PARAM_LINKS]: {
         [POST_PARAM_LINKS_GITHUB]: TEMPLATE_GITHUB_REPO
@@ -208,7 +208,7 @@ describe('POST templates', () => {
       ...fakeParams
     });
     expect(response).toEqual({
-      'statusCode': 409
+      statusCode: 409
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
@@ -221,14 +221,14 @@ describe('POST templates', () => {
     fetchUrl.mockReturnValue('');
     const templateName = '@adobe/app-builder-template';
     const template = {
-      '_id': new ObjectId(),
-      'name': templateName,
-      'status': 'InVerification',
-      'links': {
-        'npm': 'https://www.npmjs.com/package/@adobe/app-builder-template',
-        'github': 'https://github.com/adobe/app-builder-template'
+      _id: new ObjectId(),
+      name: templateName,
+      status: 'InVerification',
+      links: {
+        npm: 'https://www.npmjs.com/package/@adobe/app-builder-template',
+        github: 'https://github.com/adobe/app-builder-template'
       },
-      'foo': 'bar'
+      foo: 'bar'
     };
     addTemplate.mockReturnValue(template);
     // TODO: Uncomment the following after integrating with App Builder templates again
@@ -236,13 +236,13 @@ describe('POST templates', () => {
     // const issueNumber = 1001;
     // createReviewIssue.mockReturnValue(issueNumber);
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_URL,
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'ACCESS_TOKEN_GITHUB': process.env.ACCESS_TOKEN_GITHUB,
-      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
       [POST_PARAM_NAME]: TEMPLATE_NAME,
       [POST_PARAM_LINKS]: {
         [POST_PARAM_LINKS_GITHUB]: TEMPLATE_GITHUB_REPO
@@ -250,13 +250,13 @@ describe('POST templates', () => {
       ...fakeParams
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 500,
-        'body': {
-          'errors': [
+      error: {
+        statusCode: 500,
+        body: {
+          errors: [
             {
-              'code': utils.ERR_RC_SERVER_ERROR,
-              'message': 'An error occurred, please try again later.'
+              code: utils.ERR_RC_SERVER_ERROR,
+              message: 'An error occurred, please try again later.'
             }
           ]
         }
@@ -271,26 +271,26 @@ describe('POST templates', () => {
     fetchUrl.mockReturnValue('');
     const templateName = '@adobe/app-builder-template';
     const template = {
-      '_id': new ObjectId(),
-      'name': templateName,
-      'status': 'InVerification',
-      'links': {
-        'npm': 'https://www.npmjs.com/package/@adobe/app-builder-template',
-        'github': 'https://github.com/adobe/app-builder-template'
+      _id: new ObjectId(),
+      name: templateName,
+      status: 'InVerification',
+      links: {
+        npm: 'https://www.npmjs.com/package/@adobe/app-builder-template',
+        github: 'https://github.com/adobe/app-builder-template'
       }
     };
     const convertedTemplate = utils.convertMongoIdToString(template);
     addTemplate.mockReturnValue({
-      ...convertedTemplate,
+      ...convertedTemplate
     });
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': process.env.IMS_URL,
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'ACCESS_TOKEN_GITHUB': process.env.ACCESS_TOKEN_GITHUB,
-      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
       [POST_PARAM_NAME]: TEMPLATE_NAME,
       [POST_PARAM_LINKS]: {
         [POST_PARAM_LINKS_GITHUB]: TEMPLATE_GITHUB_REPO
@@ -298,23 +298,23 @@ describe('POST templates', () => {
       ...fakeParams
     });
     expect(response).toEqual({
-      'statusCode': 200,
-      'body': {
+      statusCode: 200,
+      body: {
         ...template,
-        '_links': {
-          'self': {
-            'href': `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+        _links: {
+          self: {
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
           }
         }
       }
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
-    expect(findTemplateByName).toHaveBeenCalledWith({},TEMPLATE_NAME);
-    expect(addTemplate).toHaveBeenCalledWith({MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
-      'name': TEMPLATE_NAME,
-      'links': {
-        'github': TEMPLATE_GITHUB_REPO
+    expect(findTemplateByName).toHaveBeenCalledWith({}, TEMPLATE_NAME);
+    expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
+      name: TEMPLATE_NAME,
+      links: {
+        github: TEMPLATE_GITHUB_REPO
       }
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
@@ -343,27 +343,27 @@ describe('POST templates', () => {
     fetchUrl.mockReturnValue('');
     const templateName = '@adobe/developer-console-template';
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
-      'name': templateName,
-      'description': 'Developer Console template',
-      'status': 'InVerification',
-      'version': '1.0.0',
-      'links': {
-        'consoleProject': DEVELOPER_CONSOLE_PROJECT
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      name: templateName,
+      description: 'Developer Console template',
+      status: 'InVerification',
+      version: '1.0.0',
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
       }
     };
     addTemplate.mockReturnValue(template);
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': IMS_CLIENT_ID,
-      'IMS_CLIENT_SECRET': IMS_CLIENT_SECRET,
-      'IMS_AUTH_CODE': IMS_AUTH_CODE,
-      'IMS_SCOPES': IMS_SCOPES,
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'ACCESS_TOKEN_GITHUB': process.env.ACCESS_TOKEN_GITHUB,
-      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID,
+      IMS_CLIENT_SECRET,
+      IMS_AUTH_CODE,
+      IMS_SCOPES,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
       name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
       links: {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
@@ -374,12 +374,12 @@ describe('POST templates', () => {
       ...fakeParams
     });
     expect(response).toEqual({
-      'statusCode': 200,
-      'body': {
+      statusCode: 200,
+      body: {
         ...template,
-        '_links': {
-          'self': {
-            'href': `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+        _links: {
+          self: {
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
           }
         }
       }
@@ -387,29 +387,29 @@ describe('POST templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
-    expect(findTemplateByName).toHaveBeenCalledWith({},DEVELOPER_CONSOLE_TEMPLATE_NAME);
-    expect(addTemplate).toHaveBeenCalledWith({MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
-      'name': DEVELOPER_CONSOLE_TEMPLATE_NAME,
-      'apis': [
+    expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
+    expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
+      name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
+      apis: [
         {
-          'credentialType': 'serviceAccount',
-          'flowType': 'oauth2',
-          'code': 'AdobeIO',
-          'productProfiles': undefined
+          credentialType: 'serviceAccount',
+          flowType: 'oauth2',
+          code: 'AdobeIO',
+          productProfiles: undefined
         }
       ],
-      'credentials': [
+      credentials: [
         {
-          'type': 'serviceAccount',
-          'flowType': 'oauth2'
+          type: 'serviceAccount',
+          flowType: 'oauth2'
         }
       ],
-      'links': {
-        'consoleProject': DEVELOPER_CONSOLE_PROJECT
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
-      'description': 'Developer Console template',
-      'version': '1.0.0',
-      'createdBy': 'Capernicus'
+      description: 'Developer Console template',
+      version: '1.0.0',
+      createdBy: 'Capernicus'
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
@@ -432,27 +432,27 @@ describe('POST templates', () => {
     fetchUrl.mockReturnValue('');
     const templateName = '@adobe/developer-console-template';
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
-      'name': templateName,
-      'description': 'Developer Console template',
-      'status': 'InVerification',
-      'version': '1.0.0',
-      'links': {
-        'consoleProject': DEVELOPER_CONSOLE_PROJECT
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      name: templateName,
+      description: 'Developer Console template',
+      status: 'InVerification',
+      version: '1.0.0',
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
       }
     };
     addTemplate.mockReturnValue(template);
     const response = await action.main({
-      'IMS_URL': process.env.IMS_URL,
-      'IMS_CLIENT_ID': IMS_CLIENT_ID,
-      'IMS_CLIENT_SECRET': IMS_CLIENT_SECRET,
-      'IMS_AUTH_CODE': IMS_AUTH_CODE,
-      'IMS_SCOPES': IMS_SCOPES,
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'ACCESS_TOKEN_GITHUB': process.env.ACCESS_TOKEN_GITHUB,
-      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-      '__ow_method': HTTP_METHOD,
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID,
+      IMS_CLIENT_SECRET,
+      IMS_AUTH_CODE,
+      IMS_SCOPES,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
       name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
       links: {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
@@ -462,12 +462,12 @@ describe('POST templates', () => {
       ...fakeParams
     });
     expect(response).toEqual({
-      'statusCode': 200,
-      'body': {
+      statusCode: 200,
+      body: {
         ...template,
-        '_links': {
-          'self': {
-            'href': `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+        _links: {
+          self: {
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
           }
         }
       }
@@ -475,21 +475,21 @@ describe('POST templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
-    expect(findTemplateByName).toHaveBeenCalledWith({},DEVELOPER_CONSOLE_TEMPLATE_NAME);
-    expect(addTemplate).toHaveBeenCalledWith({MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
-      'name': DEVELOPER_CONSOLE_TEMPLATE_NAME,
-      'apis': [],
-      'credentials': [
+    expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
+    expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
+      name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
+      apis: [],
+      credentials: [
         {
-          'type': 'serviceAccount',
-          'flowType': 'oauth2'
+          type: 'serviceAccount',
+          flowType: 'oauth2'
         }
       ],
-      'links': {
-        'consoleProject': DEVELOPER_CONSOLE_PROJECT
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
-      'description': 'Developer Console template',
-      'version': '1.0.0'
+      description: 'Developer Console template',
+      version: '1.0.0'
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);

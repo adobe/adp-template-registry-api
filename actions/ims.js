@@ -23,16 +23,14 @@ const CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
  * @param {string} imsClientId IMS client id
  * @returns {void}
  */
-async function validateAccessToken(accessToken, imsUrl, imsClientId) {
+async function validateAccessToken (accessToken, imsUrl, imsClientId) {
   const response = await requestImsResource(
     imsUrl + '/ims/validate_token/v1',
     accessToken,
     { 'X-IMS-ClientId': imsClientId },
-    { 'client_id': imsClientId, 'type': 'access_token' }
+    { client_id: imsClientId, type: 'access_token' }
   );
-  if (response.valid === true) {
-    return;
-  } else {
+  if (!response.valid) {
     const error = `Provided IMS access token is invalid. Reason: ${response.reason}`;
     throw new Error(error);
   }
@@ -43,10 +41,10 @@ async function validateAccessToken(accessToken, imsUrl, imsClientId) {
  *
  * @param {string} accessToken IMS access token
  * @param {string} imsUrl IMS host
- * @param {array<string>} adminImsOrganizations IMS organizations related to admin users
- * @returns {Promise<boolean>}
+ * @param {Array<string>} adminImsOrganizations IMS organizations related to admin users
+ * @returns {Promise<boolean>} true if the user is an admin, false otherwise
  */
-async function isAdmin(accessToken, imsUrl, adminImsOrganizations) {
+async function isAdmin (accessToken, imsUrl, adminImsOrganizations) {
   const imsOrganizations = await requestImsResource(imsUrl + '/ims/organizations/v6', accessToken);
   let isAdmin = false;
   imsOrganizations.forEach(item => {
@@ -59,13 +57,13 @@ async function isAdmin(accessToken, imsUrl, adminImsOrganizations) {
 }
 
 /**
- * Checks if the provided IMS access token is a service token. Checking for "@AdobeService" is the new way 
- * to check for a service token, but older service clients won't add this to their tokens, so we also check 
+ * Checks if the provided IMS access token is a service token. Checking for "@AdobeService" is the new way
+ * to check for a service token, but older service clients won't add this to their tokens, so we also check
  * for the "system" scope.
  * @param {string} accessToken IMS access token
  * @returns {boolean} If the token is a service token
  */
-function isServiceToken(accessToken) {
+function isServiceToken (accessToken) {
   const tokenData = getTokenData(accessToken);
   return tokenData?.user_id?.endsWith('@AdobeService') || tokenData?.scope?.includes('system');
 }
@@ -78,16 +76,16 @@ function isServiceToken(accessToken) {
  * @returns {Promise}
  * @private
  */
-async function requestImsResource(url, accessToken, headers = {}, params = {}) {
+async function requestImsResource (url, accessToken, headers = {}, params = {}) {
   return new Promise((resolve, reject) => {
     axios({
-      'method': 'get',
-      'url': url,
-      'headers': {
-        'Authorization': `Bearer ${accessToken}`,
+      method: 'get',
+      url,
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
         ...headers
       },
-      'params': params
+      params
     })
       .then(response => {
         if (response.status === 200) {
@@ -104,7 +102,15 @@ async function requestImsResource(url, accessToken, headers = {}, params = {}) {
   });
 }
 
-async function generateAccessToken(imsAuthCode, imsClientId, imsClientSecret, imsScopes) {
+/**
+ * Generates an IMS access token using the provided IMS Auth Code.
+ * @param {string} imsAuthCode - IMS Auth Code
+ * @param {string} imsClientId - IMS Client ID
+ * @param {string} imsClientSecret - IMS Client Secret
+ * @param {string} imsScopes - List of space-separated scopes
+ * @returns {Promise<string>} - IMS access token
+ */
+async function generateAccessToken (imsAuthCode, imsClientId, imsClientSecret, imsScopes) {
   // Check if we have a cached access token
   const cachedAccessToken = kv.get('authorization');
   if (cachedAccessToken) {

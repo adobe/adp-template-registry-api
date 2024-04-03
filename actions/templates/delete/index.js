@@ -10,15 +10,19 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_PERMISSION_DENIED }
-  = require('../../utils');
+const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_PERMISSION_DENIED } =
+  require('../../utils');
 const { validateAccessToken, isAdmin, isServiceToken } = require('../../ims');
 const { findTemplateByName, removeTemplateByName } = require('../../templateRegistry');
 
 const HTTP_METHOD = 'delete';
 
-// main function that will be executed by Adobe I/O Runtime
-async function main(params) {
+/**
+ * Delete a template from the Template Registry.
+ * @param {object} params request parameters
+ * @returns {object} response
+ */
+async function main (params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
 
@@ -27,8 +31,8 @@ async function main(params) {
   const adminImsOrganizations = params.ADMIN_IMS_ORGANIZATIONS.split(',');
 
   const dbParams = {
-    'MONGODB_URI': params.MONGODB_URI,
-    'MONGODB_NAME': params.MONGODB_NAME
+    MONGODB_URI: params.MONGODB_URI,
+    MONGODB_NAME: params.MONGODB_NAME
   };
 
   try {
@@ -74,20 +78,20 @@ async function main(params) {
     const templateName = params.templateName;
     if ((orgName === undefined) && (templateName === undefined)) {
       return {
-        'statusCode': 404
+        statusCode: 404
       };
     }
     const fullTemplateName = (orgName !== undefined) ? orgName + '/' + templateName : templateName;
     const template = await findTemplateByName(dbParams, fullTemplateName);
-    if (null === template) {
+    if (template === null) {
       return {
-        'statusCode': 404
+        statusCode: 404
       };
     }
 
     await removeTemplateByName(dbParams, fullTemplateName);
     const response = {
-      'statusCode': 200
+      statusCode: 200
     };
 
     logger.info('"DELETE templates" executed successfully');

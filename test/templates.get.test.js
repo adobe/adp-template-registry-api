@@ -9,17 +9,16 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { expect, describe, test, beforeEach } = require('@jest/globals');
 const { Core } = require('@adobe/aio-sdk');
 const action = require('../actions/templates/get/index');
 const utils = require('../actions/utils');
 const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION } = require('../actions/templateRegistry');
 
-const mockLoggerInstance = { 'info': jest.fn(), 'debug': jest.fn(), 'error': jest.fn() };
+const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
 Core.Logger.mockReturnValue(mockLoggerInstance);
 jest.mock('@adobe/aio-sdk', () => ({
-  'Core': {
-    'Logger': jest.fn()
+  Core: {
+    Logger: jest.fn()
   }
 }));
 jest.mock('../actions/templateRegistry');
@@ -44,79 +43,79 @@ describe('GET templates', () => {
     const templateName = 'app-builder-template';
     const fullTemplateName = `${orgName}/${templateName}`;
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d1',
-      'author': 'Adobe Inc.',
-      'name': fullTemplateName,
-      'description': 'A template for testing purposes [1.0.9]',
-      'latestVersion': '1.0.9',
-      'publishDate': '2022-05-01T03:50:39.658Z',
-      'apis': [
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d1',
+      author: 'Adobe Inc.',
+      name: fullTemplateName,
+      description: 'A template for testing purposes [1.0.9]',
+      latestVersion: '1.0.9',
+      publishDate: '2022-05-01T03:50:39.658Z',
+      apis: [
         {
-          'code': 'AnalyticsSDK',
-          'credentials': 'OAuth'
+          code: 'AnalyticsSDK',
+          credentials: 'OAuth'
         },
         {
-          'code': 'CampaignStandard'
+          code: 'CampaignStandard'
         },
         {
-          'code': 'Runtime'
+          code: 'Runtime'
         },
         {
-          'code': 'Events',
-          'hooks': [
+          code: 'Events',
+          hooks: [
             {
-              'postdeploy': 'some command'
+              postdeploy: 'some command'
             }
           ]
         },
         {
-          'code': 'Mesh',
-          'endpoints': [
+          code: 'Mesh',
+          endpoints: [
             {
               'my-action': 'https://some-action.com/action'
             }
           ]
         }
       ],
-      'adobeRecommended': false,
-      'keywords': [
+      adobeRecommended: false,
+      keywords: [
         'aio',
         'adobeio',
         'app',
         'templates',
         'aio-app-builder-template'
       ],
-      'status': 'Approved',
-      'links': {
-        'npm': 'https://www.npmjs.com/package/@adobe/app-builder-template',
-        'github': 'https://github.com/adobe/app-builder-template'
+      status: 'Approved',
+      links: {
+        npm: 'https://www.npmjs.com/package/@adobe/app-builder-template',
+        github: 'https://github.com/adobe/app-builder-template'
       },
-      'extensions': [
+      extensions: [
         {
-          'extensionPointId': 'dx/excshell/1'
+          extensionPointId: 'dx/excshell/1'
         }
       ],
-      'categories': [
+      categories: [
         'action',
         'ui'
       ]
     };
     findTemplateByName.mockReturnValue(template);
     const response = await action.main({
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-      'orgName': orgName,
-      'templateName': templateName,
-      '__ow_method': HTTP_METHOD
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      orgName,
+      templateName,
+      __ow_method: HTTP_METHOD
     });
     expect(response).toEqual({
-      'statusCode': 200,
-      'body': {
+      statusCode: 200,
+      body: {
         ...template,
-        '_links': {
-          'self': {
-            'href': `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
+        _links: {
+          self: {
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
           }
         }
       }
@@ -130,35 +129,35 @@ describe('GET templates', () => {
     const templateName = 'app-builder-template';
     const fullTemplateName = templateName;
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d2',
-      'name': fullTemplateName,
-      'status': TEMPLATE_STATUS_IN_VERIFICATION,
-      'links': {
-        'npm': 'https://www.npmjs.com/package/@adobe/app-builder-template',
-        'github': 'https://github.com/adobe/app-builder-template'
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d2',
+      name: fullTemplateName,
+      status: TEMPLATE_STATUS_IN_VERIFICATION,
+      links: {
+        npm: 'https://www.npmjs.com/package/@adobe/app-builder-template',
+        github: 'https://github.com/adobe/app-builder-template'
       }
     };
     const reviewIssue = `https://github.com/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/issues/100`;
     findTemplateByName.mockReturnValue(template);
     getReviewIssueByTemplateName.mockReturnValue(reviewIssue);
     const response = await action.main({
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-      'templateName': templateName,
-      '__ow_method': HTTP_METHOD
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      templateName,
+      __ow_method: HTTP_METHOD
     });
     expect(response).toEqual({
-      'statusCode': 200,
-      'body': {
+      statusCode: 200,
+      body: {
         ...template,
-        '_links': {
-          'self': {
-            'href': `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
+        _links: {
+          self: {
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
           },
-          'review': {
-            'href': reviewIssue,
-            'description': 'A link to the "Template Review Request" Github issue.'
+          review: {
+            href: reviewIssue,
+            description: 'A link to the "Template Review Request" Github issue.'
           }
         }
       }
@@ -173,30 +172,30 @@ describe('GET templates', () => {
     const templateName = 'app-builder-template';
     const fullTemplateName = templateName;
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d2',
-      'name': fullTemplateName,
-      'status': TEMPLATE_STATUS_IN_VERIFICATION,
-      'links': {
-        'npm': 'https://www.npmjs.com/package/@adobe/app-builder-template',
-        'github': 'https://github.com/adobe/app-builder-template'
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d2',
+      name: fullTemplateName,
+      status: TEMPLATE_STATUS_IN_VERIFICATION,
+      links: {
+        npm: 'https://www.npmjs.com/package/@adobe/app-builder-template',
+        github: 'https://github.com/adobe/app-builder-template'
       }
     };
     findTemplateByName.mockReturnValue(template);
     getReviewIssueByTemplateName.mockReturnValue(null);
     const response = await action.main({
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-      'templateName': templateName,
-      '__ow_method': HTTP_METHOD
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      templateName,
+      __ow_method: HTTP_METHOD
     });
     expect(response).toEqual({
-      'statusCode': 200,
-      'body': {
+      statusCode: 200,
+      body: {
         ...template,
-        '_links': {
-          'self': {
-            'href': `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
+        _links: {
+          self: {
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
           }
         }
       }
@@ -213,14 +212,14 @@ describe('GET templates', () => {
     const fullTemplateName = `${orgName}/${templateName}`;
     findTemplateByName.mockReturnValue(null);
     const response = await action.main({
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'orgName': orgName,
-      'templateName': templateName,
-      '__ow_method': HTTP_METHOD
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      orgName,
+      templateName,
+      __ow_method: HTTP_METHOD
     });
     expect(response).toEqual({
-      'statusCode': 404
+      statusCode: 404
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
@@ -230,12 +229,12 @@ describe('GET templates', () => {
   test('Org name and template name ommitted, should return 404', async () => {
     findTemplateByName.mockReturnValue(null);
     const response = await action.main({
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      '__ow_method': HTTP_METHOD
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      __ow_method: HTTP_METHOD
     });
     expect(response).toEqual({
-      'statusCode': 404
+      statusCode: 404
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
   });
@@ -244,20 +243,20 @@ describe('GET templates', () => {
     const orgName = '@adobe';
     const templateName = 'app-builder-template';
     const response = await action.main({
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'orgName': orgName,
-      'templateName': templateName,
-      '__ow_method': 'delete'
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      orgName,
+      templateName,
+      __ow_method: 'delete'
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 405,
-        'body': {
-          'errors': [
+      error: {
+        statusCode: 405,
+        body: {
+          errors: [
             {
-              'code': utils.ERR_RC_HTTP_METHOD_NOT_ALLOWED,
-              'message': 'HTTP "delete" method is unsupported.'
+              code: utils.ERR_RC_HTTP_METHOD_NOT_ALLOWED,
+              message: 'HTTP "delete" method is unsupported.'
             }
           ]
         }
@@ -273,30 +272,30 @@ describe('GET templates', () => {
     const templateName = 'app-builder-template';
     const fullTemplateName = `${orgName}/${templateName}`;
     const template = {
-      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d3',
-      'name': fullTemplateName,
-      'links': {
-        'npm': 'https://www.npmjs.com/package/@adobe/app-builder-template',
-        'github': 'https://github.com/adobe/app-builder-template'
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d3',
+      name: fullTemplateName,
+      links: {
+        npm: 'https://www.npmjs.com/package/@adobe/app-builder-template',
+        github: 'https://github.com/adobe/app-builder-template'
       }
     };
     findTemplateByName.mockReturnValue(template);
     const response = await action.main({
-      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
-      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
-      'TEMPLATE_REGISTRY_API_URL': process.env.TEMPLATE_REGISTRY_API_URL,
-      'orgName': orgName,
-      'templateName': templateName,
-      '__ow_method': HTTP_METHOD
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      orgName,
+      templateName,
+      __ow_method: HTTP_METHOD
     });
     expect(response).toEqual({
-      'error': {
-        'statusCode': 500,
-        'body': {
-          'errors': [
+      error: {
+        statusCode: 500,
+        body: {
+          errors: [
             {
-              'code': utils.ERR_RC_SERVER_ERROR,
-              'message': 'An error occurred, please try again later.'
+              code: utils.ERR_RC_SERVER_ERROR,
+              message: 'An error occurred, please try again later.'
             }
           ]
         }
