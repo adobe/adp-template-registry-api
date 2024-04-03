@@ -3,8 +3,22 @@
     "basePath": "/v1",
     "info": {
         "title": "Template Registry API",
-        "version": "1.0.0"
+        "version": "1.0.0",
+        "license": {
+          "name": "Apache-2.0 License",
+          "url": "https://github.com/adobe/adp-template-registry-api?tab=Apache-2.0-1-ov-file"
+        }
       },
+    "servers": [
+      {
+        "url": "https://adobeioruntime.net/apis/adp-template-registry-service/v1",
+        "description": "Production"
+      },
+      {
+        "url": "https://adobeioruntime.net/apis/adp-template-registry-service-stage/v1",
+        "description": "Stage"
+      }
+    ],
     "paths": {
       "/templates": {
         "post": {
@@ -122,6 +136,7 @@
         "get": {
           "summary": "Return a list of templates matching a specified criteria.",
           "operationId": "template-registry-api/templates-list.http",
+          "security": [],
           "tags": [
             "templates"
           ],
@@ -275,6 +290,7 @@
         "get": {
           "summary": "Get information about a template.",
           "operationId": "template-registry-api/templates-get.http",
+          "security": [],
           "tags": [
             "templates"
           ],
@@ -404,8 +420,9 @@
       },
       "/templates/{orgName}/{templateName}": {
         "get": {
-          "summary": "Get information about a template.",
-          "operationId": "template-registry-api/templates-get.http",
+          "summary": "Get information about a template by organization.",
+          "operationId": "template-registry-api/templates-get-org-name.http",
+          "security": [],
           "tags": [
             "templates"
           ],
@@ -485,8 +502,8 @@
           }
         },
         "delete": {
-          "summary": "Delete a template from Template Registry.",
-          "operationId": "template-registry-api/templates-delete.http",
+          "summary": "Delete a template from Template Registry by organization.",
+          "operationId": "template-registry-api/templates-delete-org-name.http",
           "tags": [
             "templates"
           ],
