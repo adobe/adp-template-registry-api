@@ -12,7 +12,7 @@ governing permissions and limitations under the License.
 const { Core } = require('@adobe/aio-sdk');
 const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_PERMISSION_DENIED }
   = require('../../utils');
-const { validateAccessToken, isAdmin } = require('../../ims');
+const { validateAccessToken, isAdmin, isServiceToken } = require('../../ims');
 const { findTemplateByName, removeTemplateByName } = require('../../templateRegistry');
 
 const HTTP_METHOD = 'delete';
@@ -60,11 +60,14 @@ async function main(params) {
       return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
     }
 
-    // check if the token belongs to an admin
-    const isCallerAdmin = await isAdmin(accessToken, imsUrl, adminImsOrganizations);
-    if (isCallerAdmin !== true) {
-      const err = 'This operation is available to admins only. To request template removal from Template Registry, please, create a "Template Removal Request" issue on https://github.com/adobe/aio-template-submission';
-      return errorResponse(403, [errorMessage(ERR_RC_PERMISSION_DENIED, err)], logger);
+    // if the token is not a service token, check if the user token is an admin
+    if (!isServiceToken(accessToken)) {
+      // check if the token belongs to an admin
+      const isCallerAdmin = await isAdmin(accessToken, imsUrl, adminImsOrganizations);
+      if (isCallerAdmin !== true) {
+        const err = 'This operation is available to admins only. To request template removal from Template Registry, please, create a "Template Removal Request" issue on https://github.com/adobe/aio-template-submission';
+        return errorResponse(403, [errorMessage(ERR_RC_PERMISSION_DENIED, err)], logger);
+      }
     }
 
     const orgName = params.orgName;

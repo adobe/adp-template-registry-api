@@ -12,8 +12,8 @@ governing permissions and limitations under the License.
 const { expect, describe, test } = require('@jest/globals');
 const nock = require('nock');
 const Kvjs = require('@heyputer/kv.js');
-const { Ims } = require('@adobe/aio-lib-ims');
-const { validateAccessToken, isAdmin, generateAccessToken } = require('../actions/ims');
+const { Ims, getTokenData } = require('@adobe/aio-lib-ims');
+const { validateAccessToken, isAdmin, generateAccessToken, isServiceToken } = require('../actions/ims');
 
 jest.mock('@heyputer/kv.js');
 jest.mock('@adobe/aio-lib-ims');
@@ -136,5 +136,22 @@ describe('Verify communication with IMS', () => {
     jest.spyOn(Kvjs.prototype, 'get').mockImplementation(() => 'cached-access--token');
     await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid'))
       .resolves.toBe('cached-access--token');
+  });
+
+  test('Verify checking that provided IMS access token is a service token', () => {
+    getTokenData.mockImplementation(() => ({
+      'user_id': 'service-account@AdobeService'
+    }));
+
+    expect(isServiceToken('fake-token')).toBe(true);
+  });
+
+  test('Verify checking that provided IMS access token is not a service token', () => {
+    getTokenData.mockImplementation(() => ({
+      'user_id': 'service-account@AdobeID',
+      'scope': 'not-the-scope'
+    }));
+
+    expect(isServiceToken('fake-token')).toBe(false);
   });
 });

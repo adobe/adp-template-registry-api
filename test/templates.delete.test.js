@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 
 const { expect, describe, test, beforeEach } = require('@jest/globals');
 const { Core } = require('@adobe/aio-sdk');
-const { validateAccessToken, isAdmin } = require('../actions/ims');
+const { validateAccessToken, isAdmin, isServiceToken } = require('../actions/ims');
 const utils = require('../actions/utils');
 const action = require('../actions/templates/delete/index');
 const { fetchUrl, findTemplateByName, removeTemplateByName } = require('../actions/templateRegistry');
@@ -268,6 +268,68 @@ describe('DELETE templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
     expect(isAdmin).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.ADMIN_IMS_ORGANIZATIONS.split(','));
+    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
+    expect(removeTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
+  });
+
+  test('Service token, should return 200', async () => {
+    isServiceToken.mockReturnValue(true);
+
+    const templateName = 'app-builder-template';
+    const fullTemplateName = templateName;
+    const template = {
+      'id': '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      'author': 'Adobe Inc.',
+      'name': fullTemplateName,
+      'description': 'A template for testing purposes [1.0.9]',
+      'latestVersion': '1.0.9',
+      'publishDate': '2022-05-01T03:50:39.658Z',
+      'apis': [
+        {
+          'code': 'CampaignStandard'
+        },
+        {
+          'code': 'Runtime'
+        }
+      ],
+      'adobeRecommended': false,
+      'keywords': [
+        'aio',
+        'adobeio',
+        'app',
+        'templates',
+        'aio-app-builder-template'
+      ],
+      'status': 'Approved',
+      'links': {
+        'npm': 'https://www.npmjs.com/package/@adobe/app-builder-template',
+        'github': 'https://github.com/adobe/app-builder-template'
+      },
+      'categories': [
+        'action',
+        'ui'
+      ]
+    };
+    findTemplateByName.mockReturnValue(template);
+    fetchUrl.mockReturnValue(`>${fullTemplateName}<`);
+    const response = await action.main({
+      'IMS_URL': process.env.IMS_URL,
+      'IMS_CLIENT_ID': process.env.IMS_CLIENT_ID,
+      'ADMIN_IMS_ORGANIZATIONS': process.env.ADMIN_IMS_ORGANIZATIONS,
+      'TEMPLATE_REGISTRY_ORG': process.env.TEMPLATE_REGISTRY_ORG,
+      'TEMPLATE_REGISTRY_REPOSITORY': process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      'ACCESS_TOKEN_GITHUB': process.env.ACCESS_TOKEN_GITHUB,
+      '__ow_method': HTTP_METHOD,
+      'templateName': templateName,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      'statusCode': 200
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
+    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
+    expect(isServiceToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN);
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(removeTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
