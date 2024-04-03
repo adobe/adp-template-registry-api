@@ -3,7 +3,7 @@
     "basePath": "/v1",
     "info": {
         "title": "Template Registry API",
-        "version": "1.0.0",
+        "version": "0.2.0",
         "license": {
           "name": "Apache-2.0 License",
           "url": "https://github.com/adobe/adp-template-registry-api?tab=Apache-2.0-1-ov-file"
