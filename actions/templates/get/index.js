@@ -45,7 +45,7 @@ async function main (params) {
 
     Enforcer.v3_0.Schema.defineDataTypeFormat('string', 'uuid', null);
     Enforcer.v3_0.Schema.defineDataTypeFormat('string', 'uri', null);
-    
+
     // WPAR002 - skip a warning about the "allowEmptyValue" property
     // see https://swagger.io/docs/specification/describing-parameters/ Empty-Valued and Nullable Parameters
     // EDEV001 - skip a warning about the basepath property, needed by IO Runtime for deploying apis

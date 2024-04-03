@@ -17,7 +17,7 @@ governing permissions and limitations under the License.
 ## OpenAPI Schema
 Template Registry API follows OpenAPI 3.0.3 Specification.
 
-See [Template Registry API Schema](./openapi.yaml) for more details on this RESTful API.
+See [Template Registry API Schema](https://opensource.adobe.com/adp-template-registry-api/) for more details on this RESTful API.
 
 # Getting started
 

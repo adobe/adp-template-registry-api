@@ -913,10 +913,6 @@
             "links": {
               "type": "object",
               "description": "A list of locations where the package's code can be found",
-              "required": [
-                "npm",
-                "github"
-              ],
               "additionalProperties": false,
               "properties": {
                 "npm": {
