@@ -10,7 +10,7 @@
     "axios": "^0.27.2",
     "lodash.orderby": "^4.6.0",
     "mongodb": "^6.5.0",
-    "openapi-enforcer": "^1.21.0",
+    "openapi-enforcer": "^1.23.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
