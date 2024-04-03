@@ -57,15 +57,18 @@ async function isAdmin (accessToken, imsUrl, adminImsOrganizations) {
 }
 
 /**
- * Checks if the provided IMS access token is a service token. Checking for "@AdobeService" is the new way
- * to check for a service token, but older service clients won't add this to their tokens, so we also check
- * for the "system" scope.
+ * Checks if the provided IMS access token is a service token and has access to the list of required scopes.
+ * Checking for "@AdobeService" is the new way to check for a service token, but older service clients won't
+ * add this to their tokens, so we also check for the "system" scope.
  * @param {string} accessToken IMS access token
+ * @param {Array<string>} requiredScopes Required scopes for the token
  * @returns {boolean} If the token is a service token
  */
-function isServiceToken (accessToken) {
+function isValidServiceToken (accessToken, requiredScopes = []) {
   const tokenData = getTokenData(accessToken);
-  return tokenData?.user_id?.endsWith('@AdobeService') || tokenData?.scope?.includes('system');
+  const isServiceToken = tokenData?.user_id?.endsWith('@AdobeService') || tokenData?.scope?.includes('system');
+  const hasValidScopes = requiredScopes.every(scope => tokenData?.scope?.includes(scope));
+  return isServiceToken && hasValidScopes;
 }
 
 /**
@@ -133,6 +136,6 @@ async function generateAccessToken (imsAuthCode, imsClientId, imsClientSecret, i
 module.exports = {
   validateAccessToken,
   isAdmin,
-  isServiceToken,
+  isValidServiceToken,
   generateAccessToken
 };

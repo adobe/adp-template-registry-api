@@ -12,7 +12,7 @@ governing permissions and limitations under the License.
 const nock = require('nock');
 const Kvjs = require('@heyputer/kv.js');
 const { Ims, getTokenData } = require('@adobe/aio-lib-ims');
-const { validateAccessToken, isAdmin, generateAccessToken, isServiceToken } = require('../actions/ims');
+const { validateAccessToken, isAdmin, generateAccessToken, isValidServiceToken } = require('../actions/ims');
 
 jest.mock('@heyputer/kv.js');
 jest.mock('@adobe/aio-lib-ims');
@@ -137,12 +137,12 @@ describe('Verify communication with IMS', () => {
       .resolves.toBe('cached-access--token');
   });
 
-  test('Verify checking that provided IMS access token is a service token', () => {
+  test('Verify checking that provided IMS access token is a service token with no required scopes', () => {
     getTokenData.mockImplementation(() => ({
       user_id: 'service-account@AdobeService'
     }));
 
-    expect(isServiceToken('fake-token')).toBe(true);
+    expect(isValidServiceToken('fake-token')).toBe(true);
   });
 
   test('Verify checking that provided IMS access token is not a service token', () => {
@@ -151,6 +151,24 @@ describe('Verify communication with IMS', () => {
       scope: 'not-the-scope'
     }));
 
-    expect(isServiceToken('fake-token')).toBe(false);
+    expect(isValidServiceToken('fake-token')).toBe(false);
+  });
+
+  test('Verify checking that provided IMS access token is a service token, but does not have required scopes', () => {
+    getTokenData.mockImplementation(() => ({
+      user_id: 'service-account@AdobeID',
+      scope: 'not-the-scope'
+    }));
+
+    expect(isValidServiceToken('fake-token', ['the-scope'])).toBe(false);
+  });
+
+  test('Verify checking that provided IMS access token is a service token and has access to multiple scopes', () => {
+    getTokenData.mockImplementation(() => ({
+      user_id: 'service-account@AdobeID',
+      scope: 'not-the-scope,the-other-scope'
+    }));
+
+    expect(isValidServiceToken('fake-token', ['the-scope', 'the-other-scope'])).toBe(false);
   });
 });

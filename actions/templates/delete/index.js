@@ -12,10 +12,11 @@ governing permissions and limitations under the License.
 const { Core } = require('@adobe/aio-sdk');
 const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_PERMISSION_DENIED } =
   require('../../utils');
-const { validateAccessToken, isAdmin, isServiceToken } = require('../../ims');
+const { validateAccessToken, isAdmin, isValidServiceToken } = require('../../ims');
 const { findTemplateByName, removeTemplateByName } = require('../../templateRegistry');
 
 const HTTP_METHOD = 'delete';
+const requiredScopes = ['template_registry.write'];
 
 /**
  * Delete a template from the Template Registry.
@@ -64,8 +65,8 @@ async function main (params) {
       return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
     }
 
-    // if the token is not a service token, check if the user token is an admin
-    if (!isServiceToken(accessToken)) {
+    // check if the token is a service token and has access to the required scopes
+    if (!isValidServiceToken(accessToken, requiredScopes)) {
       // check if the token belongs to an admin
       const isCallerAdmin = await isAdmin(accessToken, imsUrl, adminImsOrganizations);
       if (isCallerAdmin !== true) {

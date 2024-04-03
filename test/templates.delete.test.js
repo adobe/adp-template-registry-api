@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { validateAccessToken, isAdmin, isServiceToken } = require('../actions/ims');
+const { validateAccessToken, isAdmin, isValidServiceToken } = require('../actions/ims');
 const utils = require('../actions/utils');
 const action = require('../actions/templates/delete/index');
 const { fetchUrl, findTemplateByName, removeTemplateByName } = require('../actions/templateRegistry');
@@ -274,7 +274,7 @@ describe('DELETE templates', () => {
   });
 
   test('Service token, should return 200', async () => {
-    isServiceToken.mockReturnValue(true);
+    isValidServiceToken.mockReturnValue(true);
 
     const templateName = 'app-builder-template';
     const fullTemplateName = templateName;
@@ -329,7 +329,7 @@ describe('DELETE templates', () => {
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
-    expect(isServiceToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN);
+    expect(isValidServiceToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, ['template_registry.write']);
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(removeTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
