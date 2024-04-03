@@ -10,7 +10,7 @@
     "axios": "^0.27.2",
     "lodash.orderby": "^4.6.0",
     "mongodb": "^6.5.0",
-    "openapi-enforcer": "^1.21.0",
+    "openapi-enforcer": "^1.23.0",
     "uuid": "^9.0.1"
   },
   "devDependencies": {
@@ -27,7 +27,7 @@
     "eslint-plugin-promise": "^6.1.1",
     "jest": "^27.2.4",
     "jest-junit": "^14.0.0",
-    "nock": "^13.2.4"
+    "nock": "^13.5.4"
   },
   "scripts": {
     "test": "npm run lint:check && npm run unit-tests",
