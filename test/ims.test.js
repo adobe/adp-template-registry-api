@@ -145,6 +145,15 @@ describe('Verify communication with IMS', () => {
     expect(isValidServiceToken('fake-token')).toBe(true);
   });
 
+  test('Verify checking that provided IMS access token is a service token due to the system scope', () => {
+    getTokenData.mockImplementation(() => ({
+      user_id: 'service-account@AdobeID',
+      scope: 'system'
+    }));
+
+    expect(isValidServiceToken('fake-token')).toBe(true);
+  });
+
   test('Verify checking that provided IMS access token is not a service token', () => {
     getTokenData.mockImplementation(() => ({
       user_id: 'service-account@AdobeID',
