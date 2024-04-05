@@ -14,7 +14,7 @@ application:
             web: "yes"
             runtime: "nodejs:18"
             include:
-              - ["openapi.yaml"]
+              - ["template-registry-api.json"]
             inputs:
               LOG_LEVEL: debug
               IMS_URL: $IMS_URL
@@ -34,7 +34,7 @@ application:
             web: "yes"
             runtime: "nodejs:18"
             include:
-              - ["openapi.yaml"]
+              - ["template-registry-api.json"]
             inputs:
               LOG_LEVEL: debug
               TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
@@ -48,7 +48,7 @@ application:
             web: "yes"
             runtime: "nodejs:18"
             include:
-              - ["openapi.yaml"]
+              - ["template-registry-api.json"]
             inputs:
               LOG_LEVEL: debug
               IMS_URL: $IMS_URL
@@ -66,7 +66,7 @@ application:
             web: "yes"
             runtime: "nodejs:18"
             include:
-              - ["openapi.yaml"]
+              - ["template-registry-api.json"]
             inputs:
               LOG_LEVEL: debug
               TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG

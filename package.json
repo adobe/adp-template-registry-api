@@ -16,6 +16,7 @@
   "devDependencies": {
     "@adobe/eslint-config-aio-lib-config": "^4.0.0",
     "@openwhisk/wskdebug": "^1.3.0",
+    "@redocly/cli": "^1.10.6",
     "@types/jest": "^28.1.2",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",
@@ -33,7 +34,9 @@
     "test": "npm run lint:check && npm run unit-tests",
     "unit-tests": "jest --ci",
     "lint:check": "eslint --ext .js .",
-    "lint:fix": "eslint --ext .js --fix ."
+    "lint:fix": "eslint --ext .js --fix .",
+    "api:spec:lint": "redocly lint template-registry-api.json",
+    "api:spec:generate": "redocly build-docs template-registry-api.json --output index.html"
   },
   "engines": {
     "node": "^18"
