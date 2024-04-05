@@ -165,19 +165,19 @@ describe('Verify communication with IMS', () => {
 
   test('Verify checking that provided IMS access token is a service token, but does not have required scopes', () => {
     getTokenData.mockImplementation(() => ({
-      user_id: 'service-account@AdobeID',
+      user_id: 'service-account@AdobeService',
       scope: 'not-the-scope'
     }));
 
-    expect(isValidServiceToken('fake-token', ['the-scope'])).toBe(false);
+    expect(isValidServiceToken('fake-token', ['that-scope'])).toBe(false);
   });
 
   test('Verify checking that provided IMS access token is a service token and has access to multiple scopes', () => {
     getTokenData.mockImplementation(() => ({
-      user_id: 'service-account@AdobeID',
+      user_id: 'service-account@AdobeService',
       scope: 'not-the-scope,the-other-scope'
     }));
 
-    expect(isValidServiceToken('fake-token', ['the-scope', 'the-other-scope'])).toBe(false);
+    expect(isValidServiceToken('fake-token', ['that-scope', 'the-other-scope'])).toBe(false);
   });
 });
