@@ -45,7 +45,11 @@ async function main (params) {
 
     Enforcer.v3_0.Schema.defineDataTypeFormat('string', 'uuid', null);
     Enforcer.v3_0.Schema.defineDataTypeFormat('string', 'uri', null);
-    const openapi = await Enforcer('./openapi.yaml', { componentOptions: { exceptionSkipCodes: ['WPAR002'] } });
+
+    // WPAR002 - skip a warning about the "allowEmptyValue" property
+    // see https://swagger.io/docs/specification/describing-parameters/ Empty-Valued and Nullable Parameters
+    // EDEV001 - skip a warning about the basepath property, needed by IO Runtime for deploying apis
+    const openapi = await Enforcer('./template-registry-api.json', { componentOptions: { exceptionSkipCodes: ['WPAR002', 'EDEV001'] } });
     const [req] = openapi.request({
       method: HTTP_METHOD,
       path: '/templates/{templateName}'

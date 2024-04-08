@@ -3,8 +3,22 @@
     "basePath": "/v1",
     "info": {
         "title": "Template Registry API",
-        "version": "1.0.0"
+        "version": "0.2.0",
+        "license": {
+          "name": "Apache-2.0 License",
+          "url": "https://github.com/adobe/adp-template-registry-api?tab=Apache-2.0-1-ov-file"
+        }
       },
+    "servers": [
+      {
+        "url": "https://adobeioruntime.net/apis/adp-template-registry-service/v1",
+        "description": "Production"
+      },
+      {
+        "url": "https://adobeioruntime.net/apis/adp-template-registry-service-stage/v1",
+        "description": "Stage"
+      }
+    ],
     "paths": {
       "/templates": {
         "post": {
@@ -35,16 +49,31 @@
                       "description": "The name of the package implementing the template on npmjs.com",
                       "example": "@adobe/app-builder-template"
                     },
+                    "description": {
+                      "type": "string",
+                      "description": "A description of the template",
+                      "example": "This is a template for Adobe App Builder"
+                    },
+                    "createdBy": {
+                      "type": "string",
+                      "description": "The name of the user who created the template",
+                      "example": "Lazarus"
+                    },
+                    "version": {
+                      "type": "string",
+                      "description": "The version of the template in the semver format",
+                      "example": "1.0.0"
+                    },
                     "links": {
                       "type": "object",
                       "description": "A link to the Github repository containing the package's source code",
-                      "required": [
-                        "github"
-                      ],
                       "additionalProperties": false,
                       "properties": {
                         "github": {
                           "$ref": "#/components/schemas/GithubUrl"
+                        },
+                        "consoleProject": {
+                          "$ref": "#/components/schemas/DeveloperConsoleUrl"
                         }
                       }
                     }
@@ -122,6 +151,7 @@
         "get": {
           "summary": "Return a list of templates matching a specified criteria.",
           "operationId": "template-registry-api/templates-list.http",
+          "security": [],
           "tags": [
             "templates"
           ],
@@ -275,6 +305,7 @@
         "get": {
           "summary": "Get information about a template.",
           "operationId": "template-registry-api/templates-get.http",
+          "security": [],
           "tags": [
             "templates"
           ],
@@ -404,8 +435,9 @@
       },
       "/templates/{orgName}/{templateName}": {
         "get": {
-          "summary": "Get information about a template.",
-          "operationId": "template-registry-api/templates-get.http",
+          "summary": "Get information about a template by organization.",
+          "operationId": "template-registry-api/templates-get-org-name.http",
+          "security": [],
           "tags": [
             "templates"
           ],
@@ -485,8 +517,8 @@
           }
         },
         "delete": {
-          "summary": "Delete a template from Template Registry.",
-          "operationId": "template-registry-api/templates-delete.http",
+          "summary": "Delete a template from Template Registry by organization.",
+          "operationId": "template-registry-api/templates-delete-org-name.http",
           "tags": [
             "templates"
           ],
@@ -743,6 +775,16 @@
               "description": "The name of the template on npmjs.com",
               "example": "@adobe/app-builder-template"
             },
+            "createdBy": {
+              "type": "string",
+              "description": "The name of the user who created the template",
+              "example": "Lazarus"
+            },
+            "version": {
+              "type": "string",
+              "description": "The version of the template in the semver format",
+              "example": "1.0.0"
+            },
             "description": {
               "type": "string",
               "description": "A description of the template",
@@ -812,6 +854,31 @@
                 }
               }
             },
+            "credentials": {
+              "type": "array",
+              "description": "A list of credentials required by the template",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "required": [
+                  "type",
+                  "flowType"
+                ],
+                "additionalProperties": true,
+                "properties": {
+                  "type": {
+                    "type": "string",
+                    "description": "The type of the credential",
+                    "example": "OAUTH_SERVER_TO_SERVER"
+                  },
+                  "flowType": {
+                    "type": "string",
+                    "description": "The flow type of the credential",
+                    "example": "ENTP"
+                  }
+                }
+              }
+            },
             "runtime": {
               "type": "boolean",
               "description": "Whether to add Runtime to App Builder application or not.",
@@ -846,10 +913,6 @@
             "links": {
               "type": "object",
               "description": "A list of locations where the package's code can be found",
-              "required": [
-                "npm",
-                "github"
-              ],
               "additionalProperties": false,
               "properties": {
                 "npm": {
@@ -861,6 +924,9 @@
                 },
                 "github": {
                   "$ref": "#/components/schemas/GithubUrl"
+                },
+                "consoleProject": {
+                  "$ref": "#/components/schemas/DeveloperConsoleUrl"
                 }
               }
             },
@@ -875,6 +941,13 @@
           "pattern": "^https://github\\.com/",
           "description": "A link to the Github repository containing the package's source code",
           "example": "https://github.com/adobe/app-builder-template"
+        },
+        "DeveloperConsoleUrl": {
+          "type": "string",
+          "format": "uri",
+          "pattern": "^https://developer-stage\\.adobe\\.com/console/projects",
+          "description": "A link to the console project",
+          "example": "https://developer-stage.adobe.com/console/projects/<project-id>"
         },
         "Links": {
           "type": "object",
