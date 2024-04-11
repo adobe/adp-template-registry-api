@@ -28,7 +28,7 @@ const requiredScopes = ['template_registry.read'];
  * LIST operation is available to everyone, no IMS access token is required
  *
  * However, templates are filtered based on the type of the auth token:
- * - If the user is not authenticated or passes a user token, only approved App Builder templates are returned.
+ * - If the user is not authenticated or passes a user token, only App Builder templates are returned.
  * - If the user passes a service token, all templates are returned.
  */
 
