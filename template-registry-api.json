@@ -154,7 +154,12 @@
         "get": {
           "summary": "Return a list of templates matching a specified criteria.",
           "operationId": "template-registry-api/templates-list.http",
-          "security": [],
+          "security": [
+            {}, 
+            {
+              "bearerAuth": []
+            }
+          ],
           "tags": [
             "templates"
           ],
