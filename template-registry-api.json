@@ -47,7 +47,8 @@
                     "name": {
                       "type": "string",
                       "description": "The name of the package implementing the template on npmjs.com",
-                      "example": "@adobe/app-builder-template"
+                      "example": "@adobe/app-builder-template",
+                      "nullable": false
                     },
                     "description": {
                       "type": "string",
@@ -68,6 +69,8 @@
                       "type": "object",
                       "description": "A link to the Github repository containing the package's source code",
                       "additionalProperties": false,
+                      "minProperties": 1,
+                      "nullable": false,
                       "properties": {
                         "github": {
                           "$ref": "#/components/schemas/GithubUrl"
@@ -938,6 +941,7 @@
         "GithubUrl": {
           "type": "string",
           "format": "uri",
+          "nullable": false,
           "pattern": "^https://github\\.com/",
           "description": "A link to the Github repository containing the package's source code",
           "example": "https://github.com/adobe/app-builder-template"
@@ -945,6 +949,7 @@
         "DeveloperConsoleUrl": {
           "type": "string",
           "format": "uri",
+          "nullable": false,
           "pattern": "^https://developer-stage\\.adobe\\.com/console/projects",
           "description": "A link to the console project",
           "example": "https://developer-stage.adobe.com/console/projects/<project-id>"

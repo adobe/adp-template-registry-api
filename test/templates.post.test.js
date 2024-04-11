@@ -495,4 +495,130 @@ describe('POST templates', () => {
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
   });
+
+  test('Do not allow null name param', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      name: null,
+      links: {
+        consoleProject: 'https://developer-stage.adobe.com/console/projects/1234'
+      },
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: 'Request has one or more errors => In body => For Content-Type application/json => Unable to deserialize value => at: name => Expected a string. Received: null'
+            }
+          ]
+        }
+      }
+    });
+  });
+
+  test('Do not allow null links param', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      name: 'test-project',
+      links: null,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: 'Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
+            }
+          ]
+        }
+      }
+    });
+  });
+
+  test('Do not allow null links.consoleProject param', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      name: 'test-project',
+      links: {
+        consoleProject: null
+      },
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: 'Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
+            }
+          ]
+        }
+      }
+    });
+  });
+
+  test('Do not allow null links.githubUrl param', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      name: 'test-project',
+      links: {
+        githubUrl: null
+      },
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: 'Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
+            }
+          ]
+        }
+      }
+    });
+  });
+
+  test('Do not allow both null name and links params', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      name: null,
+      links: null,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: 'Request has one or more errors => In body => For Content-Type application/json => Unable to deserialize value => at: name => Expected a string. Received: null'
+            }
+          ]
+        }
+      }
+    });
+  });
 });
