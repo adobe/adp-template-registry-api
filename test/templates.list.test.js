@@ -545,4 +545,21 @@ describe('LIST templates', () => {
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.full.no-review-issues.json')));
   });
+
+  test('Should only return dev console templates when service token present', async () => {
+    getTemplates.mockReturnValue(require(path.join(__dirname, '/fixtures/list/registry.json')));
+
+    const response = await action.main(
+      {
+        TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+        TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+        __ow_method: 'get',
+        Authorization: 'Bearer dummy-token'
+      }
+    );
+
+    expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.dev-console-templates.json')));
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
+  })
 });
