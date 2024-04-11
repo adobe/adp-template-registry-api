@@ -132,6 +132,9 @@ async function main (params) {
       }
     });
 
+    // Return all templates if valid service token, otherwise filter out dev console templates
+    templates = validServiceToken ? templates : templates.filter(template => !template?.links?.consoleProject);
+
     // top-level keys are query parameters
     // query parameters mapped to their respective fields
     // and possibly nested fields in each template object for sorting
@@ -260,7 +263,7 @@ async function main (params) {
  * @param {string} subfield subfield to filter by
  * @returns {Array} filtered array of templates
  */
-function filter (templates, filterValues, field, filterType, subfield, validServiceToken) {
+function filter (templates, filterValues, field, filterType, subfield) {
   // From filterValues, extract values that start with "!" to be used as a negative filter
   const filterValuesToExclude = [];
   const filterOrValues = [];
@@ -277,9 +280,6 @@ function filter (templates, filterValues, field, filterType, subfield, validServ
 
     return true;
   });
-
-  // Return all templates if valid service token, otherwise filter out dev console templates
-  templates = validServiceToken ? templates : templates.filter(template => !template?.links?.consoleProject); 
 
   return templates.filter(template => {
     const isFieldSet = Object.prototype.hasOwnProperty.call(template, field);
