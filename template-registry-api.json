@@ -570,6 +570,64 @@
             "url": "not-used"
           }
         }
+      },
+      "/templates/{templateName}/install": {
+        "post": {
+          "summary": "Install a template",
+          "operationId": "template-registry-api/templates-install.http",
+          "tags": [
+            "templates"
+          ],
+          "security": [
+            {
+              "bearerAuth": []
+            }
+          ],
+          "parameters": [
+            {
+              "$ref": "#/components/parameters/TemplateName"
+            }
+          ],
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TemplateInstallationRequest"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "Template installed successfully"
+            },
+            "400": {
+              "$ref": "#/components/responses/BadRequest"
+            },
+            "401": {
+              "$ref": "#/components/responses/Unauthorized"
+            },
+            "403": {
+              "$ref": "#/components/responses/Forbidden"
+            },
+            "404": {
+              "$ref": "#/components/responses/NotFound"
+            },
+            "405": {
+              "$ref": "#/components/responses/HttpMethodNotAllowed"
+            },
+            "500": {
+              "$ref": "#/components/responses/InternalServerError"
+            },
+            "503": {
+              "$ref": "#/components/responses/ServiceUnavailable"
+            },
+            "504": {
+              "$ref": "#/components/responses/GatewayTimeout"
+            }
+          }
+        }
       }
     },
     "components": {
@@ -1003,6 +1061,32 @@
               "type": "string",
               "description": "A description of this error.",
               "example": "The \"XXX\" parameter is not set"
+            }
+          }
+        },
+        "TemplateInstallationRequest": {
+          "type": "object",
+          "required": [
+            "orgId",
+            "projectName"
+          ],
+          "properties": {
+            "orgId": {
+              "type": "string",
+              "description": "AMS org id"
+            },
+            "projectName": {
+              "type": "string",
+              "description": "Project name"
+            },
+            "description": {
+              "type": "string",
+              "description": "Project description"
+            },
+            "metadata": {
+              "type": "object",
+              "description": "Key value pairs of credential metadata like allowed domains, redirect uris etc",
+              "additionalProperties": {}
             }
           }
         }
