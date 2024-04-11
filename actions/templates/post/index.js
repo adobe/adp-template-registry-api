@@ -83,7 +83,7 @@ async function main (params) {
     let body = {
       name: params.name,
       ...(params.description && { description: params.description }), // developer console only
-      ...(params.version && { version: params.version }), // developer console only
+      ...(params.latestVersion && { latestVersion: params.latestVersion }), // developer console only
       ...(params.createdBy && { createdBy: params.createdBy }),
       links: {
         ...(params?.links?.consoleProject && { consoleProject: params.links.consoleProject }), // developer console only
