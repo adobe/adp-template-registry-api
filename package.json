@@ -2,7 +2,7 @@
   "name": "template-registry-api",
   "version": "0.2.0",
   "dependencies": {
-    "@adobe/aio-lib-console": "^5.0.1",
+    "@adobe/aio-lib-console": "^5.1.0",
     "@adobe/aio-lib-ims": "^7.0.1",
     "@adobe/aio-sdk": "^3.0.0",
     "@heyputer/kv.js": "^0.1.6",
@@ -22,7 +22,7 @@
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.29.1",
     "eslint-plugin-jest": "^27.9.0",
-    "eslint-plugin-jsdoc": "^48.2.2",
+    "eslint-plugin-jsdoc": "^48.2.3",
     "eslint-plugin-n": "^15.7.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
