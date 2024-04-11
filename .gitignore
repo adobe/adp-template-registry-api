@@ -3,6 +3,9 @@
 node_modules
 jspm_packages
 
+# lock file
+package-lock.json
+
 # build
 build
 dist
@@ -38,4 +41,3 @@ coverage
 
 # logs folder for aio-run-detached
 logs
-
