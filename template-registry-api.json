@@ -65,6 +65,30 @@
                       "description": "The version of the template in the semver format",
                       "example": "1.0.0"
                     },
+                    "author": {
+                      "type": "string",
+                      "description": "The name of the template's author",
+                      "example": "Adobe Inc."
+                    },
+                    "status": {
+                      "type": "string",
+                      "description": "A status of a package in Template Registry.\n\"Error\" indicates that an application error occurred.\n",
+                      "enum": [
+                        "InVerification",
+                        "Approved",
+                        "Rejected",
+                        "Error"
+                      ],
+                      "example": "Approved"
+                    },
+                    "adobeRecommended": {
+                      "type": "boolean",
+                      "description": "Whether the template is recommended by Adobe",
+                      "example": true
+                    },
+                    "codeSamples": {
+                      "$ref": "#/components/schemas/CodeSamples"
+                    },
                     "links": {
                       "type": "object",
                       "description": "A link to the Github repository containing the package's source code",
@@ -913,6 +937,9 @@
               ],
               "example": "Approved"
             },
+            "codeSamples": {
+              "$ref": "#/components/schemas/CodeSamples"
+            },
             "links": {
               "type": "object",
               "description": "A list of locations where the package's code can be found",
@@ -953,6 +980,30 @@
           "pattern": "^https://developer-stage\\.adobe\\.com/console/projects",
           "description": "A link to the console project",
           "example": "https://developer-stage.adobe.com/console/projects/<project-id>"
+        },
+        "CodeSamples": {
+          "type": "array",
+          "description": "A list of code samples for the template",
+          "items": {
+            "type": "object",
+            "required": [
+              "language",
+              "link"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "language": {
+                "type": "string",
+                "description": "The language of the code sample",
+                "example": "javascript"
+              },
+              "link": {
+                "type": "string",
+                "description": "The code sample",
+                "example": "https://developer-stage.adobe.com/codeSample.zip"
+              }
+            }
+          }
         },
         "Links": {
           "type": "object",
