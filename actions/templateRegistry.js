@@ -47,7 +47,8 @@ async function addTemplate (dbParams, body) {
   const collection = await mongoConnection(dbParams, collectionName);
   const template = {
     ...body,
-    status: 'InVerification'
+    status: body.status ? body.status : TEMPLATE_STATUS_IN_VERIFICATION,
+    adobeRecommended: body.adobeRecommended ? body.adobeRecommended : false
   };
 
   // Only add npm link if github link is provided
