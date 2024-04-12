@@ -4,7 +4,7 @@
   "dependencies": {
     "@adobe/aio-lib-console": "^5.1.0",
     "@adobe/aio-lib-ims": "^7.0.1",
-    "@adobe/aio-sdk": "^3.0.0",
+    "@adobe/aio-sdk": "^5.0.1",
     "@heyputer/kv.js": "^0.1.6",
     "@octokit/rest": "^20.0.2",
     "axios": "^0.27.2",
