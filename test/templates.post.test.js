@@ -520,7 +520,7 @@ describe('POST templates', () => {
       id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
       name: templateName,
       description: 'Developer Console template',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       links: {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
@@ -551,7 +551,7 @@ describe('POST templates', () => {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
       description: 'Developer Console template',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       createdBy: 'Capernicus',
       author: 'Capernicus',
       adobeRecommended: true,
@@ -599,7 +599,7 @@ describe('POST templates', () => {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
       description: 'Developer Console template',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       createdBy: 'Capernicus',
       author: 'Capernicus',
       adobeRecommended: true,
@@ -641,7 +641,7 @@ describe('POST templates', () => {
       name: templateName,
       description: 'Developer Console template',
       status: 'InVerification',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       links: {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
@@ -664,7 +664,7 @@ describe('POST templates', () => {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
       description: 'Developer Console template',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       createdBy: 'Capernicus',
       author: 'Capernicus',
       ...fakeParams
@@ -704,7 +704,7 @@ describe('POST templates', () => {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
       description: 'Developer Console template',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       createdBy: 'Capernicus',
       author: 'Capernicus'
     });
