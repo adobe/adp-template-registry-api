@@ -1,0 +1,28 @@
+[
+    {
+        "id": "d1dc1000-f32e-4172-a0ec-9b2f4ef6cc48",
+        "name": "@author/app-builder-template-4",
+        "status": "InVerification",
+        "links": {
+            "npm": "https://www.npmjs.com/package/@author/app-builder-template-4",
+            "github": "https://github.com/author/app-builder-template-4"
+        }
+    },
+    {
+        "id": "d1dc1000-f32e-4172-a0ac-9b2f3ef6ac48",
+        "name": "@author/app-builder-template-5",
+        "status": "Rejected",
+        "links": {
+            "npm": "https://www.npmjs.com/package/@author/app-builder-template-5",
+            "github": "https://github.com/author/app-builder-template-5"
+        }
+    },
+    {
+        "id": "d1dc1000-f32e-4172-a0ac-9b2f3ef6ac48",
+        "name": "@author/app-builder-template-6",
+        "status": "Rejected",
+        "links": {
+            "consoleProject": "https://developer-stage.adobe.com/console/projects/1234"
+        }
+    }
+]
