@@ -14,6 +14,7 @@ const action = require('../actions/templates/list/index');
 const utils = require('../actions/utils');
 const nock = require('nock');
 const { getTemplates, getReviewIssueByTemplateName } = require('../actions/templateRegistry');
+const { validateAccessToken, isValidServiceToken } = require('../actions/ims');
 
 process.env = {
   TEMPLATE_REGISTRY_ORG: 'adobe',
@@ -39,6 +40,8 @@ jest.mock('../actions/templateRegistry', () => {
     getTemplates: jest.fn()
   };
 });
+jest.mock('../actions/ims');
+jest.mock('@heyputer/kv.js');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -544,5 +547,97 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.full.no-review-issues.json')));
+  });
+
+  test('Should throw an error on invalid access token', async () => {
+    const err = 'Provided IMS access token is invalid. Reason: bad_signature';
+    validateAccessToken.mockImplementation(() => {
+      throw new Error(err);
+    });
+
+    const response = await action.main(
+      {
+        TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+        TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+        __ow_method: 'get',
+        __ow_headers: {
+          authorization: 'Bearer dummy-token'
+        }
+      }
+    );
+
+    expect(response).toEqual(
+      {
+        error: {
+          statusCode: 401,
+          body: {
+            errors: [
+              {
+                code: utils.ERR_RC_INVALID_IMS_ACCESS_TOKEN,
+                message: err
+              }
+            ]
+          }
+        }
+      }
+    );
+  });
+
+  test('Should only return app builder templates with no token', async () => {
+    getTemplates.mockReturnValue(require(path.join(__dirname, '/fixtures/list/registry-with-dev-console.json')));
+    validateAccessToken.mockImplementation(() => true);
+    isValidServiceToken.mockImplementation(() => false);
+
+    const response = await action.main(
+      {
+        TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+        TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+        __ow_method: 'get'
+      }
+    );
+
+    expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.only-app-builder-templates.json')));
+  });
+
+  test('Should only return app builder templates with user token', async () => {
+    getTemplates.mockReturnValue(require(path.join(__dirname, '/fixtures/list/registry-with-dev-console.json')));
+    validateAccessToken.mockImplementation(() => true);
+    isValidServiceToken.mockImplementation(() => false);
+
+    const response = await action.main(
+      {
+        TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+        TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+        __ow_method: 'get',
+        __ow_headers: {
+          authorization: 'Bearer dummy-token'
+        }
+      }
+    );
+
+    expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.only-app-builder-templates.json')));
+  });
+
+  test('Should return console templates when service token present', async () => {
+    getTemplates.mockReturnValue(require(path.join(__dirname, '/fixtures/list/registry-with-dev-console.json')));
+    validateAccessToken.mockImplementation(() => true);
+    isValidServiceToken.mockImplementation(() => true);
+
+    const response = await action.main(
+      {
+        TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+        TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+        TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+        __ow_method: 'get',
+        __ow_headers: {
+          authorization: 'Bearer dummy-token'
+        }
+      }
+    );
+
+    expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.with-dev-console-templates.json')));
   });
 });
