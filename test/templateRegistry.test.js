@@ -134,7 +134,8 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       links: {
         npm: `https://www.npmjs.com/package/${templateName}`,
         github: githubRepoUrl
-      }
+      },
+      adobeRecommended: false
     });
     expect(templateResponse).toEqual({
       id: expect.any(String),
@@ -143,7 +144,8 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       links: {
         npm: `https://www.npmjs.com/package/${templateName}`,
         github: githubRepoUrl
-      }
+      },
+      adobeRecommended: false
     });
   });
 
@@ -176,7 +178,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     const consoleTemplate = {
       name: templateName,
       description: 'My template description',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       links: {
         consoleProject: 'https://developer-stage.adobe.com/console/projects/123'
       }
@@ -187,11 +189,73 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(collectionMock.insertOne).toHaveBeenCalledWith({
       status: 'InVerification',
+      adobeRecommended: false,
       ...consoleTemplate
     });
     expect(templateResponse).toEqual({
       status: 'InVerification',
       id: 'mongodb-template-id',
+      adobeRecommended: false,
+      ...consoleTemplate
+    });
+  });
+
+  test('should add a developer console template to the collection with additional fields in request body', async () => {
+    const consoleTemplate = {
+      name: templateName,
+      description: 'My template description',
+      latestVersion: '1.0.0',
+      links: {
+        consoleProject: 'https://developer-stage.adobe.com/console/projects/123'
+      },
+      author: 'Adobe Inc.',
+      adobeRecommended: true,
+      status: 'Approved'
+    };
+
+    const templateResponse = await addTemplate(dbParams, consoleTemplate);
+
+    expect(clientConnectSpy).toHaveBeenCalled();
+    expect(collectionMock.insertOne).toHaveBeenCalledWith({
+      author: 'Adobe Inc.',
+      adobeRecommended: true,
+      status: 'Approved',
+      ...consoleTemplate
+    });
+    expect(templateResponse).toEqual({
+      id: 'mongodb-template-id',
+      author: 'Adobe Inc.',
+      adobeRecommended: true,
+      status: 'Approved',
+      ...consoleTemplate
+    });
+  });
+
+  test('should add a developer console template to the collection with only one additional field in request body', async () => {
+    const consoleTemplate = {
+      name: templateName,
+      description: 'My template description',
+      latestVersion: '1.0.0',
+      links: {
+        consoleProject: 'https://developer-stage.adobe.com/console/projects/123'
+      },
+      author: 'Adobe Inc.'
+    };
+
+    const templateResponse = await addTemplate(dbParams, consoleTemplate);
+
+    expect(clientConnectSpy).toHaveBeenCalled();
+    expect(collectionMock.insertOne).toHaveBeenCalledWith({
+      author: 'Adobe Inc.',
+      adobeRecommended: false,
+      status: 'InVerification',
+      ...consoleTemplate
+    });
+    expect(templateResponse).toEqual({
+      id: 'mongodb-template-id',
+      author: 'Adobe Inc.',
+      adobeRecommended: false,
+      status: 'InVerification',
       ...consoleTemplate
     });
   });

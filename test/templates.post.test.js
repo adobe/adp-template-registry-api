@@ -347,7 +347,7 @@ describe('POST templates', () => {
       name: templateName,
       description: 'Developer Console template',
       status: 'InVerification',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       links: {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       }
@@ -369,7 +369,7 @@ describe('POST templates', () => {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
       description: 'Developer Console template',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       createdBy: 'Capernicus',
       ...fakeParams
     });
@@ -408,7 +408,7 @@ describe('POST templates', () => {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
       description: 'Developer Console template',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       createdBy: 'Capernicus'
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
@@ -436,7 +436,7 @@ describe('POST templates', () => {
       name: templateName,
       description: 'Developer Console template',
       status: 'InVerification',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       links: {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       }
@@ -458,7 +458,7 @@ describe('POST templates', () => {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
       description: 'Developer Console template',
-      version: '1.0.0',
+      latestVersion: '1.0.0',
       ...fakeParams
     });
     expect(response).toEqual({
@@ -489,10 +489,353 @@ describe('POST templates', () => {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
       description: 'Developer Console template',
-      version: '1.0.0'
+      latestVersion: '1.0.0'
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
+  });
+
+  test('Adding new developer console template with additional fields, should return 200', async () => {
+    mockConsoleSDKInstance.getProjectInstallConfig.mockResolvedValue({
+      body: {
+        credentials: [
+          {
+            type: 'serviceAccount',
+            flowType: 'oauth2',
+            apis: [
+              {
+                code: 'AdobeIO'
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    findTemplateByName.mockReturnValue(null);
+    fetchUrl.mockReturnValue('');
+    const templateName = '@adobe/developer-console-template';
+    const template = {
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      name: templateName,
+      description: 'Developer Console template',
+      latestVersion: '1.0.0',
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
+      },
+      author: 'Capernicus',
+      adobeRecommended: true,
+      status: 'Approved',
+      codeSamples: [
+        {
+          language: 'node',
+          link: 'https://developer-stage.adobe.com/sample.zip'
+        }
+      ]
+    };
+    addTemplate.mockReturnValue(template);
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID,
+      IMS_CLIENT_SECRET,
+      IMS_AUTH_CODE,
+      IMS_SCOPES,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
+      name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
+      },
+      description: 'Developer Console template',
+      latestVersion: '1.0.0',
+      createdBy: 'Capernicus',
+      author: 'Capernicus',
+      adobeRecommended: true,
+      status: 'Approved',
+      codeSamples: [
+        {
+          language: 'node',
+          link: 'https://developer-stage.adobe.com/sample.zip'
+        }
+      ],
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      statusCode: 200,
+      body: {
+        ...template,
+        _links: {
+          self: {
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+          }
+        }
+      }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
+    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
+    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
+    expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
+    expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
+      name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
+      apis: [
+        {
+          credentialType: 'serviceAccount',
+          flowType: 'oauth2',
+          code: 'AdobeIO',
+          productProfiles: undefined
+        }
+      ],
+      credentials: [
+        {
+          type: 'serviceAccount',
+          flowType: 'oauth2'
+        }
+      ],
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
+      },
+      description: 'Developer Console template',
+      latestVersion: '1.0.0',
+      createdBy: 'Capernicus',
+      author: 'Capernicus',
+      adobeRecommended: true,
+      status: 'Approved',
+      codeSamples: [
+        {
+          language: 'node',
+          link: 'https://developer-stage.adobe.com/sample.zip'
+        }
+      ]
+    });
+    // TODO: Uncomment the following after integrating with App Builder templates again
+    // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
+  });
+
+  test('Adding new developer console template with only one additional field, should return 200', async () => {
+    mockConsoleSDKInstance.getProjectInstallConfig.mockResolvedValue({
+      body: {
+        credentials: [
+          {
+            type: 'serviceAccount',
+            flowType: 'oauth2',
+            apis: [
+              {
+                code: 'AdobeIO'
+              }
+            ]
+          }
+        ]
+      }
+    });
+
+    findTemplateByName.mockReturnValue(null);
+    fetchUrl.mockReturnValue('');
+    const templateName = '@adobe/developer-console-template';
+    const template = {
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      name: templateName,
+      description: 'Developer Console template',
+      status: 'InVerification',
+      latestVersion: '1.0.0',
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
+      },
+      author: 'Capernicus'
+    };
+    addTemplate.mockReturnValue(template);
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID,
+      IMS_CLIENT_SECRET,
+      IMS_AUTH_CODE,
+      IMS_SCOPES,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
+      name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
+      },
+      description: 'Developer Console template',
+      latestVersion: '1.0.0',
+      createdBy: 'Capernicus',
+      author: 'Capernicus',
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      statusCode: 200,
+      body: {
+        ...template,
+        _links: {
+          self: {
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+          }
+        }
+      }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
+    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
+    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
+    expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
+    expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
+      name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
+      apis: [
+        {
+          credentialType: 'serviceAccount',
+          flowType: 'oauth2',
+          code: 'AdobeIO',
+          productProfiles: undefined
+        }
+      ],
+      credentials: [
+        {
+          type: 'serviceAccount',
+          flowType: 'oauth2'
+        }
+      ],
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
+      },
+      description: 'Developer Console template',
+      latestVersion: '1.0.0',
+      createdBy: 'Capernicus',
+      author: 'Capernicus'
+    });
+    // TODO: Uncomment the following after integrating with App Builder templates again
+    // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
+  });
+
+  test('Do not allow null name param', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      name: null,
+      links: {
+        consoleProject: 'https://developer-stage.adobe.com/console/projects/1234'
+      },
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: 'Request has one or more errors => In body => For Content-Type application/json => Unable to deserialize value => at: name => Expected a string. Received: null'
+            }
+          ]
+        }
+      }
+    });
+  });
+
+  test('Do not allow null links param', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      name: 'test-project',
+      links: null,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: 'Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
+            }
+          ]
+        }
+      }
+    });
+  });
+
+  test('Do not allow null links.consoleProject param', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      name: 'test-project',
+      links: {
+        consoleProject: null
+      },
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: 'Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
+            }
+          ]
+        }
+      }
+    });
+  });
+
+  test('Do not allow null links.githubUrl param', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      name: 'test-project',
+      links: {
+        githubUrl: null
+      },
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: 'Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
+            }
+          ]
+        }
+      }
+    });
+  });
+
+  test('Do not allow both null name and links params', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      name: null,
+      links: null,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: 'Request has one or more errors => In body => For Content-Type application/json => Unable to deserialize value => at: name => Expected a string. Received: null'
+            }
+          ]
+        }
+      }
+    });
   });
 });

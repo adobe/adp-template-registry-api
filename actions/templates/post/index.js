@@ -21,6 +21,28 @@ const HTTP_METHOD = 'post';
 const POST_PARAM_NAME = 'name';
 
 /**
+ * Serialize the request body
+ * @param {object} params action params
+ * @returns {object} serialized request body
+ */
+const serializeRequestBody = (params) => {
+  return {
+    name: params.name,
+    ...(params.description && { description: params.description }), // developer console only
+    ...(params.latestVersion && { latestVersion: params.latestVersion }), // developer console only
+    ...(params.createdBy && { createdBy: params.createdBy }),
+    ...(params.author && { author: params.author }), // developer console only
+    ...(params.status && { status: params.status }), // developer console only
+    ...(params.adobeRecommended && { adobeRecommended: params.adobeRecommended }), // developer console only
+    ...(params.codeSamples && { codeSamples: params.codeSamples }), // developer console only
+    links: {
+      ...(params?.links?.consoleProject && { consoleProject: params.links.consoleProject }), // developer console only
+      ...(params?.links?.github && { github: params.links.github }) // app builder only
+    }
+  };
+};
+
+/**
  * Create a new template in the Template Registry.
  * @param {object} params request parameters
  * @returns {object} response
@@ -80,16 +102,7 @@ async function main (params) {
     // EDEV001 - skip a warning about the basepath property, needed by IO Runtime for deploying apis
     const openapi = await Enforcer('./template-registry-api.json', { componentOptions: { exceptionSkipCodes: ['WPAR002', 'EDEV001'] } });
 
-    let body = {
-      name: params.name,
-      ...(params.description && { description: params.description }), // developer console only
-      ...(params.version && { version: params.version }), // developer console only
-      ...(params.createdBy && { createdBy: params.createdBy }),
-      links: {
-        ...(params.links.consoleProject && { consoleProject: params.links.consoleProject }), // developer console only
-        ...(params.links.github && { github: params.links.github }) // app builder only
-      }
-    };
+    let body = serializeRequestBody(params);
 
     const [req, reqError] = openapi.request({
       method: HTTP_METHOD,

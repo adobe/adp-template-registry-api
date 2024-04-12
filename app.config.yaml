@@ -69,6 +69,8 @@ application:
               - ["template-registry-api.json"]
             inputs:
               LOG_LEVEL: debug
+              IMS_URL: $IMS_URL
+              IMS_CLIENT_ID: $IMS_CLIENT_ID
               TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
               TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL

@@ -12,10 +12,11 @@ governing permissions and limitations under the License.
 const { Core } = require('@adobe/aio-sdk');
 const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_PERMISSION_DENIED } =
   require('../../utils');
-const { validateAccessToken, isAdmin } = require('../../ims');
+const { validateAccessToken, isAdmin, isValidServiceToken } = require('../../ims');
 const { findTemplateByName, removeTemplateByName } = require('../../templateRegistry');
 
 const HTTP_METHOD = 'delete';
+const requiredScopes = ['template_registry.write'];
 
 /**
  * Delete a template from the Template Registry.
@@ -64,11 +65,14 @@ async function main (params) {
       return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
     }
 
-    // check if the token belongs to an admin
-    const isCallerAdmin = await isAdmin(accessToken, imsUrl, adminImsOrganizations);
-    if (isCallerAdmin !== true) {
-      const err = 'This operation is available to admins only. To request template removal from Template Registry, please, create a "Template Removal Request" issue on https://github.com/adobe/aio-template-submission';
-      return errorResponse(403, [errorMessage(ERR_RC_PERMISSION_DENIED, err)], logger);
+    // check if the token is a service token and has access to the required scopes
+    if (!isValidServiceToken(accessToken, requiredScopes)) {
+      // check if the token belongs to an admin
+      const isCallerAdmin = await isAdmin(accessToken, imsUrl, adminImsOrganizations);
+      if (isCallerAdmin !== true) {
+        const err = 'This operation is available to admins only. To request template removal from Template Registry, please, create a "Template Removal Request" issue on https://github.com/adobe/aio-template-submission';
+        return errorResponse(403, [errorMessage(ERR_RC_PERMISSION_DENIED, err)], logger);
+      }
     }
 
     const orgName = params.orgName;
