@@ -21,7 +21,7 @@ const CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
  * @param {string} accessToken IMS access token
  * @param {string} imsUrl IMS host
  * @param {string} imsClientId IMS client id
- * @returns {void}
+ * @returns {Promise<void>}
  */
 async function validateAccessToken (accessToken, imsUrl, imsClientId) {
   const response = await requestImsResource(

@@ -10,8 +10,9 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, stringParameters, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INCORRECT_REQUEST } = require('../../utils');
+const { getBearerToken, errorResponse, errorMessage, stringParameters, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INCORRECT_REQUEST } = require('../../utils');
 const { getTemplates, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED } = require('../../templateRegistry');
+const { validateAccessToken, isValidServiceToken } = require('../../ims');
 const Enforcer = require('openapi-enforcer');
 const orderBy = require('lodash.orderby');
 
@@ -21,8 +22,15 @@ const FILTER_VALUE_NONE = '';
 const FILTER_VALUE_NOT = '!';
 const FILTER_VALUE_OR = '|';
 const FILTER_TYPE_STUB = 'stub';
+const requiredScopes = ['template_registry.read'];
 
-// LIST operation is available to everyone, no IMS access token is required
+/**
+ * LIST operation is available to everyone, no IMS access token is required
+ *
+ * However, templates are filtered based on the type of the auth token:
+ * - If the user is not authenticated or passes a user token, only App Builder templates are returned.
+ * - If the user passes a service token, all templates are returned.
+ */
 
 /**
  * List templates from the Template Registry.
@@ -32,6 +40,10 @@ const FILTER_TYPE_STUB = 'stub';
 async function main (params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
+
+  const imsUrl = params.IMS_URL;
+  const imsClientId = params.IMS_CLIENT_ID;
+
   const dbParams = {
     MONGODB_URI: params.MONGODB_URI,
     MONGODB_NAME: params.MONGODB_NAME
@@ -46,6 +58,19 @@ async function main (params) {
 
     if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
       return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
+    }
+
+    // extract the user Bearer token from the Authorization header
+    const accessToken = getBearerToken(params);
+
+    let validServiceToken = false;
+    if (accessToken) {
+      try {
+        await validateAccessToken(accessToken, imsUrl, imsClientId);
+      } catch (error) {
+        return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
+      }
+      validServiceToken = isValidServiceToken(accessToken, requiredScopes);
     }
 
     // Configuration for filtering.
@@ -106,6 +131,9 @@ async function main (params) {
         queryParams[config.queryParam] = queryParamValues;
       }
     });
+
+    // Return all templates if valid service token, otherwise filter out dev console templates
+    templates = validServiceToken ? templates : templates.filter(template => !template?.links?.consoleProject);
 
     // top-level keys are query parameters
     // query parameters mapped to their respective fields
