@@ -60,7 +60,7 @@
                       "description": "The name of the user who created the template",
                       "example": "Lazarus"
                     },
-                    "version": {
+                    "latestVersion": {
                       "type": "string",
                       "description": "The version of the template in the semver format",
                       "example": "1.0.0"
@@ -787,11 +787,6 @@
               "type": "string",
               "description": "The name of the user who created the template",
               "example": "Lazarus"
-            },
-            "version": {
-              "type": "string",
-              "description": "The version of the template in the semver format",
-              "example": "1.0.0"
             },
             "description": {
               "type": "string",
