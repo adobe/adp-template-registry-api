@@ -20,6 +20,7 @@ const TEMPLATE_STATUS_REJECTED = 'Rejected';
 
 let openReviewIssues = null;
 
+const { ObjectId } = require('mongodb');
 const { mongoConnection } = require('../db/mongo');
 const { convertMongoIdToString } = require('./utils');
 
@@ -34,6 +35,20 @@ async function findTemplateByName (dbParams, templateName) {
   const collection = await mongoConnection(dbParams, collectionName);
   const results = await collection.find({ name: templateName }).toArray();
   return results?.length ? convertMongoIdToString(results[0]) : null;
+}
+
+/**
+ * Returns a template record from Template Registry by a template id.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateId template id
+ * @returns {Promise<object|null>} an existing template record or {}
+ */
+async function findTemplateById (dbParams, templateId) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const _id = new ObjectId(templateId);
+  const result = await collection.find({ _id }).toArray();
+  return Object.values(result).length ? convertMongoIdToString(result) : null;
 }
 
 /**
@@ -58,6 +73,27 @@ async function addTemplate (dbParams, body) {
   const result = await collection.insertOne(template);
   const output = { ...template, id: result?.insertedId?.toString() };
   return convertMongoIdToString(output);
+}
+
+/**
+ * Updates a template to Template Registry.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateId template Id
+ * @param {object} templateBody template data
+ * @returns {object} mongo response
+ */
+async function updateTemplate (dbParams, templateId, templateBody) {
+  const collection = await mongoConnection(dbParams, collectionName);
+
+  const response = await collection.updateOne({ _id: new ObjectId(templateId) }, {
+    $set: templateBody
+  });
+
+  return response;
+  /**
+   * { "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+   */
 }
 
 /**
@@ -173,8 +209,10 @@ module.exports = {
   fetchUrl,
   getTemplates,
   findTemplateByName,
+  findTemplateById,
   addTemplate,
   removeTemplateByName,
+  updateTemplate,
   createReviewIssue,
   getReviewIssueByTemplateName,
   TEMPLATE_STATUS_IN_VERIFICATION,
