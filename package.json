@@ -1,10 +1,10 @@
 {
   "name": "template-registry-api",
-  "version": "0.2.0",
+  "version": "0.4.0",
   "dependencies": {
-    "@adobe/aio-lib-console": "^5.0.1",
+    "@adobe/aio-lib-console": "^5.1.0",
     "@adobe/aio-lib-ims": "^7.0.1",
-    "@adobe/aio-sdk": "^3.0.0",
+    "@adobe/aio-sdk": "^5.0.1",
     "@heyputer/kv.js": "^0.1.6",
     "@octokit/rest": "^20.0.2",
     "axios": "^0.27.2",
@@ -27,7 +27,7 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.1.1",
     "jest": "^29.7.0",
-    "jest-junit": "^14.0.0",
+    "jest-junit": "^16.0.0",
     "nock": "^13.5.4"
   },
   "scripts": {
