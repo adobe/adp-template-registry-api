@@ -633,7 +633,12 @@
             "504": {
               "$ref": "#/components/responses/GatewayTimeout"
             }
-          }
+          },
+            "x-openwhisk": {
+                "action": "templates-install.http",
+                "package": "template-registry-api",
+                "url": "not-used"
+            }
         }
       }
     },
