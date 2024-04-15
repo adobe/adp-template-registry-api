@@ -21,18 +21,29 @@ const ERR_RC_PERMISSION_DENIED = 'permission_denied';
 /**
  *
  * Returns a log ready string of the action input parameters.
- * The `Authorization` header content will be replaced by '<hidden>'.
+ * Any sensitive content will be replaced by '<hidden>'.
  *
  * @param {object} params action input parameters.
  * @returns {string} a stringified version of the input parameters.
  */
 function stringParameters (params) {
+  const newParams = {
+    ...params,
+    ...(params.IMS_AUTH_CODE && { IMS_AUTH_CODE: '<hidden>' }),
+    ...(params.IMS_CLIENT_SECRET && { IMS_CLIENT_SECRET: '<hidden>' }),
+    ...(params.GITHUB_ACCESS_TOKEN && { GITHUB_ACCESS_TOKEN: '<hidden>' }),
+    ...(params.MONGODB_URI && { MONGODB_URI: '<hidden>' })
+  };
+
   // hide authorization token without overriding params
   let headers = params.__ow_headers || {};
   if (headers.authorization) {
-    headers = { ...headers, authorization: '<hidden>' };
+    headers = {
+      ...headers,
+      authorization: '<hidden>'
+    };
   }
-  return JSON.stringify({ ...params, __ow_headers: headers });
+  return JSON.stringify({ ...newParams, __ow_headers: headers });
 }
 
 /**
