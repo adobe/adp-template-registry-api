@@ -29,6 +29,26 @@ application:
             annotations:
               require-adobe-auth: false
               final: true
+          templates-put:
+            function: actions/templates/put/index.js
+            web: "yes"
+            runtime: "nodejs:18"
+            include:
+              - ["template-registry-api.json"]
+            inputs:
+              LOG_LEVEL: debug
+              IMS_URL: $IMS_URL
+              IMS_CLIENT_ID: $IMS_CLIENT_ID
+              IMS_CLIENT_SECRET: $IMS_CLIENT_SECRET
+              IMS_AUTH_CODE: $IMS_AUTH_CODE
+              IMS_SCOPES: $IMS_SCOPES
+              ACCESS_TOKEN_GITHUB: $ACCESS_TOKEN_GITHUB
+              TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
+              TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
+              TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+            annotations:
+              require-adobe-auth: false
+              final: true
           templates-get:
             function: actions/templates/get/index.js
             web: "yes"

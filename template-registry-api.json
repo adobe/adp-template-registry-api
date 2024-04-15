@@ -482,7 +482,7 @@
               "bearerAuth": []
             },
             {
-              "scopes_auth": []
+              "scopes_auth": ["template_registry.write"]
             }
           ],
           "requestBody": {
@@ -551,7 +551,7 @@
             }
           },
           "x-openwhisk": {
-            "action": "templates-post.http",
+            "action": "templates-put.http",
             "package": "template-registry-api",
             "url": "not-used"
           }
@@ -708,7 +708,7 @@
           "authorizationUrl": "",
           "flow": "implicit",
           "scopes": {
-            "write:template_registry": "modify the template registry"
+            "template_registry.write": "Access to modify the template registry"
           }
         }
       },
