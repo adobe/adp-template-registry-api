@@ -67,6 +67,29 @@ describe('stringParameters', () => {
     expect(utils.stringParameters(params)).toEqual(expect.stringContaining('"authorization":"<hidden>"'));
     expect(utils.stringParameters(params)).not.toEqual(expect.stringContaining('secret'));
   });
+  test('with sensitive values in params', () => {
+    const params = {
+      IMS_AUTH_CODE: '1234',
+      MONGODB_URI: 'mongodb://mongo:27017',
+      GITHUB_ACCESS_TOKEN: 'fake-token',
+      IMS_CLIENT_SECRET: 'secret'
+    };
+    expect(utils.stringParameters(params)).toEqual(expect.stringContaining(
+      '"IMS_AUTH_CODE":"<hidden>","MONGODB_URI":"<hidden>","GITHUB_ACCESS_TOKEN":"<hidden>","IMS_CLIENT_SECRET":"<hidden>"'
+    ));
+  });
+  test('with only some sensitive values in params', () => {
+    const params = {
+      IMS_AUTH_CODE: '1234',
+      MONGODB_URI: 'mongodb://mongo:27017',
+      GITHUB_ACCESS_TOKEN: 'fake-token'
+    };
+    const stringParams = utils.stringParameters(params);
+    expect(stringParams).toEqual(expect.stringContaining(
+      '"IMS_AUTH_CODE":"<hidden>","MONGODB_URI":"<hidden>","GITHUB_ACCESS_TOKEN":"<hidden>"'
+    ));
+    expect(stringParams).toEqual(expect.not.stringContaining('IMS_CLIENT_SECRET'));
+  });
 });
 
 describe('checkMissingRequestInputs', () => {
