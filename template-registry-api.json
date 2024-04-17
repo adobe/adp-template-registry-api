@@ -354,6 +354,7 @@
         "tags": [
           "templates"
         ],
+        "security": [],
         "parameters": [
           {
             "$ref": "#/parameters/NamesParam"
@@ -506,7 +507,7 @@
         "tags": [
           "templates"
         ],
-
+        "security": [],
         "parameters": [
           {
             "$ref": "#/parameters/TemplateName"
@@ -639,6 +640,7 @@
         "tags": [
           "templates"
         ],
+        "security": [],
         "parameters": [
           {
             "$ref": "#/parameters/TemplateName"
