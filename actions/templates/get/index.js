@@ -48,8 +48,7 @@ async function main (params) {
 
     // WPAR002 - skip a warning about the "allowEmptyValue" property
     // see https://swagger.io/docs/specification/describing-parameters/ Empty-Valued and Nullable Parameters
-    // EDEV001 - skip a warning about the basepath property, needed by IO Runtime for deploying apis
-    const openapi = await Enforcer('./template-registry-api.json', { componentOptions: { exceptionSkipCodes: ['WPAR002', 'EDEV001'] } });
+    const openapi = await Enforcer('./template-registry-api.json', { componentOptions: { exceptionSkipCodes: ['WPAR002'] } });
     const [req] = openapi.request({
       method: HTTP_METHOD,
       path: '/templates/{templateName}'
@@ -103,7 +102,7 @@ async function main (params) {
     // log any server errors
     logger.error(error);
     // return with 500
-    return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.')], logger);
+    return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.'), error.message], logger);
   }
 }
 
