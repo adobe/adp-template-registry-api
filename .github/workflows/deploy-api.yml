@@ -41,6 +41,7 @@ jobs:
         env:
           AIO_runtime_auth: ${{ secrets.AIO_RUNTIME_AUTH }}
           AIO_runtime_namespace: ${{ secrets.AIO_RUNTIME_NAMESPACE }}
+          AIO_runtime_apihost: ${{ secrets.AIO_RUNTIME_APIHOST }}
         run: aio runtime api create --config-file=template-registry-api.json
       - name: Deploy
         env:
