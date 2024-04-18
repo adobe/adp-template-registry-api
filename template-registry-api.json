@@ -297,24 +297,6 @@
             "description": "Information about a newly added template.",
             "schema": {
               "$ref": "#/definitions/Template",
-              "example": {
-                "id": "56bf8211-d92d-44ef-b98b-6ee89812e1d7",
-                "name": "@adobe/app-builder-template",
-                "status": "InVerification",
-                "links": {
-                  "npm": "https://www.npmjs.com/package/@adobe/app-builder-template",
-                  "github": "https://github.com/adobe/app-builder-template"
-                },
-                "_links": {
-                  "self": {
-                    "href": "https://template-registry-api.tbd/apis/v1/templates/@adobe/app-builder-template"
-                  },
-                  "review": {
-                    "href": "https://github.com/adobe/aio-template-submission/issues/<number>",
-                    "description": "A link to \"Template Review Request\" Github Issue"
-                  }
-                }
-              }
             }
           },
           "400": {
@@ -520,38 +502,7 @@
           "200": {
             "description": "Information about a template.",
             "schema": {
-              "$ref": "#/definitions/Template",
-              "example": {
-                "id": "4bfdb3ef-b84c-4a74-b9fc-39657ed1aaf8",
-                "author": "Adobe Inc.",
-                "name": "@adobe/app-builder-template",
-                "description": "AppBuilder template",
-                "adobeRecommended": true,
-                "latestVersion": "1.0.10",
-                "publishDate": "2022-04-22T04:21:26.922Z",
-                "categories": [
-                  "graphql-mesh"
-                ],
-                "apis": [
-                  {
-                    "code": "Runtime"
-                  }
-                ],
-                "keywords": [
-                  "aio-app-builder-template",
-                  "aio"
-                ],
-                "status": "Approved",
-                "links": {
-                  "npm": "https://www.npmjs.com/package/@adobe/app-builder-template",
-                  "github": "https://github.com/adobe/app-builder-template"
-                },
-                "_links": {
-                  "self": {
-                    "href": "https://template-registry-api.tbd/apis/v1/templates/@adobe/app-builder-template"
-                  }
-                }
-              }
+              "$ref": "#/definitions/Template"
             }
           },
           "400": {
@@ -656,38 +607,7 @@
           "200": {
             "description": "Information about a template.",
             "schema": {
-              "$ref": "#/definitions/Template",
-              "example": {
-                "id": "4bfdb3ef-b84c-4a74-b9fc-39657ed1aaf8",
-                "author": "Adobe Inc.",
-                "name": "@adobe/app-builder-template",
-                "description": "AppBuilder template",
-                "adobeRecommended": true,
-                "latestVersion": "1.0.10",
-                "publishDate": "2022-04-22T04:21:26.922Z",
-                "categories": [
-                  "graphql-mesh"
-                ],
-                "apis": [
-                  {
-                    "code": "Runtime"
-                  }
-                ],
-                "keywords": [
-                  "aio-app-builder-template",
-                  "aio"
-                ],
-                "status": "Approved",
-                "links": {
-                  "npm": "https://www.npmjs.com/package/@adobe/app-builder-template",
-                  "github": "https://github.com/adobe/app-builder-template"
-                },
-                "_links": {
-                  "self": {
-                    "href": "https://template-registry-api.tbd/apis/v1/templates/@adobe/app-builder-template"
-                  }
-                }
-              }
+              "$ref": "#/definitions/Template"
             }
           },
           "400": {
