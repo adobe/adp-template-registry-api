@@ -296,7 +296,7 @@
           "200": {
             "description": "Information about a newly added template.",
             "schema": {
-              "$ref": "#/definitions/Template",
+              "$ref": "#/definitions/Template"
             }
           },
           "400": {
