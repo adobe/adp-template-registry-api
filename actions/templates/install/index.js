@@ -41,11 +41,6 @@ const serializeRequestBody = (params) => {
  * @param {object} params request parameters
  * @returns {object} response
  */
-
-/**
- *
- * @param params
- */
 async function main (params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
@@ -137,7 +132,9 @@ async function main (params) {
       oauthsinglepageapp: 'SinglePageApp'
     };
 
-    const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, 'stage');
+    // need to check how env should be set
+    const nodeEnv = process.env.NODE_ENV;
+    const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, nodeEnv);
 
     // Console APIs only support creating one type of credential at a time
     // Also, for current templates, we only support one credential type per template
@@ -161,8 +158,6 @@ async function main (params) {
         services: []
       };
 
-      logger.debug(`Create AdobeId Integration Request Body: ${JSON.stringify(createAdobeIdIntegrationReqBody)}`);
-
       // iterate over APIs and add APIs to request body services array
       for (const api of apis) {
         if (api.flowType !== 'adobeid' || api.credentialType !== credentialType) {
@@ -177,7 +172,7 @@ async function main (params) {
         createAdobeIdIntegrationReqBody.services.push(service);
       }
 
-      logger.debug(`Create AdobeId Integration Request Body after adding services: ${JSON.stringify(createAdobeIdIntegrationReqBody)}`);
+      logger.debug(`Create AdobeId Integration Request Body: ${JSON.stringify(createAdobeIdIntegrationReqBody)}`);
 
       // create AdobeID integration
       createIntegrationResponse = await consoleClient.createAdobeIdIntegration(body.orgId, createAdobeIdIntegrationReqBody);
@@ -191,8 +186,6 @@ async function main (params) {
         services: []
       };
 
-      logger.debug(`Create OAuthS2S Integration Request Body: ${JSON.stringify(createOAuthS2SIntegrationReqBody)}`);
-
       for (const api of apis) {
         if (api.flowType !== 'entp' || api.credentialType !== credentialType) {
           continue;
@@ -205,9 +198,10 @@ async function main (params) {
         };
         createOAuthS2SIntegrationReqBody.services.push(service);
       }
+      logger.debug(`Create OAuth S2S Integration Request Body: ${JSON.stringify(createOAuthS2SIntegrationReqBody)}`);
 
-      // create Entp integration
-      createIntegrationResponse = await consoleClient.createOauthS2SCredential(body.orgId, createOAuthS2SIntegrationReqBody);
+      // create OAuth server to server integration
+      createIntegrationResponse = await consoleClient.createOauthS2SCredentialIntegration(body.orgId, createOAuthS2SIntegrationReqBody);
       logger.debug(`OAuth S2S Integration created: ${JSON.stringify(createIntegrationResponse)}`);
     }
     const { projectId, workspaceId } = createIntegrationResponse;
