@@ -16,7 +16,7 @@ governing permissions and limitations under the License.
 # Template Registry API
 
 ## OpenAPI Schema
-Template Registry API follows OpenAPI 3.0.3 Specification.
+Template Registry API follows OpenAPI 2.0 Specification.
 
 See [Template Registry API Schema](https://opensource.adobe.com/adp-template-registry-api/) for more details on this RESTful API.
 
@@ -29,6 +29,21 @@ $ git clone git@github.com:adobe/adp-template-registry-api.git
 $ cd adp-template-registry-api
 $ npm install
 ```
+
+## Populate .env
+
+Copy the root `.env.example` to a new `.env` file and fill out all the fields
+
+## Deploy service and APIs
+
+```bash
+$ aio app deploy
+$ aio runtime api create /v1 --config-file=template-registry-api.json
+```
+
+The output of the second command should provide you with the base URL for calling your service
+
+> Note: It can take up to five minutes for the API configuration to be fully setup and ready for use
 
 ## Run Tests
 
