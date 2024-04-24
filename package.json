@@ -36,7 +36,8 @@
     "lint:check": "eslint --ext .js .",
     "lint:fix": "eslint --ext .js --fix .",
     "api:spec:lint": "redocly lint template-registry-api.json",
-    "api:spec:generate": "redocly build-docs template-registry-api.json --output index.html"
+    "api:spec:generate": "redocly build-docs template-registry-api.json --output index.html",
+    "version": "node scripts/version.js"
   },
   "engines": {
     "node": "^18"
