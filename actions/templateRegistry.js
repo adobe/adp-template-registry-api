@@ -42,13 +42,12 @@ async function findTemplateByName (dbParams, templateName) {
  *
  * @param {object} dbParams database connection parameters
  * @param {string} templateId template id
- * @returns {Promise<object|null>} an existing template record or {}
+ * @returns {Promise<object|null>} an existing template record or null
  */
 async function findTemplateById (dbParams, templateId) {
   const collection = await mongoConnection(dbParams, collectionName);
-  const _id = new ObjectId(templateId);
-  const result = await collection.find({ _id }).toArray();
-  return Object.values(result).length ? convertMongoIdToString(result) : null;
+  const result = await collection.findOne({ _id: new ObjectId(templateId) });
+  return result ? convertMongoIdToString(result) : null;
 }
 
 /**

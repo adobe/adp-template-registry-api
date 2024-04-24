@@ -136,7 +136,7 @@ describe('POST templates', () => {
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
   });
 
-  test('Unsupported HTTP method, should return 400', async () => {
+  test('Unsupported HTTP method, should return 405', async () => {
     const response = await action.main({
       IMS_URL: process.env.IMS_URL,
       IMS_CLIENT_ID: process.env.IMS_URL,

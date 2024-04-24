@@ -20,7 +20,7 @@ const HTTP_METHOD = 'post';
 const POST_PARAM_NAME = 'templateId';
 
 /**
- * Serialize the request body
+ * Serialize the request body of Install template action
  * @param {object} params action params
  * @returns {object} serialized request body
  */
@@ -60,7 +60,8 @@ async function main (params) {
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
-    if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
+    if (params.__ow_method === undefined || params.__ow_method.toString().toLowerCase() !== HTTP_METHOD) {
+      logger.error(`Unsupported method: ${params.__ow_method}`);
       return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
     }
 
@@ -101,19 +102,21 @@ async function main (params) {
     logger.debug(`Request body: ${JSON.stringify(body)}`);
 
     const [req, reqError] = openapi.request({
-      method: HTTP_METHOD,
+      method: 'POST',
       path: '/templates/{templateId}/install',
       body
     });
     if (reqError) {
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, reqError.toString().split('\n').map(line => line.trim()).join(' => '))], logger);
     }
+    console.log('Request:', req);
 
     const template = await findTemplateById(dbParams, params.templateId);
     if (!template) {
+      logger.error(`Template with id ${params.templateId} not found.`);
       return errorResponse(404, [errorMessage(ERR_RC_INVALID_TEMPLATE_ID, `Template with id ${params.templateId} not found.`)], logger);
     }
-    logger.debug(`Template found: ${JSON.stringify(template)}`);
+    logger.info(`Template found: ${JSON.stringify(template)}`);
 
     // extract credentials and APIs from the template
     const { credentials, apis } = template;
