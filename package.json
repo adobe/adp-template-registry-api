@@ -37,7 +37,7 @@
     "lint:fix": "eslint --ext .js --fix .",
     "api:spec:lint": "redocly lint template-registry-api.json",
     "api:spec:generate": "redocly build-docs template-registry-api.json --output index.html",
-    "version": "node scripts/version.js"
+    "version": "node scripts/updateSwaggerVersion.js && npm run api:spec:generate"
   },
   "engines": {
     "node": "^18"
