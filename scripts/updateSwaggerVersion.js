@@ -9,16 +9,19 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const fs = require('fs')
-const path = require('path')
+const fs = require('fs');
+const path = require('path');
 
+/**
+ *
+ */
 async function main () {
-    const newVersion = process.env.npm_package_version
-    const templateRegistryApiPath = path.resolve(__dirname, '../template-registry-api.json')
-    const templateRegistryApi = require(templateRegistryApiPath)
-    templateRegistryApi.info.version = newVersion
-    fs.writeFileSync(templateRegistryApiPath, JSON.stringify(templateRegistryApi, null, 2))
+  const newVersion = process.env.npm_package_version;
+  const templateRegistryApiPath = path.resolve(__dirname, '../template-registry-api.json');
+  const templateRegistryApi = require(templateRegistryApiPath);
+  templateRegistryApi.info.version = newVersion;
+  fs.writeFileSync(templateRegistryApiPath, JSON.stringify(templateRegistryApi, null, 2));
 }
 
 main()
-    .catch(console.error)
+  .catch(console.error);
