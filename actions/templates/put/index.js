@@ -20,6 +20,24 @@ const consoleLib = require('@adobe/aio-lib-console');
 const HTTP_METHOD = 'put';
 const PUT_PARAM_NAME = 'templateId';
 
+const serializeRequestBody = (params) => {
+  return {
+    ...(params.description && { description: params.description }), // developer console only
+    ...(params.latestVersion && { latestVersion: params.latestVersion }), // developer console only
+    ...(params.updatedBy && { updatedBy: params.updatedBy }),
+    ...('adobeRecommended' in params && { adobeRecommended: params.adobeRecommended }),
+    ...('keywords' in params && params.keywords.length && { keywords: params.keywords }),
+    ...('categories' in params && params.categories.length && { categories: params.categories }),
+    ...('extensions' in params && params.extensions.length && { extensions: params.extensions }),
+    ...('credentials' in params && params.credentials.length && { credentials: params.credentials }),
+    ...('codeSamples' in params && params.codeSamples.length && { codeSamples: params.codeSamples }),
+    ...('apis' in params && params.apis.length && { apis: params.apis }),
+    ...('status' in params && { status: params.status }),
+    ...('runtime' in params && { runtime: params.runtime }),
+    ...('links' in params && { links: params.links })
+  };
+};
+
 /**
  * Updates a new template in the Template Registry.
  * @param {object} params request parameters
@@ -77,24 +95,9 @@ async function main (params) {
 
     // WPAR002 - skip a warning about the "allowEmptyValue" property
     // see https://swagger.io/docs/specification/describing-parameters/ Empty-Valued and Nullable Parameters
-    // EDEV001 - skip a warning about the basepath property, needed by IO Runtime for deploying apis
-    const openapi = await Enforcer('./template-registry-api.json', { componentOptions: { exceptionSkipCodes: ['WPAR002', 'EDEV001'] } });
+    const openapi = await Enforcer('./template-registry-api.json', { componentOptions: { exceptionSkipCodes: ['WPAR002'] } });
 
-    let body = {
-      ...(params.description && { description: params.description }), // developer console only
-      ...(params.latestVersion && { latestVersion: params.latestVersion }), // developer console only
-      ...(params.updatedBy && { updatedBy: params.updatedBy }),
-      ...('adobeRecommended' in params && { adobeRecommended: params.adobeRecommended }),
-      ...('keywords' in params && params.keywords.length && { keywords: params.keywords }),
-      ...('categories' in params && params.categories.length && { categories: params.categories }),
-      ...('extensions' in params && params.extensions.length && { extensions: params.extensions }),
-      ...('credentials' in params && params.credentials.length && { credentials: params.credentials }),
-      ...('codeSamples' in params && params.codeSamples.length && { codeSamples: params.codeSamples }),
-      ...('apis' in params && params.apis.length && { apis: params.apis }),
-      ...('status' in params && { status: params.status }),
-      ...('runtime' in params && { runtime: params.runtime }),
-      ...('links' in params && { links: params.links })
-    };
+    let body = serializeRequestBody(params);
 
     const [req, reqError] = openapi.request({
       method: HTTP_METHOD,

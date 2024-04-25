@@ -19,7 +19,8 @@ const {
   getTemplates,
   addTemplate,
   removeTemplateByName,
-  updateTemplate
+  updateTemplate,
+  findTemplateById
 } = require('../actions/templateRegistry');
 
 const dbParams = {
@@ -149,31 +150,6 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     });
   });
 
-  test('should update an app builder template to the collection', async () => {
-    const templateResponse = await updateTemplate(dbParams, '6618567c770086a68ee56fca', {
-      status: 'InVerification',
-      links: {
-        npm: `https://www.npmjs.com/package/${templateName}`,
-        github: githubRepoUrl
-      }
-    });
-
-    expect(clientConnectSpy).toHaveBeenCalled();
-    expect(collectionMock.updateOne).toHaveBeenCalled();
-    expect(collectionMock.updateOne).toHaveBeenCalledWith({
-      _id: new ObjectId('6618567c770086a68ee56fca')
-    }, {
-      $set: {
-        status: 'InVerification',
-        links: {
-          npm: `https://www.npmjs.com/package/${templateName}`,
-          github: githubRepoUrl
-        }
-      }
-    });
-    expect(templateResponse).toEqual({ acknowledged: true, matchedCount: 1, modifiedCount: 1 });
-  });
-
   test('should add a developer console template to the collection', async () => {
     const consoleTemplate = {
       name: templateName,
@@ -271,6 +247,16 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     });
   });
 
+  test('should get templates by id from the collection', async () => {
+    const templateId = '6618567c770086a68ee56fca';
+    const templatesResult = await findTemplateById(dbParams, templateId);
+    expect(collectionMock.find).toHaveBeenCalledWith({
+      _id: new ObjectId(templateId)
+    });
+    expect(collectionMock.find().toArray).toHaveBeenCalled();
+    expect(templatesResult).toEqual(templates);
+  });
+
   test('should get all templates from the collection', async () => {
     const templatesResult = await getTemplates(dbParams);
     expect(collectionMock.find).toHaveBeenCalledWith({});
@@ -356,5 +342,30 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     const githubRepoUrl = 'https://github.com/my-org/my-template';
     const issueNumber = await createReviewIssue(templateName, githubRepoUrl, process.env.GITHUB_ACCESS_TOKEN, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(issueNumber).toBe(1);
+  });
+
+  test('should update an app builder template to the collection', async () => {
+    const templateResponse = await updateTemplate(dbParams, '6618567c770086a68ee56fca', {
+      status: 'InVerification',
+      links: {
+        npm: `https://www.npmjs.com/package/${templateName}`,
+        github: githubRepoUrl
+      }
+    });
+
+    expect(clientConnectSpy).toHaveBeenCalled();
+    expect(collectionMock.updateOne).toHaveBeenCalled();
+    expect(collectionMock.updateOne).toHaveBeenCalledWith({
+      _id: new ObjectId('6618567c770086a68ee56fca')
+    }, {
+      $set: {
+        status: 'InVerification',
+        links: {
+          npm: `https://www.npmjs.com/package/${templateName}`,
+          github: githubRepoUrl
+        }
+      }
+    });
+    expect(templateResponse).toEqual({ acknowledged: true, matchedCount: 1, modifiedCount: 1 });
   });
 });

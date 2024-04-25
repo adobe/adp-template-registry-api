@@ -54,10 +54,8 @@
       "name": "templateId",
       "in": "path",
       "required": true,
-      "description": "The id of the template to be updated",
-      "schema": {
-        "type": "string"
-      }
+      "description": "The id of the template in the database",
+      "type": "string"
     },
     "TemplateName": {
       "name": "templateName",
@@ -491,6 +489,76 @@
         }
       }
     },
+    "/templates/{templateId}": {
+      "put": {
+        "summary": "Modify a template to Template Registry.",
+        "operationId": "template-registry-api/templates-put.http",
+        "tags": [
+          "templates"
+        ],
+        "security": [
+          {
+            "createAndUpdateTemplateAuth": [
+              "template_registry.write"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/TemplateId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Template object to update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateTemplate"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Information about a newly added template.",
+            "schema": {
+              "$ref": "#/definitions/UpdateTemplateResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "405": {
+            "$ref": "#/responses/HttpMethodNotAllowed"
+          },
+          "409": {
+            "$ref": "#/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/responses/GatewayTimeout"
+          }
+        },
+        "x-openwhisk": {
+          "action": "templates-post.http",
+          "package": "template-registry-api",
+          "url": "not-used"
+        }
+      }
+    },
     "/templates/{templateName}": {
       "get": {
         "summary": "Get information about a template.",
@@ -696,97 +764,6 @@
         },
         "x-openwhisk": {
           "action": "templates-delete.http",
-          "package": "template-registry-api",
-          "url": "not-used"
-        }
-      }
-    },
-    "/templates/{templateId}":{
-      "put": {
-        "summary": "Update an exisiting template.",
-        "operationId": "template-registry-api/templates-put.http",
-        "tags": [
-          "templates"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/parameters/TemplateId"
-          }
-        ],
-        "security": [
-          {
-            "createAndUpdateTemplateAuth": [
-              "template_registry.write"
-            ]
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                  "$ref":"#/definitions/UpdateTemplate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Information about a updated added template.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/definitions/UpdateTemplateResponse",
-                  "example": {
-                    "id": "56bf8211-d92d-44ef-b98b-6ee89812e1d7",
-                    "name": "@adobe/app-builder-template",
-                    "status": "InVerification",
-                    "links": {
-                      "npm": "https://www.npmjs.com/package/@adobe/app-builder-template",
-                      "github": "https://github.com/adobe/app-builder-template"
-                    },
-                    "_links": {
-                      "self": {
-                        "href": "https://template-registry-api.tbd/apis/v1/templates/@adobe/app-builder-template"
-                      },
-                      "review": {
-                        "href": "https://github.com/adobe/aio-template-submission/issues/<number>",
-                        "description": "A link to \"Template Review Request\" Github Issue"
-                      }
-                    },
-                    "updatedBy": "Lazarus"
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "$ref": "#/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/responses/Forbidden"
-          },
-          "405": {
-            "$ref": "#/responses/HttpMethodNotAllowed"
-          },
-          "409": {
-            "$ref": "#/responses/Conflict"
-          },
-          "500": {
-            "$ref": "#/responses/InternalServerError"
-          },
-          "503": {
-            "$ref": "#/responses/ServiceUnavailable"
-          },
-          "504": {
-            "$ref": "#/responses/GatewayTimeout"
-          }
-        },
-        "x-openwhisk": {
-          "action": "templates-put.http",
           "package": "template-registry-api",
           "url": "not-used"
         }
@@ -1201,26 +1178,7 @@
           }
         },
         "codeSamples": {
-          "type": "array",
-          "description": "Code samples for the template",
-          "minItems": 0,
-          "items": {
-            "type": "object",
-            "required": [],
-            "additionalProperties": true,
-            "properties": {
-              "language": {
-                "type": "string",
-                "description": "programming language for the code sample",
-                "example": "js, python, java"
-              },
-              "link": {
-                "type": "string",
-                "description": "link to the zip file containing the code sample",
-                "example": "http://example.com/code-sample.zip"
-              }
-            }
-          }
+          "$ref": "#/definitions/CodeSamples"
         },
         "apis": {
           "type": "array",
@@ -1247,10 +1205,10 @@
           "additionalProperties": false,
           "properties": {
             "github": {
-              "$ref": "#/components/schemas/GithubUrl"
+              "$ref": "#/definitions/GithubUrl"
             },
             "consoleProject": {
-              "$ref": "#/components/schemas/DeveloperConsoleUrl"
+              "$ref": "#/definitions/DeveloperConsoleUrl"
             }
           }
         }
@@ -1374,26 +1332,7 @@
           }
         },
         "codeSamples": {
-          "type": "array",
-          "description": "Code samples for the template",
-          "minItems": 0,
-          "items": {
-            "type": "object",
-            "required": [],
-            "additionalProperties": true,
-            "properties": {
-              "language": {
-                "type": "string",
-                "description": "programming language for the code sample",
-                "example": "js, python, java"
-              },
-              "link": {
-                "type": "string",
-                "description": "link to the zip file containing the code sample",
-                "example": "http://example.com/code-sample.zip"
-              }
-            }
-          }
+          "$ref": "#/definitions/CodeSamples"
         },
         "apis": {
           "type": "array",
@@ -1420,15 +1359,15 @@
           "additionalProperties": false,
           "properties": {
             "github": {
-              "$ref": "#/components/schemas/GithubUrl"
+              "$ref": "#/definitions/GithubUrl"
             },
             "consoleProject": {
-              "$ref": "#/components/schemas/DeveloperConsoleUrl"
+              "$ref": "#/definitions/DeveloperConsoleUrl"
             }
           }
         },
         "_links": {
-          "$ref": "#/components/schemas/Links"
+          "$ref": "#/definitions/Links"
         }
       }
     }

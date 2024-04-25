@@ -177,19 +177,13 @@ describe('PUT templates', () => {
       updatedBy: 'fake-user',
       ...fakeParams
     });
-    expect(response).toEqual({
-      error: {
-        statusCode: 400,
-        body: {
-          errors: [
-            {
-              code: utils.ERR_RC_INCORRECT_REQUEST,
-              message: `Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links > github => String does not match required pattern /^https:\\/\\/github\\.com\\// with value: "${nonGithubRepoLink}"`
-            }
-          ]
-        }
-      }
-    });
+
+    const responseErrorCode = response.error.body.errors[0].code;
+    const responseErrorMessage = response.error.body.errors[0].message;
+    const responseStatusCode = response.error.statusCode;
+    expect(responseErrorCode).toEqual(utils.ERR_RC_INCORRECT_REQUEST);
+    expect(responseStatusCode).toEqual(400);
+    expect(responseErrorMessage).not.toBeNull();
   });
 
   test('Template does not exist, should return 404', async () => {

@@ -25,19 +25,6 @@ const { mongoConnection } = require('../db/mongo');
 const { convertMongoIdToString } = require('./utils');
 
 /**
- * Returns a template record from Template Registry by a template name.
- *
- * @param {object} dbParams database connection parameters
- * @param {string} templateName template name
- * @returns {Promise<object|null>} an existing template record or null
- */
-async function findTemplateByName (dbParams, templateName) {
-  const collection = await mongoConnection(dbParams, collectionName);
-  const results = await collection.find({ name: templateName }).toArray();
-  return results?.length ? convertMongoIdToString(results[0]) : null;
-}
-
-/**
  * Returns a template record from Template Registry by a template id.
  *
  * @param {object} dbParams database connection parameters
@@ -49,6 +36,40 @@ async function findTemplateById (dbParams, templateId) {
   const _id = new ObjectId(templateId);
   const result = await collection.find({ _id }).toArray();
   return Object.values(result).length ? convertMongoIdToString(result) : null;
+}
+
+/**
+ * Updates a template to Template Registry.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateId template Id
+ * @param {object} templateBody template data
+ * @returns {object} mongo response
+ */
+async function updateTemplate (dbParams, templateId, templateBody) {
+  const collection = await mongoConnection(dbParams, collectionName);
+
+  const response = await collection.updateOne({ _id: new ObjectId(templateId) }, {
+    $set: templateBody
+  });
+
+  return response;
+  /**
+   * { "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+   */
+}
+
+/**
+ * Returns a template record from Template Registry by a template name.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateName template name
+ * @returns {Promise<object|null>} an existing template record or null
+ */
+async function findTemplateByName (dbParams, templateName) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const results = await collection.find({ name: templateName }).toArray();
+  return results?.length ? convertMongoIdToString(results[0]) : null;
 }
 
 /**
@@ -74,27 +95,6 @@ async function addTemplate (dbParams, body) {
   const result = await collection.insertOne(template);
   const output = { ...template, id: result?.insertedId?.toString() };
   return convertMongoIdToString(output);
-}
-
-/**
- * Updates a template to Template Registry.
- *
- * @param {object} dbParams database connection parameters
- * @param {string} templateId template Id
- * @param {object} templateBody template data
- * @returns {object} mongo response
- */
-async function updateTemplate (dbParams, templateId, templateBody) {
-  const collection = await mongoConnection(dbParams, collectionName);
-
-  const response = await collection.updateOne({ _id: new ObjectId(templateId) }, {
-    $set: templateBody
-  });
-
-  return response;
-  /**
-   * { "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
-   */
 }
 
 /**
@@ -210,11 +210,11 @@ module.exports = {
   fetchUrl,
   getTemplates,
   findTemplateByName,
-  findTemplateById,
   addTemplate,
   removeTemplateByName,
-  updateTemplate,
   createReviewIssue,
+  findTemplateById,
+  updateTemplate,
   getReviewIssueByTemplateName,
   TEMPLATE_STATUS_IN_VERIFICATION,
   TEMPLATE_STATUS_APPROVED,
