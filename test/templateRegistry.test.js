@@ -9,7 +9,7 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const nock = require('nock');
 const {
   fetchUrl,
@@ -18,7 +18,8 @@ const {
   findTemplateByName,
   getTemplates,
   addTemplate,
-  removeTemplateByName
+  removeTemplateByName,
+  updateTemplate
 } = require('../actions/templateRegistry');
 
 const dbParams = {
@@ -93,6 +94,9 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       insertOne: jest.fn().mockResolvedValue({
         acknowledged: true,
         insertedId: 'mongodb-template-id'
+      }),
+      updateOne: jest.fn().mockResolvedValue({
+        acknowledged: true, matchedCount: 1, modifiedCount: 1
       }),
       deleteOne: jest.fn().mockResolvedValue(),
       find: jest.fn().mockReturnThis(),
@@ -327,5 +331,30 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     const githubRepoUrl = 'https://github.com/my-org/my-template';
     const issueNumber = await createReviewIssue(templateName, githubRepoUrl, process.env.GITHUB_ACCESS_TOKEN, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(issueNumber).toBe(1);
+  });
+
+  test('should update an app builder template to the collection', async () => {
+    const templateResponse = await updateTemplate(dbParams, '6618567c770086a68ee56fca', {
+      status: 'InVerification',
+      links: {
+        npm: `https://www.npmjs.com/package/${templateName}`,
+        github: githubRepoUrl
+      }
+    });
+
+    expect(clientConnectSpy).toHaveBeenCalled();
+    expect(collectionMock.updateOne).toHaveBeenCalled();
+    expect(collectionMock.updateOne).toHaveBeenCalledWith({
+      _id: new ObjectId('6618567c770086a68ee56fca')
+    }, {
+      $set: {
+        status: 'InVerification',
+        links: {
+          npm: `https://www.npmjs.com/package/${templateName}`,
+          github: githubRepoUrl
+        }
+      }
+    });
+    expect(templateResponse).toEqual({ acknowledged: true, matchedCount: 1, modifiedCount: 1 });
   });
 });

@@ -11,6 +11,7 @@ governing permissions and limitations under the License.
 
 const axios = require('axios').default;
 const { Octokit } = require('@octokit/rest');
+const { ObjectId } = require('mongodb');
 
 const collectionName = 'templates';
 
@@ -22,6 +23,41 @@ let openReviewIssues = null;
 
 const { mongoConnection } = require('../db/mongo');
 const { convertMongoIdToString } = require('./utils');
+
+/**
+ * Returns a template record from Template Registry by a template id.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateId template id
+ * @returns {Promise<object|null>} an existing template record or {}
+ */
+async function findTemplateById (dbParams, templateId) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const _id = new ObjectId(templateId);
+  const result = await collection.find({ _id }).toArray();
+  return Object.values(result).length ? convertMongoIdToString(result) : null;
+}
+
+/**
+ * Updates a template to Template Registry.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateId template Id
+ * @param {object} templateBody template data
+ * @returns {object} mongo response
+ */
+async function updateTemplate (dbParams, templateId, templateBody) {
+  const collection = await mongoConnection(dbParams, collectionName);
+
+  const response = await collection.updateOne({ _id: new ObjectId(templateId) }, {
+    $set: templateBody
+  });
+
+  return response;
+  /**
+   * { "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+   */
+}
 
 /**
  * Returns a template record from Template Registry by a template name.
@@ -177,6 +213,8 @@ module.exports = {
   addTemplate,
   removeTemplateByName,
   createReviewIssue,
+  findTemplateById,
+  updateTemplate,
   getReviewIssueByTemplateName,
   TEMPLATE_STATUS_IN_VERIFICATION,
   TEMPLATE_STATUS_APPROVED,
