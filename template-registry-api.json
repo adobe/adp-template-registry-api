@@ -164,169 +164,6 @@
       "required": false,
       "description": "A query parameter used for sorting.\nThe value of the orderBy parameter contains a comma-separated list of expressions used to sort the items.\nThe expression MAY include the suffix \"asc\" for ascending or \"desc\" for descending, separated from the property name by a space.\nIf \"asc\" or \"desc\" is not specified, the service MUST order by the specified property in ascending order.\nSub-sorts can be specified by a comma-separated list of property names with an OPTIONAL direction qualifier.\n",
       "type": "string"
-    },
-    "UpdateTemplate": {
-      "type": "object",
-      "required": ["updatedBy"],
-      "additionalProperties": false,
-      "properties": {
-        "updatedBy": {
-          "type": "string",
-          "description": "The name of the user who created the template",
-          "example": "Lazarus"
-        },
-        "description": {
-          "type": "string",
-          "description": "A description of the template",
-          "example": "AppBuilder template"
-        },
-        "latestVersion": {
-          "type": "string",
-          "description": "The version of the template in the semver format",
-          "example": "1.0.10"
-        },
-        "categories": {
-          "type": "array",
-          "description": "A list of categories the template belongs to",
-          "minItems": 1,
-          "items": {
-            "type": "string"
-          },
-          "example": [
-            "graphql-mesh"
-          ]
-        },
-        "adobeRecommended": {
-          "type": "boolean",
-          "description": "Whether the template is recommended by Adobe",
-          "example": true
-        },
-        "keywords": {
-          "type": "array",
-          "description": "A list of keywords specified in the packages.json file",
-          "items": {
-            "type": "string"
-          },
-          "example": [
-            "aio-app-builder-template",
-            "aio"
-          ]
-        },
-        "status": {
-          "type": "string",
-          "description": "A status of a package in Template Registry.\n\"Error\" indicates that an application error occurred.\n",
-          "enum": [
-            "InVerification",
-            "Approved",
-            "Rejected",
-            "Error"
-          ],
-          "example": "Approved"
-        },
-        "extensions": {
-          "type": "array",
-          "description": "Extension points that a template implements",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "required": [
-              "extensionPointId"
-            ],
-            "additionalProperties": true,
-            "properties": {
-              "extensionPointId": {
-                "type": "string",
-                "description": "Extension Point Id",
-                "example": "dx/excshell/1"
-              }
-            }
-          }
-        },
-        "runtime": {
-          "type": "boolean",
-          "description": "Whether to add Runtime to App Builder application or not.",
-          "default": false
-        },
-        "credentials": {
-          "type": "array",
-          "description": "A list of credentials required by the template",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "required": [
-              "type",
-              "flowType"
-            ],
-            "additionalProperties": true,
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "The type of the credential",
-                "example": "OAUTH_SERVER_TO_SERVER"
-              },
-              "flowType": {
-                "type": "string",
-                "description": "The flow type of the credential",
-                "example": "ENTP"
-              }
-            }
-          }
-        },
-        "codeSamples": {
-          "type": "array",
-          "description": "Code samples for the template",
-          "minItems": 0,
-          "items": {
-            "type": "object",
-            "required": [],
-            "additionalProperties": true,
-            "properties": {
-              "language": {
-                "type": "string",
-                "description": "programming language for the code sample",
-                "example": "js, python, java"
-              },
-              "link": {
-                "type": "string",
-                "description": "link to the zip file containing the code sample",
-                "example": "http://example.com/code-sample.zip"
-              }
-            }
-          }
-        },
-        "apis": {
-          "type": "array",
-          "description": "A list of Adobe APIs required by the template",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "required": [
-              "code"
-            ],
-            "additionalProperties": true,
-            "properties": {
-              "code": {
-                "type": "string",
-                "description": "The sdk code of the service",
-                "example": "AdobeAnalyticsSDK"
-              }
-            }
-          }
-        },
-        "links": {
-          "type": "object",
-          "description": "A link to the Github repository containing the package's source code",
-          "additionalProperties": false,
-          "properties": {
-            "github": {
-              "$ref": "#/components/schemas/GithubUrl"
-            },
-            "consoleProject": {
-              "$ref": "#/components/schemas/DeveloperConsoleUrl"
-            }
-          }
-        }
-      }
     }
   },
   "securityDefinitions": {
@@ -879,8 +716,7 @@
         "security": [
           {
             "createAndUpdateTemplateAuth": [
-              "template_registry.write",
-              "template_registry.read"
+              "template_registry.write"
             ]
           }
         ],
@@ -889,7 +725,7 @@
           "content": {
             "application/json": {
               "schema": {
-                  "$ref":"#/parameters/UpdateTemplate"
+                  "$ref":"#/definitions/UpdateTemplate"
               }
             }
           }
@@ -1254,6 +1090,169 @@
           "type": "string",
           "description": "A description of this error.",
           "example": "The \"XXX\" parameter is not set"
+        }
+      }
+    },
+    "UpdateTemplate": {
+      "type": "object",
+      "required": ["updatedBy"],
+      "additionalProperties": false,
+      "properties": {
+        "updatedBy": {
+          "type": "string",
+          "description": "The name of the user who created the template",
+          "example": "Lazarus"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the template",
+          "example": "AppBuilder template"
+        },
+        "latestVersion": {
+          "type": "string",
+          "description": "The version of the template in the semver format",
+          "example": "1.0.10"
+        },
+        "categories": {
+          "type": "array",
+          "description": "A list of categories the template belongs to",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "graphql-mesh"
+          ]
+        },
+        "adobeRecommended": {
+          "type": "boolean",
+          "description": "Whether the template is recommended by Adobe",
+          "example": true
+        },
+        "keywords": {
+          "type": "array",
+          "description": "A list of keywords specified in the packages.json file",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "aio-app-builder-template",
+            "aio"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "A status of a package in Template Registry.\n\"Error\" indicates that an application error occurred.\n",
+          "enum": [
+            "InVerification",
+            "Approved",
+            "Rejected",
+            "Error"
+          ],
+          "example": "Approved"
+        },
+        "extensions": {
+          "type": "array",
+          "description": "Extension points that a template implements",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "extensionPointId"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "extensionPointId": {
+                "type": "string",
+                "description": "Extension Point Id",
+                "example": "dx/excshell/1"
+              }
+            }
+          }
+        },
+        "runtime": {
+          "type": "boolean",
+          "description": "Whether to add Runtime to App Builder application or not.",
+          "default": false
+        },
+        "credentials": {
+          "type": "array",
+          "description": "A list of credentials required by the template",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "flowType"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of the credential",
+                "example": "OAUTH_SERVER_TO_SERVER"
+              },
+              "flowType": {
+                "type": "string",
+                "description": "The flow type of the credential",
+                "example": "ENTP"
+              }
+            }
+          }
+        },
+        "codeSamples": {
+          "type": "array",
+          "description": "Code samples for the template",
+          "minItems": 0,
+          "items": {
+            "type": "object",
+            "required": [],
+            "additionalProperties": true,
+            "properties": {
+              "language": {
+                "type": "string",
+                "description": "programming language for the code sample",
+                "example": "js, python, java"
+              },
+              "link": {
+                "type": "string",
+                "description": "link to the zip file containing the code sample",
+                "example": "http://example.com/code-sample.zip"
+              }
+            }
+          }
+        },
+        "apis": {
+          "type": "array",
+          "description": "A list of Adobe APIs required by the template",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "code"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "The sdk code of the service",
+                "example": "AdobeAnalyticsSDK"
+              }
+            }
+          }
+        },
+        "links": {
+          "type": "object",
+          "description": "A link to the Github repository containing the package's source code",
+          "additionalProperties": false,
+          "properties": {
+            "github": {
+              "$ref": "#/components/schemas/GithubUrl"
+            },
+            "consoleProject": {
+              "$ref": "#/components/schemas/DeveloperConsoleUrl"
+            }
+          }
         }
       }
     },
