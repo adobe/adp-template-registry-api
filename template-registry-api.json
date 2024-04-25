@@ -865,97 +865,97 @@
       }
     },
     "/templates/{templateId}":{
-        "put": {
-          "summary": "Update an exisiting template.",
-          "operationId": "template-registry-api/templates-put.http",
-          "tags": [
-            "templates"
-          ],
-          "parameters": [
-            {
-              "$ref": "#/parameters/TemplateId"
+      "put": {
+        "summary": "Update an exisiting template.",
+        "operationId": "template-registry-api/templates-put.http",
+        "tags": [
+          "templates"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/TemplateId"
+          }
+        ],
+        "security": [
+          {
+            "createAndUpdateTemplateAuth": [
+              "template_registry.write",
+              "template_registry.read"
+            ]
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                  "$ref":"#/parameters/UpdateTemplate"
+              }
             }
-          ],
-          "security": [
-            {
-              "createAndUpdateTemplateAuth": [
-                "template_registry.write",
-                "template_registry.read"
-              ]
-            }
-          ],
-          "requestBody": {
-            "required": true,
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Information about a updated added template.",
             "content": {
               "application/json": {
                 "schema": {
-                    "$ref":"#/parameters/UpdateTemplate"
-                }
-              }
-            }
-          },
-          "responses": {
-            "200": {
-              "description": "Information about a updated added template.",
-              "content": {
-                "application/json": {
-                  "schema": {
-                    "$ref": "#/definitions/UpdateTemplateResponse",
-                    "example": {
-                      "id": "56bf8211-d92d-44ef-b98b-6ee89812e1d7",
-                      "name": "@adobe/app-builder-template",
-                      "status": "InVerification",
-                      "links": {
-                        "npm": "https://www.npmjs.com/package/@adobe/app-builder-template",
-                        "github": "https://github.com/adobe/app-builder-template"
+                  "$ref": "#/definitions/UpdateTemplateResponse",
+                  "example": {
+                    "id": "56bf8211-d92d-44ef-b98b-6ee89812e1d7",
+                    "name": "@adobe/app-builder-template",
+                    "status": "InVerification",
+                    "links": {
+                      "npm": "https://www.npmjs.com/package/@adobe/app-builder-template",
+                      "github": "https://github.com/adobe/app-builder-template"
+                    },
+                    "_links": {
+                      "self": {
+                        "href": "https://template-registry-api.tbd/apis/v1/templates/@adobe/app-builder-template"
                       },
-                      "_links": {
-                        "self": {
-                          "href": "https://template-registry-api.tbd/apis/v1/templates/@adobe/app-builder-template"
-                        },
-                        "review": {
-                          "href": "https://github.com/adobe/aio-template-submission/issues/<number>",
-                          "description": "A link to \"Template Review Request\" Github Issue"
-                        }
-                      },
-                      "updatedBy": "Lazarus"
-                    }
+                      "review": {
+                        "href": "https://github.com/adobe/aio-template-submission/issues/<number>",
+                        "description": "A link to \"Template Review Request\" Github Issue"
+                      }
+                    },
+                    "updatedBy": "Lazarus"
                   }
                 }
               }
-            },
-            "400": {
-              "$ref": "#/responses/BadRequest"
-            },
-            "401": {
-              "$ref": "#/responses/Unauthorized"
-            },
-            "403": {
-              "$ref": "#/responses/Forbidden"
-            },
-            "405": {
-              "$ref": "#/responses/HttpMethodNotAllowed"
-            },
-            "409": {
-              "$ref": "#/responses/Conflict"
-            },
-            "500": {
-              "$ref": "#/responses/InternalServerError"
-            },
-            "503": {
-              "$ref": "#/responses/ServiceUnavailable"
-            },
-            "504": {
-              "$ref": "#/responses/GatewayTimeout"
             }
           },
-          "x-openwhisk": {
-            "action": "templates-put.http",
-            "package": "template-registry-api",
-            "url": "not-used"
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "405": {
+            "$ref": "#/responses/HttpMethodNotAllowed"
+          },
+          "409": {
+            "$ref": "#/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/responses/GatewayTimeout"
           }
+        },
+        "x-openwhisk": {
+          "action": "templates-put.http",
+          "package": "template-registry-api",
+          "url": "not-used"
         }
       }
+    }
   },
   "definitions": {
     "400": {
