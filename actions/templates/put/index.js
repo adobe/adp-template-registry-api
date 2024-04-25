@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST } =
+const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST, ERR_RC_MISSING_REQUIRED_PARAMETER } =
   require('../../utils');
 const { validateAccessToken, generateAccessToken } = require('../../ims');
 const { findTemplateById, updateTemplate } = require('../../templateRegistry');
@@ -68,16 +68,14 @@ async function main (params) {
 
     // check for missing request input parameters and headers
     const requiredHeaders = ['Authorization'];
-    let errorMessages = checkMissingRequestInputs(params, [], requiredHeaders);
+    const errorMessages = checkMissingRequestInputs(params, [], requiredHeaders);
     if (errorMessages) {
       return errorResponse(401, errorMessages, logger);
     }
-    const requiredParams = [
-      PUT_PARAM_NAME
-    ];
-    errorMessages = checkMissingRequestInputs(params, requiredParams);
-    if (errorMessages) {
-      return errorResponse(400, errorMessages, logger);
+
+    const isTemplateIdValid = PUT_PARAM_NAME in params && typeof params[PUT_PARAM_NAME] === 'string' && params[PUT_PARAM_NAME].length > 0;
+    if (!isTemplateIdValid) {
+      return errorResponse(400, [errorMessage(ERR_RC_MISSING_REQUIRED_PARAMETER, `The "${PUT_PARAM_NAME}" parameter is not set.`)], logger);
     }
 
     // extract the user Bearer token from the Authorization header
@@ -159,7 +157,9 @@ async function main (params) {
 
     // an app builder template scenario
     const dbResponse = await updateTemplate(dbParams, templateId, body);
+    console.trace(`dbResponse: ${JSON.stringify(dbResponse)}`);
     if (dbResponse.matchedCount < 1) {
+      logger.info('"PUT templates" not executed successfully');
       return {
         statusCode: 404
       };

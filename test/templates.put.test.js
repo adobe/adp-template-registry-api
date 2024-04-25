@@ -137,7 +137,7 @@ describe('PUT templates', () => {
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
   });
 
-  test('Unsupported HTTP method, should return 400', async () => {
+  test('Unsupported HTTP method, should return 405', async () => {
     const response = await action.main({
       IMS_URL: process.env.IMS_URL,
       IMS_CLIENT_ID: process.env.IMS_URL,
@@ -186,7 +186,7 @@ describe('PUT templates', () => {
     expect(responseErrorMessage).not.toBeNull();
   });
 
-  test('Template does not exist, should return 404', async () => {
+  test('Template could not update, should return 404', async () => {
     findTemplateById.mockReturnValue({
       id: 'fake-templateId',
       name: 'fake-templateName',
@@ -197,6 +197,40 @@ describe('PUT templates', () => {
       updatedBy: 'fake-user',
       status: 'Approved'
     });
+    updateTemplate.mockReturnValue({ acknowledged: false, matchedCount: 0, modifiedCount: 0 });
+    const githubRepoLink = 'https://github.com/adobe/app-builder-template';
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
+      [PUT_PARAM_ID]: TEMPLATE_ID,
+      [PUT_PARAM_LINKS]: {
+        [PUT_PARAM_LINKS_GITHUB]: githubRepoLink
+      },
+      updatedBy: 'fake-user',
+      apis: [
+        {
+          code: 'fake-code',
+          credentialType: 'fake-credentialType',
+          flowType: 'fake-flowType'
+        }
+      ],
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      statusCode: 404
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
+    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
+    expect(findTemplateById).not.toHaveBeenCalledWith({}, TEMPLATE_ID);
+    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"PUT templates" executed successfully');
+  });
+
+  test('Template does not exist, should return 404', async () => {
+    findTemplateById.mockReturnValue(null);
     updateTemplate.mockReturnValue({ matchedCount: 0 });
     const githubRepoLink = 'https://github.com/adobe/app-builder-template';
     const response = await action.main({
@@ -398,5 +432,41 @@ describe('PUT templates', () => {
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" executed successfully');
+  });
+
+  test('Do not allow null templateId param', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      templateId: null,
+      name: 'fake-template-name',
+      links: {
+        github: TEMPLATE_GITHUB_REPO
+      },
+      updatedBy: 'fake-user',
+      apis: [
+        {
+          code: 'fake-code',
+          credentialType: 'fake-credentialType',
+          flowType: 'fake-flowType'
+        }
+      ],
+      status: 'Approved',
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+              message: 'The "templateId" parameter is not set.'
+            }
+          ]
+        }
+      }
+    });
   });
 });
