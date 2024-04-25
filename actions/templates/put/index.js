@@ -189,7 +189,6 @@ async function main (params) {
       body: res.body
     };
   } catch (error) {
-    console.trace('Error in main()', error);
     // log any server errors
     logger.error(error);
     // return with 500
