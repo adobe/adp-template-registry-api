@@ -22,6 +22,7 @@ let openReviewIssues = null;
 
 const { mongoConnection } = require('../db/mongo');
 const { convertMongoIdToString } = require('./utils');
+const { ObjectId } = require('mongodb');
 
 /**
  * Returns a template record from Template Registry by a template name.
@@ -34,6 +35,19 @@ async function findTemplateByName (dbParams, templateName) {
   const collection = await mongoConnection(dbParams, collectionName);
   const results = await collection.find({ name: templateName }).toArray();
   return results?.length ? convertMongoIdToString(results[0]) : null;
+}
+
+/**
+ * Returns a template record from Template Registry by a template id.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateId template id
+ * @returns {Promise<object|null>} an existing template record or null
+ */
+async function findTemplateById (dbParams, templateId) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const result = await collection.findOne({ _id: new ObjectId(templateId) });
+  return result ? convertMongoIdToString(result) : null;
 }
 
 /**
@@ -174,6 +188,7 @@ module.exports = {
   fetchUrl,
   getTemplates,
   findTemplateByName,
+  findTemplateById,
   addTemplate,
   removeTemplateByName,
   createReviewIssue,

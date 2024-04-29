@@ -17,6 +17,7 @@ const ERR_RC_MISSING_REQUIRED_PARAMETER = 'missing_required_parameter';
 const ERR_RC_INCORRECT_REQUEST = 'incorrect_request';
 const ERR_RC_INVALID_IMS_ACCESS_TOKEN = 'invalid_ims_access_token';
 const ERR_RC_PERMISSION_DENIED = 'permission_denied';
+const ERR_RC_INVALID_TEMPLATE_ID = 'invalid_template_id';
 
 /**
  *
@@ -200,5 +201,6 @@ module.exports = {
   ERR_RC_MISSING_REQUIRED_PARAMETER,
   ERR_RC_INCORRECT_REQUEST,
   ERR_RC_INVALID_IMS_ACCESS_TOKEN,
-  ERR_RC_PERMISSION_DENIED
+  ERR_RC_PERMISSION_DENIED,
+  ERR_RC_INVALID_TEMPLATE_ID
 };
