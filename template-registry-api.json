@@ -57,6 +57,13 @@
       "description": "The name of the template on npmjs.com",
       "type": "string"
     },
+    "TemplateId": {
+      "name": "templateId",
+      "in": "path",
+      "required": true,
+      "description": "The id of the template in the UUID format",
+      "type": "string"
+    },
     "OrgName": {
       "name": "orgName",
       "in": "path",
@@ -691,6 +698,73 @@
           "url": "not-used"
         }
       }
+    },
+    "/templates/{templateId}/install": {
+      "post": {
+        "summary": "Install a template",
+        "operationId": "template-registry-api/templates-install.http",
+        "tags": [
+          "templates"
+        ],
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/TemplateId"
+          },
+          {
+            "in": "body",
+            "name": "requestBody",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TemplateInstallationRequestBody"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "201": {
+            "description": "Template installed - Console Project created successfully.",
+            "schema": {
+              "$ref": "#/definitions/TemplateInstallationResponseBody"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/responses/NotFound"
+          },
+          "405": {
+            "$ref": "#/responses/HttpMethodNotAllowed"
+          },
+          "500": {
+            "$ref": "#/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/responses/GatewayTimeout"
+          }
+        },
+        "x-openwhisk": {
+          "action": "templates-install.http",
+          "package": "template-registry-api",
+          "url": "not-used"
+        }
+      }
     }
   },
   "definitions": {
@@ -990,6 +1064,366 @@
           "type": "string",
           "description": "A description of this error.",
           "example": "The \"XXX\" parameter is not set"
+        }
+      }
+    },
+    "TemplateInstallationRequestBody": {
+      "type": "object",
+      "required": [
+        "orgId",
+        "projectName",
+        "metadata"
+      ],
+      "properties": {
+        "orgId": {
+          "type": "string",
+          "description": "AMS org id"
+        },
+        "projectName": {
+          "type": "string",
+          "description": "Project name"
+        },
+        "description": {
+          "type": "string",
+          "description": "Project description"
+        },
+        "metadata": {
+          "type": "object",
+          "description": "Key value pairs of credential metadata like allowed domains, redirect uris etc",
+          "additionalProperties": {}
+        }
+      }
+    },
+    "TemplateInstallationResponseBody": {
+      "type": "object",
+      "properties": {
+        "project": {
+          "type": "object",
+          "required": ["id", "name", "org"],
+          "description": "Root element",
+          "properties": {
+            "id": {
+              "type": "string",
+              "description": "Project id"
+            },
+            "name": {
+              "type": "string",
+              "description": "Project name"
+            },
+            "title": {
+              "type": "string",
+              "description": "Project title"
+            },
+            "description": {
+              "type": "string",
+              "description": "Project description"
+            },
+            "org": {
+              "type": "object",
+              "description": "Organization info",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "description": "Organization id"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Organization name"
+                },
+                "ims_org_id": {
+                  "type": "string",
+                  "description": "Ims organization id"
+                },
+                "workspace": {
+                  "type": "object",
+                  "description": "Workspace info",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "description": "Workspace id"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Workspace name"
+                    },
+                    "title": {
+                      "type": "string",
+                      "description": "Workspace title"
+                    },
+                    "description": {
+                      "type": "string",
+                      "description": "Workspace description"
+                    },
+                    "details": {
+                      "type": "object",
+                      "description": "Workspace details",
+                      "properties": {
+                        "credentials": {
+                          "type": "array",
+                          "items": {
+                            "type": "object",
+                            "properties": {
+                              "id": {
+                                "type": "string",
+                                "description": "Credential id"
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "Credential name"
+                              },
+                              "apiKey": {
+                                "type": "string",
+                                "description": "Api key / client Id"
+                              },
+                              "integration_type": {
+                                "type": "string",
+                                "description": "Credential type, possible values (service, oauthweb, oauthandroid, oauthios)"
+                              },
+                              "jwt": {
+                                "type": "object",
+                                "description": "jwt credential details",
+                                "properties": {
+                                  "client_id": {
+                                    "type": "string",
+                                    "description": "Client id"
+                                  },
+                                  "client_secret": {
+                                    "type": "string",
+                                    "description": "Client secret"
+                                  },
+                                  "technical_account_email": {
+                                    "type": "string",
+                                    "description": "Technical account email"
+                                  },
+                                  "technical_account_id": {
+                                    "type": "string",
+                                    "description": "Technical account id"
+                                  },
+                                  "meta_scopes": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "Credential meta scope"
+                                    }
+                                  }
+                                }
+                              },
+                              "oauth_server_to_server": {
+                                "type": "object",
+                                "description": "OAuth server to server credential details",
+                                "properties": {
+                                  "client_id": {
+                                    "type": "string",
+                                    "description": "Client id"
+                                  },
+                                  "client_secrets": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "client secrets"
+                                    }
+                                  },
+                                  "technical_account_email": {
+                                    "type": "string",
+                                    "description": "Technical account email"
+                                  },
+                                  "technical_account_id": {
+                                    "type": "string",
+                                    "description": "Technical account id"
+                                  },
+                                  "scopes": {
+                                    "type": "array",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "Credential scopes"
+                                    }
+                                  }
+                                }
+                              },
+                              "oauth2": {
+                                "type": "object",
+                                "description": "oauth2 credential details",
+                                "properties": {
+                                  "client_id": {
+                                    "type": "string",
+                                    "description": "Client id"
+                                  },
+                                  "client_secret": {
+                                    "type": "string",
+                                    "description": "Client secret"
+                                  },
+                                  "redirect_uri": {
+                                    "type": "array",
+                                    "description": "Redirect urls list",
+                                    "items": {
+                                      "type": "string",
+                                      "description": "Redirect url"
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "services": {
+                          "type": "array",
+                          "description": "Workspace services",
+                          "items": {
+                            "type": "object",
+                            "description": "Service details",
+                            "properties": {
+                              "code": {
+                                "type": "string",
+                                "description": "Service code"
+                              },
+                              "name": {
+                                "type": "string",
+                                "description": "Service name"
+                              }
+                            }
+                          }
+                        },
+                        "runtime": {
+                          "type": "object",
+                          "description": "Workspace runtime",
+                          "properties": {
+                            "namespaces": {
+                              "type": "array",
+                              "description": "Runtime namespaces",
+                              "items": {
+                                "type": "object",
+                                "description": "Runtime details",
+                                "properties": {
+                                  "name": {
+                                    "type": "string",
+                                    "description": "Namespace name"
+                                  },
+                                  "auth": {
+                                    "type": "string",
+                                    "description": "Namespace auth token"
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        },
+                        "mesh": {
+                          "type": "object",
+                          "description": "Mesh configuration"
+                        },
+                        "events": {
+                          "type": "object",
+                          "description": "Events details",
+                          "properties": {
+                            "registrations": {
+                              "type": "array",
+                              "description": "Event registrations",
+                              "items": {
+                                "type": "object",
+                                "description": "Event registrations details",
+                                "properties": {
+                                  "id": {
+                                    "type": "string",
+                                    "description": "id"
+                                  },
+                                  "name": {
+                                    "type": "string",
+                                    "description": "name"
+                                  },
+                                  "description": {
+                                    "type": "string",
+                                    "description": "registration description"
+                                  },
+                                  "enabled": {
+                                    "type": "string",
+                                    "description": "enabled"
+                                  },
+                                  "client_id": {
+                                    "type": "string",
+                                    "description": "client id"
+                                  },
+                                  "registration_id": {
+                                    "type": "string",
+                                    "description": "registration id"
+                                  },
+                                  "webhook_status": {
+                                    "type": "string",
+                                    "description": "webhook status"
+                                  },
+                                  "created_date": {
+                                    "type": "string",
+                                    "description": "create date"
+                                  },
+                                  "updated_date": {
+                                    "type": "string",
+                                    "description": "update date"
+                                  },
+                                  "webhook_url": {
+                                    "type": "string",
+                                    "description": "webhook url"
+                                  },
+                                  "delivery_type": {
+                                    "type": "string",
+                                    "description": "delivery type"
+                                  },
+                                  "events_url": {
+                                    "type": "string",
+                                    "description": "events url"
+                                  },
+                                  "trace_url": {
+                                    "type": "string",
+                                    "description": "trace url"
+                                  },
+                                  "events_of_interest": {
+                                    "type": "array",
+                                    "description": "events of interested",
+                                    "items": {
+                                      "type": "object",
+                                      "description": "events of interested details",
+                                      "properties": {
+                                        "event_code": {
+                                          "type": "string",
+                                          "description": "event code"
+                                        },
+                                        "provider_id": {
+                                          "type": "string",
+                                          "description": "provider id"
+                                        },
+                                        "event_label": {
+                                          "type": "string",
+                                          "description": "event label"
+                                        },
+                                        "event_description": {
+                                          "type": "string",
+                                          "description": "event description"
+                                        },
+                                        "provider_label": {
+                                          "type": "string",
+                                          "description": "provider label"
+                                        },
+                                        "event_delivery_format": {
+                                          "type": "string",
+                                          "description": "event delivery format"
+                                        },
+                                        "provider_metadata": {
+                                          "type": "string",
+                                          "description": "provider metadata"
+                                        }
+                                      }
+                                    }
+                                  }
+                                }
+                              }
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     }

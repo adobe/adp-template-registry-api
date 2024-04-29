@@ -165,7 +165,7 @@ describe('POST Install template: Core business logic specific tests', () => {
           errors: [
             {
               code: utils.ERR_RC_INCORRECT_REQUEST,
-              message: 'Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: orgId => Expected a string. Received: undefined => at: projectName => Expected a string. Received: undefined'
+              message: 'Request has one or more errors => In body => Invalid value => at: orgId => Expected a string. Received: undefined => at: projectName => Expected a string. Received: undefined'
             }
           ]
         }
