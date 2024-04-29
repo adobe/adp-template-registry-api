@@ -135,9 +135,12 @@ async function main (params) {
       oauthsinglepageapp: 'SinglePageApp'
     };
 
-    // need to check how env should be set
-    const nodeEnv = process.env.NODE_ENV;
-    const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, nodeEnv);
+    // set env based on apiHost
+    const apiHost = process.env.__OW_API_HOST;
+    logger.debug('apiHost:', apiHost);
+    const env = apiHost.includes('prod') ? 'prod' : 'stage';
+    logger.debug('env: ', env);
+    const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, env);
 
     // Console APIs only support creating one type of credential at a time
     // Also, for current templates, we only support one credential type per template
@@ -206,6 +209,9 @@ async function main (params) {
       // create OAuth server to server integration
       createIntegrationResponse = await consoleClient.createOauthS2SCredentialIntegration(body.orgId, createOAuthS2SIntegrationReqBody);
       logger.debug(`OAuth S2S Integration created: ${JSON.stringify(createIntegrationResponse)}`);
+    } else {
+      logger.error(`Credential flow type "${credentialFlowType}" not supported for template install.`);
+      return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, `Credential flow type "${credentialFlowType}" not supported for template install`)], logger);
     }
     const { projectId, workspaceId } = createIntegrationResponse;
     logger.debug(`ProjectId: ${projectId}, WorkspaceId: ${workspaceId}`);

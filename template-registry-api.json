@@ -1174,6 +1174,7 @@
           "properties": {
             "project": {
               "type": "object",
+              "required": ["id", "name", "org"],
               "description": "Root element",
               "properties": {
                 "id": {
