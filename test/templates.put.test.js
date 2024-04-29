@@ -523,7 +523,7 @@ describe('PUT templates', () => {
     });
   });
 
-  test('Updating existing template, should make call to config endpoint and udpate the template', async () => {
+  test('Should Updating existing template, should make call to config endpoint and udpate the template', async () => {
     mockConsoleSDKInstance.getProjectInstallConfig.mockResolvedValue({
       body: {
         credentials: [
@@ -542,6 +542,85 @@ describe('PUT templates', () => {
                 ]
               }
             ]
+          }
+        ]
+      }
+    });
+    fetchUrl.mockReturnValue('');
+    const templateName = '@adobe/app-builder-template';
+    const templateId = 'fake-template-id';
+    const template = {
+      id: templateId,
+      name: templateName,
+      links: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
+      },
+      updatedBy: 'fake-user',
+      status: 'Approved',
+      credentials: [{
+        type: 'fake-type',
+        flowType: 'fake-flowType'
+      }],
+      apis: [{
+        credentialType: 'fake-type',
+        flowType: 'fake - flowType',
+        code: 'fake-code',
+        productProfiles: [
+          {
+            id: 'fake-id',
+            productId: 'fake-productId',
+            name: 'fake-name'
+          }
+        ]
+      }]
+    };
+    findTemplateById.mockReturnValue(template);
+    updateTemplate.mockReturnValue({ matchedCount: 1 });
+
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_SECRET,
+      IMS_AUTH_CODE,
+      IMS_SCOPES,
+      IMS_CLIENT_ID,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
+      [PUT_PARAM_ID]: TEMPLATE_ID,
+      [PUT_PARAM_LINKS]: {
+        consoleProject: DEVELOPER_CONSOLE_PROJECT
+      },
+      updatedBy: 'fake-user',
+      status: 'Approved',
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      statusCode: 200,
+      body: {
+        ...template,
+        _links: {
+          self: {
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+          }
+        }
+      }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
+    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
+    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
+    expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" executed successfully');
+  });
+
+  test('Should Updating existing template, but no apis present in the credential', async () => {
+    mockConsoleSDKInstance.getProjectInstallConfig.mockResolvedValue({
+      body: {
+        credentials: [
+          {
+            type: 'fake-type',
+            flowType: 'fake-flowType'
           }
         ]
       }

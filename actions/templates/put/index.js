@@ -133,7 +133,6 @@ async function main (params) {
       // compatibility with current template registry
       const credentials = [];
       const apis = [];
-
       for (const credential of installConfig.credentials) {
         credentials.push({
           type: credential.type,
