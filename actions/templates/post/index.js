@@ -99,8 +99,7 @@ async function main (params) {
 
     // WPAR002 - skip a warning about the "allowEmptyValue" property
     // see https://swagger.io/docs/specification/describing-parameters/ Empty-Valued and Nullable Parameters
-    // EDEV001 - skip a warning about the basepath property, needed by IO Runtime for deploying apis
-    const openapi = await Enforcer('./template-registry-api.json', { componentOptions: { exceptionSkipCodes: ['WPAR002', 'EDEV001'] } });
+    const openapi = await Enforcer('./template-registry-api.json', { componentOptions: { exceptionSkipCodes: ['WPAR002'] } });
 
     let body = serializeRequestBody(params);
 

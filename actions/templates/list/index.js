@@ -190,8 +190,7 @@ async function main (params) {
       componentOptions: {
         // WPAR002 - skip a warning about the "allowEmptyValue" property
         // see https://swagger.io/docs/specification/describing-parameters/ Empty-Valued and Nullable Parameters
-        // EDEV001 - skip a warning about the basepath property, needed by IO Runtime for deploying apis
-        exceptionSkipCodes: ['WPAR002', 'EDEV001']
+        exceptionSkipCodes: ['WPAR002']
       }
     };
     const openapi = await Enforcer('./template-registry-api.json', options);

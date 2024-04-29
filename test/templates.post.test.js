@@ -182,7 +182,7 @@ describe('POST templates', () => {
           errors: [
             {
               code: utils.ERR_RC_INCORRECT_REQUEST,
-              message: `Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links > github => String does not match required pattern /^https:\\/\\/github\\.com\\// with value: "${nonGithubRepoLink}"`
+              message: `Request has one or more errors => In body => Invalid value => at: links > github => String does not match required pattern /^https:\\/\\/github\\.com\\// with value: "${nonGithubRepoLink}"`
             }
           ]
         }
@@ -731,7 +731,7 @@ describe('POST templates', () => {
           errors: [
             {
               code: utils.ERR_RC_INCORRECT_REQUEST,
-              message: 'Request has one or more errors => In body => For Content-Type application/json => Unable to deserialize value => at: name => Expected a string. Received: null'
+              message: 'Request has one or more errors => In body => Unable to deserialize value => at: name => Expected a string. Received: null'
             }
           ]
         }
@@ -755,7 +755,7 @@ describe('POST templates', () => {
           errors: [
             {
               code: utils.ERR_RC_INCORRECT_REQUEST,
-              message: 'Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
+              message: 'Request has one or more errors => In body => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
             }
           ]
         }
@@ -781,7 +781,7 @@ describe('POST templates', () => {
           errors: [
             {
               code: utils.ERR_RC_INCORRECT_REQUEST,
-              message: 'Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
+              message: 'Request has one or more errors => In body => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
             }
           ]
         }
@@ -807,7 +807,7 @@ describe('POST templates', () => {
           errors: [
             {
               code: utils.ERR_RC_INCORRECT_REQUEST,
-              message: 'Request has one or more errors => In body => For Content-Type application/json => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
+              message: 'Request has one or more errors => In body => Invalid value => at: links => Expected object property count to be greater than or equal to undefined. Received: undefined'
             }
           ]
         }
@@ -831,7 +831,7 @@ describe('POST templates', () => {
           errors: [
             {
               code: utils.ERR_RC_INCORRECT_REQUEST,
-              message: 'Request has one or more errors => In body => For Content-Type application/json => Unable to deserialize value => at: name => Expected a string. Received: null'
+              message: 'Request has one or more errors => In body => Unable to deserialize value => at: name => Expected a string. Received: null'
             }
           ]
         }
