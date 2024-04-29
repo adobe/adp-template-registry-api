@@ -211,13 +211,6 @@ describe('PUT templates', () => {
         [PUT_PARAM_LINKS_GITHUB]: githubRepoLink
       },
       updatedBy: 'fake-user',
-      apis: [
-        {
-          code: 'fake-code',
-          credentialType: 'fake-credentialType',
-          flowType: 'fake-flowType'
-        }
-      ],
       ...fakeParams
     });
     expect(response).toEqual({
@@ -226,7 +219,7 @@ describe('PUT templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
     expect(findTemplateById).not.toHaveBeenCalledWith({}, TEMPLATE_ID);
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"PUT templates" executed successfully');
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" not executed successfully');
   });
 
   test('Template does not exist, should return 404', async () => {
@@ -307,7 +300,85 @@ describe('PUT templates', () => {
     findTemplateById.mockReset();
   });
 
-  test('Updating existing template, should replace the template', async () => {
+  test('Do not allow null templateId param', async () => {
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      templateId: null,
+      name: 'fake-template-name',
+      links: {
+        github: TEMPLATE_GITHUB_REPO
+      },
+      updatedBy: 'fake-user',
+      apis: [
+        {
+          code: 'fake-code',
+          credentialType: 'fake-credentialType',
+          flowType: 'fake-flowType'
+        }
+      ],
+      status: 'Approved',
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
+              message: 'The "templateId" parameter is not set.'
+            }
+          ]
+        }
+      }
+    });
+  });
+
+  test('Incorrect response, should throw error', async () => {
+    fetchUrl.mockReturnValue('');
+    findTemplateById.mockReturnValue(null);
+    updateTemplate.mockReturnValue({ matchedCount: 1 });
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
+      [PUT_PARAM_ID]: TEMPLATE_ID,
+      [PUT_PARAM_LINKS]: {
+        [PUT_PARAM_LINKS_GITHUB]: TEMPLATE_GITHUB_REPO
+      },
+      updatedBy: 'fake-user',
+      apis: [
+        {
+          code: 'fake-code',
+          credentialType: 'fake-credentialType',
+          flowType: 'fake-flowType'
+        }
+      ],
+      status: 'Approved',
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        body: {
+          errors: [
+            {
+              code: 'server_error',
+              message: 'An error occurred, please try again later.'
+            }
+          ]
+        },
+        statusCode: 500
+      }
+    });
+  });
+
+  test('Should overwrite existing template, Scenario 1 : when api present in the payload', async () => {
     fetchUrl.mockReturnValue('');
     const templateName = '@adobe/app-builder-template';
     const templateId = 'fake-template-id';
@@ -323,6 +394,12 @@ describe('PUT templates', () => {
           code: 'fake-code',
           credentialType: 'fake-credentialType',
           flowType: 'fake-flowType'
+        }
+      ],
+      codeSamples: [
+        {
+          language: 'fake-language', // programming language for the code sample
+          link: 'fake-link' // link to the zip file containing the code sample
         }
       ],
       status: 'Approved'
@@ -350,7 +427,87 @@ describe('PUT templates', () => {
           flowType: 'fake-flowType'
         }
       ],
+      codeSamples: [
+        {
+          language: 'fake-language', // programming language for the code sample
+          link: 'fake-link' // link to the zip file containing the code sample
+        }],
       status: 'Approved',
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      statusCode: 200,
+      body: {
+        ...template,
+        _links: {
+          self: {
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+          }
+        }
+      }
+    });
+  });
+
+  test('Should overwrite existing template, Scenario 2 : when credentials present in the payload', async () => {
+    fetchUrl.mockReturnValue('');
+    const templateName = '@adobe/app-builder-template';
+    const templateId = 'fake-template-id';
+    const template = {
+      id: templateId,
+      name: templateName,
+      links: {
+        github: TEMPLATE_GITHUB_REPO
+      },
+      updatedBy: 'fake-user',
+      credentials: [ // Only needed for Dev Console templates
+        {
+          type: 'apikey', // please see below for allowed values
+          flowType: 'adobeid' // please see below for allowed values
+        }
+      ],
+      status: 'Approved',
+      description: 'fake-describe',
+      latestVersion: 'fake-version',
+      adobeRecommended: true,
+      keywords: ['fake-keywords'],
+      categories: ['fake-categories'],
+      extensions: [{
+        extensionPointId: 'fake-extensionPointId'
+      }],
+      runtime: false
+    };
+    findTemplateById.mockReturnValue(template);
+    updateTemplate.mockReturnValue({ matchedCount: 1 });
+
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      TEMPLATE_REGISTRY_API_URL: process.env.TEMPLATE_REGISTRY_API_URL,
+      __ow_method: HTTP_METHOD,
+      [PUT_PARAM_ID]: TEMPLATE_ID,
+      [PUT_PARAM_LINKS]: {
+        [PUT_PARAM_LINKS_GITHUB]: TEMPLATE_GITHUB_REPO
+      },
+      updatedBy: 'fake-user',
+      credentials: [ // Only needed for Dev Console templates
+        {
+          type: 'apikey', // please see below for allowed values
+          flowType: 'adobeid' // please see below for allowed values
+        }
+      ],
+      status: 'Approved',
+      description: 'fake-describe',
+      latestVersion: 'fake-version',
+      adobeRecommended: true,
+      keywords: ['fake-keywords'],
+      categories: ['fake-categories'],
+      extensions: [{
+        extensionPointId: 'fake-extensionPointId'
+      }],
+      runtime: true,
       ...fakeParams
     });
     expect(response).toEqual({
@@ -371,11 +528,18 @@ describe('PUT templates', () => {
       body: {
         credentials: [
           {
-            type: 'serviceAccount',
-            flowType: 'oauth2',
+            type: 'fake-type',
+            flowType: 'fake-flowType',
             apis: [
               {
-                code: 'AdobeIO'
+                code: 'fake-code',
+                productProfiles: [
+                  {
+                    id: 'fake-id',
+                    productId: 'fake-productId',
+                    name: 'fake-name'
+                  }
+                ]
               }
             ]
           }
@@ -392,7 +556,23 @@ describe('PUT templates', () => {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
       updatedBy: 'fake-user',
-      status: 'Approved'
+      status: 'Approved',
+      credentials: [{
+        type: 'fake-type',
+        flowType: 'fake-flowType'
+      }],
+      apis: [{
+        credentialType: 'fake-type',
+        flowType: 'fake - flowType',
+        code: 'fake-code',
+        productProfiles: [
+          {
+            id: 'fake-id',
+            productId: 'fake-productId',
+            name: 'fake-name'
+          }
+        ]
+      }]
     };
     findTemplateById.mockReturnValue(template);
     updateTemplate.mockReturnValue({ matchedCount: 1 });
@@ -432,41 +612,5 @@ describe('PUT templates', () => {
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" executed successfully');
-  });
-
-  test('Do not allow null templateId param', async () => {
-    const response = await action.main({
-      IMS_URL: process.env.IMS_URL,
-      IMS_CLIENT_ID: process.env.IMS_URL,
-      __ow_method: HTTP_METHOD,
-      templateId: null,
-      name: 'fake-template-name',
-      links: {
-        github: TEMPLATE_GITHUB_REPO
-      },
-      updatedBy: 'fake-user',
-      apis: [
-        {
-          code: 'fake-code',
-          credentialType: 'fake-credentialType',
-          flowType: 'fake-flowType'
-        }
-      ],
-      status: 'Approved',
-      ...fakeParams
-    });
-    expect(response).toEqual({
-      error: {
-        statusCode: 400,
-        body: {
-          errors: [
-            {
-              code: utils.ERR_RC_MISSING_REQUIRED_PARAMETER,
-              message: 'The "templateId" parameter is not set.'
-            }
-          ]
-        }
-      }
-    });
   });
 });

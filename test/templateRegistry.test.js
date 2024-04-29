@@ -248,7 +248,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   });
 
   test('should get templates by id from the collection', async () => {
-    const templateId = '6618567c770086a68ee56fca';
+    const templateId = '662f8c822fb28925eb4d7f3a';
     const templatesResult = await findTemplateById(dbParams, templateId);
     expect(collectionMock.find).toHaveBeenCalledWith({
       _id: new ObjectId(templateId)
@@ -367,5 +367,16 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       }
     });
     expect(templateResponse).toEqual({ acknowledged: true, matchedCount: 1, modifiedCount: 1 });
+  });
+
+  test('should get null when calling templates by id', async () => {
+    collectionMock.toArray.mockResolvedValue([]);
+    const templateId = '662f8c822fb28925eb4d7f3a';
+    const templatesResult = await findTemplateById(dbParams, templateId);
+    expect(collectionMock.find).toHaveBeenCalledWith({
+      _id: new ObjectId(templateId)
+    });
+    expect(collectionMock.find().toArray).toHaveBeenCalled();
+    expect(templatesResult).toEqual(null);
   });
 });

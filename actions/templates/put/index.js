@@ -157,7 +157,6 @@ async function main (params) {
 
     // an app builder template scenario
     const dbResponse = await updateTemplate(dbParams, templateId, body);
-    console.trace(`dbResponse: ${JSON.stringify(dbResponse)}`);
     if (dbResponse.matchedCount < 1) {
       logger.info('"PUT templates" not executed successfully');
       return {
