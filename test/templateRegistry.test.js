@@ -9,13 +9,14 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { MongoClient } = require('mongodb');
+const { MongoClient, ObjectId } = require('mongodb');
 const nock = require('nock');
 const {
   fetchUrl,
   createReviewIssue,
   getReviewIssueByTemplateName,
   findTemplateByName,
+  findTemplateById,
   getTemplates,
   addTemplate,
   removeTemplateByName
@@ -79,6 +80,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   const githubRepoUrl = 'https://github.com/my-org/my-template';
   const templates = [{
     id: 'mongodb-template-id',
+    // _id: new ObjectId('6618567c770086a68ee56fca'),
     name: templateName,
     status: 'InVerification',
     links: {
@@ -96,6 +98,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       }),
       deleteOne: jest.fn().mockResolvedValue(),
       find: jest.fn().mockReturnThis(),
+      findOne: jest.fn().mockReturnValue(templates[0]),
       toArray: jest.fn().mockResolvedValue(templates)
     };
     clientDbMock = jest.spyOn(MongoClient.prototype, 'db').mockReturnValue({
@@ -271,6 +274,22 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     const templatesResult = await findTemplateByName(dbParams, templateName);
     expect(collectionMock.find).toHaveBeenCalledWith({ name: templateName });
     expect(collectionMock.find().toArray).toHaveBeenCalled();
+    expect(templatesResult).toEqual(null);
+  });
+
+  test('should get template by Id from the collection', async () => {
+    const templateId = '6618567c770086a68ee56fca';
+    const templatesResult = await findTemplateById(dbParams, templateId);
+    expect(collectionMock.findOne).toHaveBeenCalled();
+    expect(collectionMock.findOne).toHaveBeenCalledWith({ _id: new ObjectId(templateId) });
+    expect(templatesResult).toEqual(templates[0]);
+  });
+
+  test('should get template by Id from the collection, not found', async () => {
+    collectionMock.findOne.mockResolvedValueOnce(null);
+    const templateId = '6618567c770086a68ee56fca';
+    const templatesResult = await findTemplateById(dbParams, templateId);
+    expect(collectionMock.findOne).toHaveBeenCalledWith({ _id: new ObjectId(templateId) });
     expect(templatesResult).toEqual(null);
   });
 
