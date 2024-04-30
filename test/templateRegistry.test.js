@@ -81,6 +81,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   const githubRepoUrl = 'https://github.com/my-org/my-template';
   const templates = [{
     id: 'mongodb-template-id',
+    // _id: new ObjectId('6618567c770086a68ee56fca'),
     name: templateName,
     status: 'InVerification',
     links: {
@@ -101,6 +102,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       }),
       deleteOne: jest.fn().mockResolvedValue(),
       find: jest.fn().mockReturnThis(),
+      findOne: jest.fn().mockReturnValue(templates[0]),
       toArray: jest.fn().mockResolvedValue(templates)
     };
     clientDbMock = jest.spyOn(MongoClient.prototype, 'db').mockReturnValue({
@@ -250,11 +252,11 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   test('should get templates by id from the collection', async () => {
     const templateId = '662f8c822fb28925eb4d7f3a';
     const templatesResult = await findTemplateById(dbParams, templateId);
-    expect(collectionMock.find).toHaveBeenCalledWith({
+    expect(collectionMock.findOne).toHaveBeenCalledWith({
       _id: new ObjectId(templateId)
     });
-    expect(collectionMock.find().toArray).toHaveBeenCalled();
-    expect(templatesResult).toEqual(templates);
+    // expect(collectionMock.findOne().toArray).toHaveBeenCalled();
+    expect(templatesResult).toEqual(templates[0]);
   });
 
   test('should get all templates from the collection', async () => {
@@ -286,6 +288,14 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     const templatesResult = await findTemplateByName(dbParams, templateName);
     expect(collectionMock.find).toHaveBeenCalledWith({ name: templateName });
     expect(collectionMock.find().toArray).toHaveBeenCalled();
+    expect(templatesResult).toEqual(null);
+  });
+
+  test('should get template by Id from the collection, not found', async () => {
+    collectionMock.findOne.mockResolvedValueOnce(null);
+    const templateId = '6618567c770086a68ee56fca';
+    const templatesResult = await findTemplateById(dbParams, templateId);
+    expect(collectionMock.findOne).toHaveBeenCalledWith({ _id: new ObjectId(templateId) });
     expect(templatesResult).toEqual(null);
   });
 
@@ -370,13 +380,13 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   });
 
   test('should get null when calling templates by id', async () => {
-    collectionMock.toArray.mockResolvedValue([]);
+    collectionMock.findOne.mockResolvedValue(null);
     const templateId = '662f8c822fb28925eb4d7f3a';
     const templatesResult = await findTemplateById(dbParams, templateId);
-    expect(collectionMock.find).toHaveBeenCalledWith({
+    expect(collectionMock.findOne).toHaveBeenCalledWith({
       _id: new ObjectId(templateId)
     });
-    expect(collectionMock.find().toArray).toHaveBeenCalled();
     expect(templatesResult).toEqual(null);
+    collectionMock.findOne.mockReset();
   });
 });

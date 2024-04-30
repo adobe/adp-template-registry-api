@@ -97,3 +97,20 @@ application:
             annotations:
               require-adobe-auth: false
               final: true
+          templates-install:
+            function: actions/templates/install/index.js
+            web: "yes"
+            runtime: "nodejs:18"
+            include:
+              - ["template-registry-api.json"]
+            inputs:
+              LOG_LEVEL: debug
+              IMS_URL: $IMS_URL
+              IMS_CLIENT_ID: $IMS_CLIENT_ID
+              ACCESS_TOKEN_GITHUB: $ACCESS_TOKEN_GITHUB
+              TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
+              TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
+              TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+            annotations:
+              require-adobe-auth: false
+              final: true
