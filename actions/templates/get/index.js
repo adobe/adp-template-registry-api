@@ -14,6 +14,7 @@ const { errorResponse, errorMessage, stringParameters, ERR_RC_SERVER_ERROR, ERR_
 const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED } =
   require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
+const { evaluateEntitlements } = require('../../templateEntitlement');
 
 // GET operation is available to everyone, no IMS access token is required
 
@@ -62,12 +63,18 @@ async function main (params) {
       };
     }
     const fullTemplateName = (orgName !== undefined) ? orgName + '/' + templateName : templateName;
-    const template = await findTemplateByName(dbParams, fullTemplateName);
+    let template = await findTemplateByName(dbParams, fullTemplateName);
     if (template === null) {
       return {
         statusCode: 404
       };
     }
+
+    const evaluatedTemplates = await evaluateEntitlements([template], params, logger);
+    if (evaluatedTemplates?.length > 0) {
+      template = evaluatedTemplates[0];
+    }
+
     const response = {
       ...template,
       _links: {

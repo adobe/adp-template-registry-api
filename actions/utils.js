@@ -126,6 +126,33 @@ function getBearerToken (params) {
 }
 
 /**
+ * Get header value from the given request parameters.
+ * @param {object} params action input parameters.
+ * @param {string} key the header key to get the value from.
+ * @returns {string|undefined} the token string or undefined if not set in request headers.
+ */
+function getHeaderValue (params, key) {
+  if (params.__ow_headers && params.__ow_headers[key]) {
+    return params.__ow_headers[key];
+  }
+  return undefined;
+}
+
+/**
+ * Returns the environment based on the apiHost.
+ * @param {object} logger the logger instance.
+ * @returns {string} the environment.
+ */
+function getConsoleEnv (logger) {
+  // set env based on apiHost
+  const apiHost = process.env.__OW_API_HOST;
+  logger.debug('apiHost:', apiHost);
+  const env = apiHost?.includes('prod') ? 'prod' : 'stage';
+  logger.debug('env: ', env);
+  return env;
+}
+
+/**
  *
  * Returns an error response object and attempts to log.info the status code and error message(s).
  *
@@ -202,5 +229,7 @@ module.exports = {
   ERR_RC_INCORRECT_REQUEST,
   ERR_RC_INVALID_IMS_ACCESS_TOKEN,
   ERR_RC_PERMISSION_DENIED,
-  ERR_RC_INVALID_TEMPLATE_ID
+  ERR_RC_INVALID_TEMPLATE_ID,
+  getHeaderValue,
+  getConsoleEnv
 };

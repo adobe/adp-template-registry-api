@@ -13,7 +13,12 @@ const { Core } = require('@adobe/aio-sdk');
 const action = require('../actions/templates/get/index');
 const utils = require('../actions/utils');
 const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION } = require('../actions/templateRegistry');
-
+const { evaluateEntitlements } = require('../actions/templateEntitlement');
+jest.mock('../actions/templateEntitlement', () => ({
+  evaluateEntitlements: jest.fn().mockImplementation((templates, params, logger) => {
+    return templates;
+  })
+}));
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
 Core.Logger.mockReturnValue(mockLoggerInstance);
 jest.mock('@adobe/aio-sdk', () => ({
@@ -123,6 +128,7 @@ describe('GET templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
+    expect(evaluateEntitlements).toHaveBeenCalledWith([template], expect.any(Object), mockLoggerInstance);
   });
 
   test('Successful request for "InVerification" template, should return 200, and a link to the Review github issue', async () => {
@@ -166,6 +172,7 @@ describe('GET templates', () => {
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(getReviewIssueByTemplateName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
+    expect(evaluateEntitlements).toHaveBeenCalledWith([template], expect.any(Object), mockLoggerInstance);
   });
 
   test('Successful request for "InVerification" template, should return 200, but no link to github Review issue', async () => {
@@ -204,6 +211,7 @@ describe('GET templates', () => {
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(getReviewIssueByTemplateName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
+    expect(evaluateEntitlements).toHaveBeenCalledWith([template], expect.any(Object), mockLoggerInstance);
   });
 
   test('Template does not exist, should return 404', async () => {
@@ -224,6 +232,7 @@ describe('GET templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
+    expect(evaluateEntitlements).not.toHaveBeenCalled();
   });
 
   test('Org name and template name ommitted, should return 404', async () => {
@@ -237,6 +246,7 @@ describe('GET templates', () => {
       statusCode: 404
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
+    expect(evaluateEntitlements).not.toHaveBeenCalled();
   });
 
   test('Unsupported HTTP method, should return 405', async () => {
@@ -265,6 +275,7 @@ describe('GET templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).not.toHaveBeenCalledWith();
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
+    expect(evaluateEntitlements).not.toHaveBeenCalled();
   });
 
   test('Incorrect response, should return 500', async () => {
@@ -305,5 +316,6 @@ describe('GET templates', () => {
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
     expect(mockLoggerInstance.error).toHaveBeenCalledWith(new Error('Response invalid\n  at: body\n    One or more required properties missing: status'));
+    expect(evaluateEntitlements).toHaveBeenCalledWith([template], expect.any(Object), mockLoggerInstance);
   });
 });
