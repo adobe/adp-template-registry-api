@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { validateAccessToken, generateAccessToken } = require('../actions/ims');
+const { generateAccessToken } = require('../actions/ims');
 const utils = require('../actions/utils');
 const { fetchUrl, updateTemplate, findTemplateById } = require('../actions/templateRegistry');
 const action = require('../actions/templates/put/index');
@@ -40,7 +40,6 @@ process.env = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  validateAccessToken.mockReset();
 });
 
 const HTTP_METHOD = 'put';
@@ -86,7 +85,6 @@ describe('PUT templates', () => {
         }
       }
     });
-    expect(validateAccessToken).not.toHaveBeenCalled();
   });
 
   test('Missing PUT payload, should return 400', async () => {
@@ -109,32 +107,6 @@ describe('PUT templates', () => {
         }
       }
     });
-    expect(validateAccessToken).not.toHaveBeenCalled();
-  });
-
-  test('Invalid token, should return 401', async () => {
-    const err = 'Provided IMS access token is invalid. Reason: bad_signature';
-    validateAccessToken.mockImplementation(() => {
-      throw new Error(err);
-    });
-
-    const response = await action.main({
-      IMS_URL: process.env.IMS_URL,
-      IMS_CLIENT_ID: process.env.IMS_URL,
-      __ow_method: HTTP_METHOD,
-      [PUT_PARAM_ID]: TEMPLATE_NAME,
-      [PUT_PARAM_LINKS]: {
-        [PUT_PARAM_LINKS_GITHUB]: TEMPLATE_GITHUB_REPO
-      },
-      ...fakeParams
-    });
-    expect(response).toEqual({
-      error: {
-        statusCode: 401,
-        body: { errors: [utils.errorMessage(utils.ERR_RC_INVALID_IMS_ACCESS_TOKEN, err)] }
-      }
-    });
-    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
   });
 
   test('Unsupported HTTP method, should return 405', async () => {
@@ -217,7 +189,6 @@ describe('PUT templates', () => {
       statusCode: 404
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
-    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
     expect(findTemplateById).not.toHaveBeenCalledWith({}, TEMPLATE_ID);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" not executed successfully');
   });
@@ -251,7 +222,6 @@ describe('PUT templates', () => {
       statusCode: 404
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
-    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
     expect(findTemplateById).not.toHaveBeenCalledWith({}, TEMPLATE_ID);
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"PUT templates" executed successfully');
   });
@@ -608,7 +578,6 @@ describe('PUT templates', () => {
       }
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
-    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" executed successfully');
@@ -687,7 +656,6 @@ describe('PUT templates', () => {
       }
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
-    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" executed successfully');

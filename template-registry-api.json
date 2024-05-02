@@ -553,7 +553,7 @@
           }
         },
         "x-openwhisk": {
-          "action": "templates-post.http",
+          "action": "templates-post.put",
           "package": "template-registry-api",
           "url": "not-used"
         }

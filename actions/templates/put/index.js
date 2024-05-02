@@ -10,9 +10,9 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST, ERR_RC_MISSING_REQUIRED_PARAMETER } =
+const { errorResponse, errorMessage, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INCORRECT_REQUEST, ERR_RC_MISSING_REQUIRED_PARAMETER } =
   require('../../utils');
-const { validateAccessToken, generateAccessToken } = require('../../ims');
+const { generateAccessToken } = require('../../ims');
 const { findTemplateById, updateTemplate } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const consoleLib = require('@adobe/aio-lib-console');
@@ -47,9 +47,6 @@ async function main (params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
 
-  const imsUrl = params.IMS_URL;
-  const imsClientId = params.IMS_CLIENT_ID;
-
   const dbParams = {
     MONGODB_URI: params.MONGODB_URI,
     MONGODB_NAME: params.MONGODB_NAME
@@ -76,16 +73,6 @@ async function main (params) {
     const isTemplateIdValid = PUT_PARAM_NAME in params && typeof params[PUT_PARAM_NAME] === 'string' && params[PUT_PARAM_NAME].length > 0;
     if (!isTemplateIdValid) {
       return errorResponse(400, [errorMessage(ERR_RC_MISSING_REQUIRED_PARAMETER, `The "${PUT_PARAM_NAME}" parameter is not set.`)], logger);
-    }
-
-    // extract the user Bearer token from the Authorization header
-    const accessToken = getBearerToken(params);
-
-    try {
-      // validate the token, an exception will be thrown for a non-valid token
-      await validateAccessToken(accessToken, imsUrl, imsClientId);
-    } catch (error) {
-      return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
     }
 
     Enforcer.v3_0.Schema.defineDataTypeFormat('string', 'uuid', null);
