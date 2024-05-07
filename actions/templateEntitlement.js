@@ -23,12 +23,12 @@ async function evaluateEntitlements (templates, params, logger) {
   const orgId = getHeaderValue(params, 'x-org-id');
   const userToken = getBearerToken(params);
 
-  if (!orgId) {
-    logger.debug('No org id specified. Skipping entitlement check.');
+  if (!orgId || !templates || templates.length === 0) {
+    logger.debug('No org id or templates specified. Skipping entitlement check.');
     return templates;
   }
 
-  if (!userToken || !templates || templates.length === 0) {
+  if (!userToken) {
     throw new Error('Invalid user token or templates');
   }
 

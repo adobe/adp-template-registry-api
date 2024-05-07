@@ -108,7 +108,23 @@ describe('evaluateEntitlements', () => {
     expect(result).toEqual(templates);
     expect(mockConsoleSDK.init).not.toHaveBeenCalled();
     expect(mockConsoleClient.getServicesForOrgV2).not.toHaveBeenCalled();
-    expect(logger.debug).toHaveBeenCalledWith('No org id specified. Skipping entitlement check.');
+    expect(logger.debug).toHaveBeenCalledWith('No org id or templates specified. Skipping entitlement check.');
+  });
+
+  test('should return input if templates are null', async () => {
+    const result = await evaluateEntitlements(null, params, logger);
+    expect(result).toBeNull();
+    expect(mockConsoleSDK.init).not.toHaveBeenCalled();
+    expect(mockConsoleClient.getServicesForOrgV2).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith('No org id or templates specified. Skipping entitlement check.');
+  });
+
+  test('should return input if templates array is empty', async () => {
+    const result = await evaluateEntitlements([], params, logger);
+    expect(result).toEqual([]);
+    expect(mockConsoleSDK.init).not.toHaveBeenCalled();
+    expect(mockConsoleClient.getServicesForOrgV2).not.toHaveBeenCalled();
+    expect(logger.debug).toHaveBeenCalledWith('No org id or templates specified. Skipping entitlement check.');
   });
 
   test('should throw an error if user token is missing', async () => {
@@ -120,20 +136,6 @@ describe('evaluateEntitlements', () => {
     };
 
     await expect(evaluateEntitlements(templates, invalidParams, logger)).rejects.toThrow('Invalid user token or templates');
-    expect(mockConsoleSDK.init).not.toHaveBeenCalled();
-    expect(mockConsoleClient.getServicesForOrgV2).not.toHaveBeenCalled();
-    expect(logger.debug).not.toHaveBeenCalled();
-  });
-
-  test('should throw an error if templates are missing', async () => {
-    await expect(evaluateEntitlements(null, params, logger)).rejects.toThrow('Invalid user token or templates');
-    expect(mockConsoleSDK.init).not.toHaveBeenCalled();
-    expect(mockConsoleClient.getServicesForOrgV2).not.toHaveBeenCalled();
-    expect(logger.debug).not.toHaveBeenCalled();
-  });
-
-  test('should throw an error if templates array is empty', async () => {
-    await expect(evaluateEntitlements([], params, logger)).rejects.toThrow('Invalid user token or templates');
     expect(mockConsoleSDK.init).not.toHaveBeenCalled();
     expect(mockConsoleClient.getServicesForOrgV2).not.toHaveBeenCalled();
     expect(logger.debug).not.toHaveBeenCalled();
