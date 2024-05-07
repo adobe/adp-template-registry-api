@@ -8,7 +8,15 @@ describe('evaluateEntitlements', () => {
     getServicesForOrgV2: jest.fn().mockResolvedValue({
       body: {
         services: [
-          { code: 'sdkCode1', enabled: true, entitledForOrg: true, canRequestAccess: false },
+          {
+            code: 'sdkCode1',
+            enabled: true,
+            entitledForOrg: true,
+            canRequestAccess: false,
+            properties: {
+              licenseConfigs: [{ id: '1', name: 'licConName', productId: 'licConProd' }]
+            }
+          },
           { code: 'sdkCode2', enabled: true, entitledForOrg: true, canRequestAccess: false },
           { code: 'sdkCode3', enabled: false, entitledForOrg: false, canRequestAccess: true, disabledReasons: ['USER_MISSING_PRODUCT_PROFILES'] },
           { code: 'sdkCode4', enabled: false, entitledForOrg: false, canRequestAccess: false, disabledReasons: ['ORG_MISSING_FIS'] }
@@ -57,7 +65,7 @@ describe('evaluateEntitlements', () => {
       {
         name: 'template1',
         apis: [
-          { code: 'sdkCode1' },
+          { code: 'sdkCode1', licenseConfigs: [{ id: '1', name: 'licConName', productId: 'licConProd' }] },
           { code: 'sdkCode2' }
         ],
         userEntitled: true,

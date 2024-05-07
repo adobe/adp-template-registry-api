@@ -73,16 +73,17 @@ async function evaluateEntitlements (templates, params, logger) {
 
     template.apis.forEach((api) => {
       const orgService = orgServicesBySdkCode[api.code];
-      if (orgService) {
-        userEntitled = userEntitled && orgService.enabled;
-        orgEntitled = orgEntitled && orgService.entitledForOrg;
-        canRequestAccess = canRequestAccess && orgService.canRequestAccess;
+      userEntitled = userEntitled && orgService.enabled;
+      orgEntitled = orgEntitled && orgService.entitledForOrg;
+      canRequestAccess = canRequestAccess && orgService.canRequestAccess;
 
-        if (orgService.disabledReasons?.length > 0) {
-          orgService.disabledReasons.forEach((reason) => {
-            disEntitledReasons.add(reason);
-          });
-        }
+      if (orgService.disabledReasons?.length > 0) {
+        orgService.disabledReasons.forEach((reason) => {
+          disEntitledReasons.add(reason);
+        });
+      }
+      if (Array.isArray(orgService.properties?.licenseConfigs)) {
+        api.licenseConfigs = orgService.properties.licenseConfigs;
       }
     });
 

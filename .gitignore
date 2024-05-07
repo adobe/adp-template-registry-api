@@ -41,3 +41,7 @@ coverage
 
 # logs folder for aio-run-detached
 logs
+
+# yalc
+.yalc
+yalc.lock

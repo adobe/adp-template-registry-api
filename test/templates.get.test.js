@@ -14,11 +14,7 @@ const action = require('../actions/templates/get/index');
 const utils = require('../actions/utils');
 const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION } = require('../actions/templateRegistry');
 const { evaluateEntitlements } = require('../actions/templateEntitlement');
-jest.mock('../actions/templateEntitlement', () => ({
-  evaluateEntitlements: jest.fn().mockImplementation((templates, params, logger) => {
-    return templates;
-  })
-}));
+jest.mock('../actions/templateEntitlement');
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
 Core.Logger.mockReturnValue(mockLoggerInstance);
 jest.mock('@adobe/aio-sdk', () => ({
@@ -30,6 +26,9 @@ jest.mock('../actions/templateRegistry');
 
 beforeEach(() => {
   jest.clearAllMocks();
+  evaluateEntitlements.mockImplementation(jest.fn().mockImplementation((templates, params, logger) => {
+    return templates;
+  }));
 });
 
 process.env = {
@@ -43,7 +42,11 @@ describe('GET templates', () => {
     expect(action.main).toBeInstanceOf(Function);
   });
 
-  test('Successful request, should return 200', async () => {
+  /**
+   * Helper function for testing the success cases.
+   * @param {Function} evaluateEntitlementsMockImplementation the mock implementation to be used for {@link evaluateEntitlements}
+   */
+  async function successTest (evaluateEntitlementsMockImplementation) {
     const orgName = '@adobe';
     const templateName = 'app-builder-template';
     const fullTemplateName = `${orgName}/${templateName}`;
@@ -106,6 +109,7 @@ describe('GET templates', () => {
       ]
     };
     findTemplateByName.mockReturnValue(template);
+    evaluateEntitlements.mockImplementation(evaluateEntitlementsMockImplementation);
     const response = await action.main({
       TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
       TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
@@ -129,6 +133,13 @@ describe('GET templates', () => {
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
     expect(evaluateEntitlements).toHaveBeenCalledWith([template], expect.any(Object), mockLoggerInstance);
+  }
+
+  // eslint-disable-next-line jest/expect-expect
+  test('Successful request, should return 200', async () => {
+    await successTest(templates => templates);
+    await successTest(() => undefined);
+    await successTest(() => []);
   });
 
   test('Successful request for "InVerification" template, should return 200, and a link to the Review github issue', async () => {
