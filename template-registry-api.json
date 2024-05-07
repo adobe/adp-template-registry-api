@@ -181,6 +181,7 @@
         "adp-template-registry-service",
         "adp-template-registry-service-stage",
         "UDPWeb1",
+        "UDPService1",
         "stage_adobe_io",
         "aio-cli-console-auth",
         "aio-cli-console-auth-stage"
@@ -194,7 +195,8 @@
         "template_registry.write": "Access to modify the template registry"
       },
       "x-client-ids": [
-        "adp-template-registry-service"
+        "adp-template-registry-service",
+        "UDPService1"
       ]
     }
   },
