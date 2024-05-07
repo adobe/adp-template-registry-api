@@ -101,11 +101,25 @@ async function addTemplate (dbParams, body) {
  *
  * @param {object} dbParams database connection parameters
  * @param {string} templateName template name
- * @returns {void}
+ * @returns {object} response
  */
 async function removeTemplateByName (dbParams, templateName) {
   const collection = await mongoConnection(dbParams, collectionName);
-  await collection.deleteOne({ name: templateName });
+  const response = await collection.deleteOne({ name: templateName });
+  return response;
+}
+
+/**
+ * Removes a template from Template Registry.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateId template id
+ * @returns {object} response
+ */
+async function removeTemplateById (dbParams, templateId) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const response = await collection.deleteOne({ _id: templateId });
+  return response;
 }
 
 /**
@@ -217,5 +231,6 @@ module.exports = {
   getReviewIssueByTemplateName,
   TEMPLATE_STATUS_IN_VERIFICATION,
   TEMPLATE_STATUS_APPROVED,
-  TEMPLATE_STATUS_REJECTED
+  TEMPLATE_STATUS_REJECTED,
+  removeTemplateById
 };

@@ -20,7 +20,8 @@ const {
   addTemplate,
   removeTemplateByName,
   updateTemplate,
-  findTemplateById
+  findTemplateById,
+  removeTemplateById
 } = require('../actions/templateRegistry');
 
 const dbParams = {
@@ -246,6 +247,17 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     expect(clientConnectSpy).toHaveBeenCalled();
     expect(collectionMock.deleteOne).toHaveBeenCalledWith({
       name: templateName
+    });
+  });
+
+  test('should remove template from the collection by id', async () => {
+    const templateId = 'my-template';
+
+    await removeTemplateById(dbParams, templateId);
+
+    expect(clientConnectSpy).toHaveBeenCalled();
+    expect(collectionMock.deleteOne).toHaveBeenCalledWith({
+      _id: templateId
     });
   });
 

@@ -557,9 +557,7 @@
           "package": "template-registry-api",
           "url": "not-used"
         }
-      }
-    },
-    "/templates/{templateName}": {
+      },
       "get": {
         "summary": "Get information about a template.",
         "operationId": "template-registry-api/templates-get.http",
@@ -569,7 +567,7 @@
         "security": [],
         "parameters": [
           {
-            "$ref": "#/parameters/TemplateName"
+            "$ref": "#/parameters/TemplateId"
           }
         ],
         "produces": [
@@ -622,7 +620,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/parameters/TemplateName"
+            "$ref": "#/parameters/TemplateId"
           }
         ],
         "responses": {
