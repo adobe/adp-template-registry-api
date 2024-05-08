@@ -16,10 +16,12 @@ const {
   createReviewIssue,
   getReviewIssueByTemplateName,
   findTemplateByName,
-  findTemplateById,
   getTemplates,
   addTemplate,
-  removeTemplateByName
+  removeTemplateByName,
+  updateTemplate,
+  findTemplateById,
+  removeTemplateById
 } = require('../actions/templateRegistry');
 
 const dbParams = {
@@ -95,6 +97,9 @@ describe('Template Registry Mongodb CRUD Actions', () => {
       insertOne: jest.fn().mockResolvedValue({
         acknowledged: true,
         insertedId: 'mongodb-template-id'
+      }),
+      updateOne: jest.fn().mockResolvedValue({
+        acknowledged: true, matchedCount: 1, modifiedCount: 1
       }),
       deleteOne: jest.fn().mockResolvedValue(),
       find: jest.fn().mockReturnThis(),
@@ -245,6 +250,27 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     });
   });
 
+  test('should remove template from the collection by id', async () => {
+    const templateId = 'my-template';
+
+    await removeTemplateById(dbParams, templateId);
+
+    expect(clientConnectSpy).toHaveBeenCalled();
+    expect(collectionMock.deleteOne).toHaveBeenCalledWith({
+      _id: templateId
+    });
+  });
+
+  test('should get templates by id from the collection', async () => {
+    const templateId = '662f8c822fb28925eb4d7f3a';
+    const templatesResult = await findTemplateById(dbParams, templateId);
+    expect(collectionMock.findOne).toHaveBeenCalledWith({
+      _id: new ObjectId(templateId)
+    });
+    // expect(collectionMock.findOne().toArray).toHaveBeenCalled();
+    expect(templatesResult).toEqual(templates[0]);
+  });
+
   test('should get all templates from the collection', async () => {
     const templatesResult = await getTemplates(dbParams);
     expect(collectionMock.find).toHaveBeenCalledWith({});
@@ -275,14 +301,6 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     expect(collectionMock.find).toHaveBeenCalledWith({ name: templateName });
     expect(collectionMock.find().toArray).toHaveBeenCalled();
     expect(templatesResult).toEqual(null);
-  });
-
-  test('should get template by Id from the collection', async () => {
-    const templateId = '6618567c770086a68ee56fca';
-    const templatesResult = await findTemplateById(dbParams, templateId);
-    expect(collectionMock.findOne).toHaveBeenCalled();
-    expect(collectionMock.findOne).toHaveBeenCalledWith({ _id: new ObjectId(templateId) });
-    expect(templatesResult).toEqual(templates[0]);
   });
 
   test('should get template by Id from the collection, not found', async () => {
@@ -346,5 +364,41 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     const githubRepoUrl = 'https://github.com/my-org/my-template';
     const issueNumber = await createReviewIssue(templateName, githubRepoUrl, process.env.GITHUB_ACCESS_TOKEN, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(issueNumber).toBe(1);
+  });
+
+  test('should update an app builder template to the collection', async () => {
+    const templateResponse = await updateTemplate(dbParams, '6618567c770086a68ee56fca', {
+      status: 'InVerification',
+      links: {
+        npm: `https://www.npmjs.com/package/${templateName}`,
+        github: githubRepoUrl
+      }
+    });
+
+    expect(clientConnectSpy).toHaveBeenCalled();
+    expect(collectionMock.updateOne).toHaveBeenCalled();
+    expect(collectionMock.updateOne).toHaveBeenCalledWith({
+      _id: new ObjectId('6618567c770086a68ee56fca')
+    }, {
+      $set: {
+        status: 'InVerification',
+        links: {
+          npm: `https://www.npmjs.com/package/${templateName}`,
+          github: githubRepoUrl
+        }
+      }
+    });
+    expect(templateResponse).toEqual({ acknowledged: true, matchedCount: 1, modifiedCount: 1 });
+  });
+
+  test('should get null when calling templates by id', async () => {
+    collectionMock.findOne.mockResolvedValue(null);
+    const templateId = '662f8c822fb28925eb4d7f3a';
+    const templatesResult = await findTemplateById(dbParams, templateId);
+    expect(collectionMock.findOne).toHaveBeenCalledWith({
+      _id: new ObjectId(templateId)
+    });
+    expect(templatesResult).toEqual(null);
+    collectionMock.findOne.mockReset();
   });
 });

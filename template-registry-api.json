@@ -50,18 +50,18 @@
     }
   },
   "parameters": {
+    "TemplateId": {
+      "name": "templateId",
+      "in": "path",
+      "required": true,
+      "description": "The id of the template in the database",
+      "type": "string"
+    },
     "TemplateName": {
       "name": "templateName",
       "in": "path",
       "required": true,
       "description": "The name of the template on npmjs.com",
-      "type": "string"
-    },
-    "TemplateId": {
-      "name": "templateId",
-      "in": "path",
-      "required": true,
-      "description": "The id of the template in the UUID format",
       "type": "string"
     },
     "OrgName": {
@@ -491,7 +491,75 @@
         }
       }
     },
-    "/templates/{templateName}": {
+    "/templates/{templateId}": {
+      "put": {
+        "summary": "Modify a template to Template Registry.",
+        "operationId": "template-registry-api/templates-put.http",
+        "tags": [
+          "templates"
+        ],
+        "security": [
+          {
+            "createAndUpdateTemplateAuth": [
+              "template_registry.write"
+            ]
+          }
+        ],
+        "parameters": [
+          {
+            "$ref": "#/parameters/TemplateId"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Template object to update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UpdateTemplate"
+            }
+          }
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "Information about a newly added template.",
+            "schema": {
+              "$ref": "#/definitions/UpdateTemplateResponse"
+            }
+          },
+          "400": {
+            "$ref": "#/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/responses/Forbidden"
+          },
+          "405": {
+            "$ref": "#/responses/HttpMethodNotAllowed"
+          },
+          "409": {
+            "$ref": "#/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/responses/InternalServerError"
+          },
+          "503": {
+            "$ref": "#/responses/ServiceUnavailable"
+          },
+          "504": {
+            "$ref": "#/responses/GatewayTimeout"
+          }
+        },
+        "x-openwhisk": {
+          "action": "templates-post.put",
+          "package": "template-registry-api",
+          "url": "not-used"
+        }
+      },
       "get": {
         "summary": "Get information about a template.",
         "operationId": "template-registry-api/templates-get.http",
@@ -501,7 +569,7 @@
         "security": [],
         "parameters": [
           {
-            "$ref": "#/parameters/TemplateName"
+            "$ref": "#/parameters/TemplateId"
           }
         ],
         "produces": [
@@ -554,7 +622,7 @@
         ],
         "parameters": [
           {
-            "$ref": "#/parameters/TemplateName"
+            "$ref": "#/parameters/TemplateId"
           }
         ],
         "responses": {
@@ -1461,6 +1529,307 @@
               }
             }
           }
+        }
+      }
+    },
+    "UpdateTemplate": {
+      "type": "object",
+      "required": ["updatedBy"],
+      "additionalProperties": false,
+      "properties": {
+        "updatedBy": {
+          "type": "string",
+          "description": "The name of the user who created the template",
+          "example": "Lazarus"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the template",
+          "example": "AppBuilder template"
+        },
+        "latestVersion": {
+          "type": "string",
+          "description": "The version of the template in the semver format",
+          "example": "1.0.10"
+        },
+        "categories": {
+          "type": "array",
+          "description": "A list of categories the template belongs to",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "graphql-mesh"
+          ]
+        },
+        "adobeRecommended": {
+          "type": "boolean",
+          "description": "Whether the template is recommended by Adobe",
+          "example": true
+        },
+        "keywords": {
+          "type": "array",
+          "description": "A list of keywords specified in the packages.json file",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "aio-app-builder-template",
+            "aio"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "A status of a package in Template Registry.\n\"Error\" indicates that an application error occurred.\n",
+          "enum": [
+            "InVerification",
+            "Approved",
+            "Rejected",
+            "Error"
+          ],
+          "example": "Approved"
+        },
+        "extensions": {
+          "type": "array",
+          "description": "Extension points that a template implements",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "extensionPointId"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "extensionPointId": {
+                "type": "string",
+                "description": "Extension Point Id",
+                "example": "dx/excshell/1"
+              }
+            }
+          }
+        },
+        "runtime": {
+          "type": "boolean",
+          "description": "Whether to add Runtime to App Builder application or not.",
+          "default": false
+        },
+        "credentials": {
+          "type": "array",
+          "description": "A list of credentials required by the template",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "flowType"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of the credential",
+                "example": "OAUTH_SERVER_TO_SERVER"
+              },
+              "flowType": {
+                "type": "string",
+                "description": "The flow type of the credential",
+                "example": "ENTP"
+              }
+            }
+          }
+        },
+        "codeSamples": {
+          "$ref": "#/definitions/CodeSamples"
+        },
+        "apis": {
+          "type": "array",
+          "description": "A list of Adobe APIs required by the template",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "code"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "The sdk code of the service",
+                "example": "AdobeAnalyticsSDK"
+              }
+            }
+          }
+        },
+        "links": {
+          "type": "object",
+          "description": "A link to the Github repository containing the package's source code",
+          "additionalProperties": false,
+          "properties": {
+            "github": {
+              "$ref": "#/definitions/GithubUrl"
+            },
+            "consoleProject": {
+              "$ref": "#/definitions/DeveloperConsoleUrl"
+            }
+          }
+        }
+      }
+    },
+    "UpdateTemplateResponse": {
+      "type": "object",
+      "required": ["id", "name", "status", "links", "_links", "updatedBy"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "The id of the template",
+          "example": "template-uuid-1234"
+        },
+        "name": {
+          "type": "string",
+          "description": "The name of the template",
+          "example": "@adobe/app-builder-template"
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "The name of the user who created the template",
+          "example": "Lazarus"
+        },
+        "description": {
+          "type": "string",
+          "description": "A description of the template",
+          "example": "AppBuilder template"
+        },
+        "latestVersion": {
+          "type": "string",
+          "description": "The version of the template in the semver format",
+          "example": "1.0.10"
+        },
+        "categories": {
+          "type": "array",
+          "description": "A list of categories the template belongs to",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "graphql-mesh"
+          ]
+        },
+        "adobeRecommended": {
+          "type": "boolean",
+          "description": "Whether the template is recommended by Adobe",
+          "example": true
+        },
+        "keywords": {
+          "type": "array",
+          "description": "A list of keywords specified in the packages.json file",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "aio-app-builder-template",
+            "aio"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "description": "A status of a package in Template Registry.\n\"Error\" indicates that an application error occurred.\n",
+          "enum": [
+            "InVerification",
+            "Approved",
+            "Rejected",
+            "Error"
+          ],
+          "example": "Approved"
+        },
+        "extensions": {
+          "type": "array",
+          "description": "Extension points that a template implements",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "extensionPointId"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "extensionPointId": {
+                "type": "string",
+                "description": "Extension Point Id",
+                "example": "dx/excshell/1"
+              }
+            }
+          }
+        },
+        "runtime": {
+          "type": "boolean",
+          "description": "Whether to add Runtime to App Builder application or not.",
+          "default": false
+        },
+        "credentials": {
+          "type": "array",
+          "description": "A list of credentials required by the template",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "type",
+              "flowType"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "type": {
+                "type": "string",
+                "description": "The type of the credential",
+                "example": "OAUTH_SERVER_TO_SERVER"
+              },
+              "flowType": {
+                "type": "string",
+                "description": "The flow type of the credential",
+                "example": "ENTP"
+              }
+            }
+          }
+        },
+        "codeSamples": {
+          "$ref": "#/definitions/CodeSamples"
+        },
+        "apis": {
+          "type": "array",
+          "description": "A list of Adobe APIs required by the template",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "required": [
+              "code"
+            ],
+            "additionalProperties": true,
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "The sdk code of the service",
+                "example": "AdobeAnalyticsSDK"
+              }
+            }
+          }
+        },
+        "links": {
+          "type": "object",
+          "description": "A link to the Github repository containing the package's source code",
+          "additionalProperties": false,
+          "properties": {
+            "github": {
+              "$ref": "#/definitions/GithubUrl"
+            },
+            "consoleProject": {
+              "$ref": "#/definitions/DeveloperConsoleUrl"
+            }
+          }
+        },
+        "_links": {
+          "$ref": "#/definitions/Links"
         }
       }
     }
