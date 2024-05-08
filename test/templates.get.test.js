@@ -118,7 +118,7 @@ describe('GET templates', () => {
       templateName,
       __ow_method: HTTP_METHOD
     });
-    expect(response).toEqual({
+    const expectedResponse = {
       statusCode: 200,
       body: {
         ...template,
@@ -128,11 +128,12 @@ describe('GET templates', () => {
           }
         }
       }
-    });
+    };
+    expect(response).toEqual(expectedResponse);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
-    expect(evaluateEntitlements).toHaveBeenCalledWith([template], expect.any(Object), mockLoggerInstance);
+    expect(evaluateEntitlements).toHaveBeenCalledWith([expectedResponse.body], expect.any(Object), mockLoggerInstance);
   }
 
   // eslint-disable-next-line jest/expect-expect
@@ -164,7 +165,7 @@ describe('GET templates', () => {
       templateName,
       __ow_method: HTTP_METHOD
     });
-    expect(response).toEqual({
+    const expectedResponse = {
       statusCode: 200,
       body: {
         ...template,
@@ -178,12 +179,13 @@ describe('GET templates', () => {
           }
         }
       }
-    });
+    };
+    expect(response).toEqual(expectedResponse);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(getReviewIssueByTemplateName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
-    expect(evaluateEntitlements).toHaveBeenCalledWith([template], expect.any(Object), mockLoggerInstance);
+    expect(evaluateEntitlements).toHaveBeenCalledWith([expectedResponse.body], expect.any(Object), mockLoggerInstance);
   });
 
   test('Successful request for "InVerification" template, should return 200, but no link to github Review issue', async () => {
@@ -207,7 +209,7 @@ describe('GET templates', () => {
       templateName,
       __ow_method: HTTP_METHOD
     });
-    expect(response).toEqual({
+    const expectedResponse = {
       statusCode: 200,
       body: {
         ...template,
@@ -217,12 +219,13 @@ describe('GET templates', () => {
           }
         }
       }
-    });
+    };
+    expect(response).toEqual(expectedResponse);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(getReviewIssueByTemplateName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
-    expect(evaluateEntitlements).toHaveBeenCalledWith([template], expect.any(Object), mockLoggerInstance);
+    expect(evaluateEntitlements).toHaveBeenCalledWith([expectedResponse.body], expect.any(Object), mockLoggerInstance);
   });
 
   test('Template does not exist, should return 404', async () => {
@@ -301,6 +304,14 @@ describe('GET templates', () => {
         github: 'https://github.com/adobe/app-builder-template'
       }
     };
+    const expectedInputTemplate = {
+      ...template,
+      _links: {
+        self: {
+          href: 'https://template-registry-api.tbd/apis/v1/templates/@adobe/app-builder-template'
+        }
+      }
+    };
     findTemplateByName.mockReturnValue(template);
     const response = await action.main({
       TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
@@ -327,7 +338,7 @@ describe('GET templates', () => {
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
     expect(mockLoggerInstance.error).toHaveBeenCalledWith(new Error('Response invalid\n  at: body\n    One or more required properties missing: status'));
-    expect(evaluateEntitlements).toHaveBeenCalledWith([template], expect.any(Object), mockLoggerInstance);
+    expect(evaluateEntitlements).toHaveBeenCalledWith([expectedInputTemplate], expect.any(Object), mockLoggerInstance);
   });
 
   test('TemplateId Scenario : Successful request, should return 200', async () => {

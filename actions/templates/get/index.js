@@ -152,9 +152,9 @@ async function main (params) {
       }
     }
 
-    const evaluatedTemplates = await evaluateEntitlements([response.template], params, logger);
+    const evaluatedTemplates = await evaluateEntitlements([response], params, logger);
     if (evaluatedTemplates?.length > 0) {
-      response.template = evaluatedTemplates[0];
+      response = evaluatedTemplates[0];
     }
 
     // validate the response data to be sure it complies with OpenApi Schema
