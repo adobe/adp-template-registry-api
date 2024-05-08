@@ -114,7 +114,6 @@ async function main (params) {
     logger.info('"DELETE templates" executed successfully');
     return response;
   } catch (error) {
-    console.trace(error);
     // log any server errors
     logger.error(error);
     // return with 500
