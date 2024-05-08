@@ -28,7 +28,8 @@
     "eslint-plugin-promise": "^6.1.1",
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
-    "nock": "^13.5.4"
+    "nock": "^13.5.4",
+    "np": "^10.0.5"
   },
   "scripts": {
     "test": "npm run lint:check && npm run unit-tests",
@@ -36,7 +37,9 @@
     "lint:check": "eslint --ext .js .",
     "lint:fix": "eslint --ext .js --fix .",
     "api:spec:lint": "redocly lint template-registry-api.json",
-    "api:spec:generate": "redocly build-docs template-registry-api.json --output index.html"
+    "api:spec:generate": "redocly build-docs template-registry-api.json --output index.html",
+    "version": "node scripts/updateSwaggerVersion.js && npm run api:spec:generate",
+    "release": "np --no-publish"
   },
   "engines": {
     "node": "^18"
