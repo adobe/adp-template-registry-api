@@ -20,22 +20,9 @@ const TEMPLATE_STATUS_REJECTED = 'Rejected';
 
 let openReviewIssues = null;
 
+const { ObjectId } = require('mongodb');
 const { mongoConnection } = require('../db/mongo');
 const { convertMongoIdToString } = require('./utils');
-const { ObjectId } = require('mongodb');
-
-/**
- * Returns a template record from Template Registry by a template name.
- *
- * @param {object} dbParams database connection parameters
- * @param {string} templateName template name
- * @returns {Promise<object|null>} an existing template record or null
- */
-async function findTemplateByName (dbParams, templateName) {
-  const collection = await mongoConnection(dbParams, collectionName);
-  const results = await collection.find({ name: templateName }).toArray();
-  return results?.length ? convertMongoIdToString(results[0]) : null;
-}
 
 /**
  * Returns a template record from Template Registry by a template id.
@@ -48,6 +35,40 @@ async function findTemplateById (dbParams, templateId) {
   const collection = await mongoConnection(dbParams, collectionName);
   const result = await collection.findOne({ _id: new ObjectId(templateId) });
   return result ? convertMongoIdToString(result) : null;
+}
+
+/**
+ * Updates a template to Template Registry.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateId template Id
+ * @param {object} templateBody template data
+ * @returns {object} mongo response
+ */
+async function updateTemplate (dbParams, templateId, templateBody) {
+  const collection = await mongoConnection(dbParams, collectionName);
+
+  const response = await collection.updateOne({ _id: new ObjectId(templateId) }, {
+    $set: templateBody
+  });
+
+  return response;
+  /**
+   * { "acknowledged" : true, "matchedCount" : 1, "modifiedCount" : 1 }
+   */
+}
+
+/**
+ * Returns a template record from Template Registry by a template name.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateName template name
+ * @returns {Promise<object|null>} an existing template record or null
+ */
+async function findTemplateByName (dbParams, templateName) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const results = await collection.find({ name: templateName }).toArray();
+  return results?.length ? convertMongoIdToString(results[0]) : null;
 }
 
 /**
@@ -80,11 +101,25 @@ async function addTemplate (dbParams, body) {
  *
  * @param {object} dbParams database connection parameters
  * @param {string} templateName template name
- * @returns {void}
+ * @returns {object} response
  */
 async function removeTemplateByName (dbParams, templateName) {
   const collection = await mongoConnection(dbParams, collectionName);
-  await collection.deleteOne({ name: templateName });
+  const response = await collection.deleteOne({ name: templateName });
+  return response;
+}
+
+/**
+ * Removes a template from Template Registry.
+ *
+ * @param {object} dbParams database connection parameters
+ * @param {string} templateId template id
+ * @returns {object} response
+ */
+async function removeTemplateById (dbParams, templateId) {
+  const collection = await mongoConnection(dbParams, collectionName);
+  const response = await collection.deleteOne({ _id: templateId });
+  return response;
 }
 
 /**
@@ -192,8 +227,10 @@ module.exports = {
   addTemplate,
   removeTemplateByName,
   createReviewIssue,
+  updateTemplate,
   getReviewIssueByTemplateName,
   TEMPLATE_STATUS_IN_VERIFICATION,
   TEMPLATE_STATUS_APPROVED,
-  TEMPLATE_STATUS_REJECTED
+  TEMPLATE_STATUS_REJECTED,
+  removeTemplateById
 };

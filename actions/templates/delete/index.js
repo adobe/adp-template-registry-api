@@ -13,10 +13,39 @@ const { Core } = require('@adobe/aio-sdk');
 const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_PERMISSION_DENIED } =
   require('../../utils');
 const { validateAccessToken, isAdmin, isValidServiceToken } = require('../../ims');
-const { findTemplateByName, removeTemplateByName } = require('../../templateRegistry');
+const { removeTemplateById, removeTemplateByName } = require('../../templateRegistry');
 
 const HTTP_METHOD = 'delete';
 const requiredScopes = ['template_registry.write'];
+
+const response200 = { statusCode: 200 };
+const response404 = { statusCode: 404 };
+
+const deleteTemplateByNameFunc = async (params, dbParams) => {
+  const orgName = params.orgName;
+  const templateName = params.templateName;
+  if ((orgName === undefined) && (templateName === undefined)) {
+    return response404;
+  }
+  const fullTemplateName = (orgName !== undefined) ? orgName + '/' + templateName : templateName;
+  const dbResponse = await removeTemplateByName(dbParams, fullTemplateName);
+  if (dbResponse.deletedCount === 0) {
+    return response404;
+  }
+  return response200;
+};
+
+const deleteTemplateByIdFunc = async (params, dbParams) => {
+  const templateId = params.templateId;
+  if ((templateId === undefined) || (templateId === null)) {
+    return response404;
+  }
+  const dbResponse = await removeTemplateById(dbParams, templateId);
+  if (dbResponse.deletedCount === 0) {
+    return response404;
+  }
+  return response200;
+};
 
 /**
  * Delete a template from the Template Registry.
@@ -75,26 +104,13 @@ async function main (params) {
       }
     }
 
-    const orgName = params.orgName;
-    const templateName = params.templateName;
-    if ((orgName === undefined) && (templateName === undefined)) {
-      return {
-        statusCode: 404
-      };
+    const shouldDeleteById = ('templateId' in params);
+    let response = null;
+    if (!shouldDeleteById) {
+      response = await deleteTemplateByNameFunc(params, dbParams);
+    } else {
+      response = await deleteTemplateByIdFunc(params, dbParams);
     }
-    const fullTemplateName = (orgName !== undefined) ? orgName + '/' + templateName : templateName;
-    const template = await findTemplateByName(dbParams, fullTemplateName);
-    if (template === null) {
-      return {
-        statusCode: 404
-      };
-    }
-
-    await removeTemplateByName(dbParams, fullTemplateName);
-    const response = {
-      statusCode: 200
-    };
-
     logger.info('"DELETE templates" executed successfully');
     return response;
   } catch (error) {
