@@ -18,7 +18,8 @@ const consoleLib = require('@adobe/aio-lib-console');
 
 const HTTP_METHOD = 'post';
 const POST_PARAM_NAME = 'templateId';
-
+const CREDENTIAL_FLOW_TYPE_ADOBEID = 'adobeid';
+const CREDENTIAL_FLOW_TYPE_ENTP = 'entp';
 /**
  * Serialize the request body of Install template action
  * @param {object} params action params
@@ -149,7 +150,7 @@ async function main (params) {
     const credentialFlowType = credentials[0].flowType;
     let createIntegrationResponse = {};
 
-    if (credentialFlowType.toLowerCase() === 'adobeid') {
+    if (credentialFlowType.toLowerCase() === CREDENTIAL_FLOW_TYPE_ADOBEID) {
       // form integration request body
       const createAdobeIdIntegrationReqBody = {
         name: String(body.projectName),
@@ -167,7 +168,7 @@ async function main (params) {
       for (const api of apis) {
         const apiFlowType = api.flowType;
         const apiCredentialType = api.credentialType;
-        if (apiFlowType.toLowerCase() !== 'adobeid' || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
+        if (apiFlowType.toLowerCase() !== CREDENTIAL_FLOW_TYPE_ADOBEID || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
           continue;
         }
         const service = {
@@ -184,7 +185,7 @@ async function main (params) {
       // create AdobeID integration
       createIntegrationResponse = await consoleClient.createAdobeIdIntegration(body.orgId, createAdobeIdIntegrationReqBody);
       logger.debug(`AdobeID Integration created: ${JSON.stringify(createIntegrationResponse)}`);
-    } else if (credentialFlowType.toLowerCase() === 'entp') {
+    } else if (credentialFlowType.toLowerCase() === CREDENTIAL_FLOW_TYPE_ENTP) {
       // form integration request body
       const createOAuthS2SIntegrationReqBody = {
         name: String(body.projectName),
@@ -196,7 +197,7 @@ async function main (params) {
       for (const api of apis) {
         const apiFlowType = api.flowType;
         const apiCredentialType = api.credentialType;
-        if (apiFlowType.toLowerCase() !== 'entp' || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
+        if (apiFlowType.toLowerCase() !== CREDENTIAL_FLOW_TYPE_ENTP || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
           continue;
         }
         const service = {
