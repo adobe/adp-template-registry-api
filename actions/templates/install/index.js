@@ -27,13 +27,14 @@ const CREDENTIAL_FLOW_TYPE_ENTP = 'entp';
  */
 const serializeRequestBody = (params) => {
   // Extracting required properties
-  const { orgId, projectName, description, metadata } = params;
+  const { orgId, projectName, description, metadata, apis } = params;
   // Constructing the serialized object
   return {
     orgId,
     projectName,
     ...(description && { description }), // Include description if it exists
-    metadata // Include metadata object
+    metadata, // Include metadata object
+    ...(apis && { apis }) // Include apis array if it exists
   };
 };
 
@@ -135,6 +136,15 @@ async function main (params) {
       oauthsinglepageapp: 'SinglePageApp'
     };
 
+    const apisInfoArray = body.apis;
+    // create map for api code and api info body
+    const mapApiCodeToApiInfo = {};
+    if (apisInfoArray) {
+      for (const api of apisInfoArray) {
+        mapApiCodeToApiInfo[api.code] = api;
+      }
+    }
+
     // set env based on apiHost
     const apiHost = process.env.__OW_API_HOST;
     logger.debug('apiHost:', apiHost);
@@ -171,10 +181,16 @@ async function main (params) {
         if (apiFlowType.toLowerCase() !== CREDENTIAL_FLOW_TYPE_ADOBEID || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
           continue;
         }
+        // extract api license config from the api info map
+        let apiLicenseConfigs = [];
+        const apiInfo = mapApiCodeToApiInfo[api.code];
+        if (apiInfo && apiInfo.credentialType.toLowerCase() === apiCredentialType.toLowerCase() && apiInfo.flowType.toLowerCase() === apiFlowType.toLowerCase()) {
+          apiLicenseConfigs = apiInfo.licenseConfigs;
+        }
         const service = {
           sdkCode: api.code,
           atlasPlanCode: '',
-          licenseConfigs: [],
+          licenseConfigs: apiLicenseConfigs,
           roles: []
         };
         createAdobeIdIntegrationReqBody.services.push(service);
@@ -200,10 +216,18 @@ async function main (params) {
         if (apiFlowType.toLowerCase() !== CREDENTIAL_FLOW_TYPE_ENTP || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
           continue;
         }
+
+        // extract api license config from the api info map
+        let apiLicenseConfigs = [];
+        const apiInfo = mapApiCodeToApiInfo[api.code];
+        if (apiInfo && apiInfo.credentialType.toLowerCase() === apiCredentialType.toLowerCase() && apiInfo.flowType.toLowerCase() === apiFlowType.toLowerCase()) {
+          apiLicenseConfigs = apiInfo.licenseConfigs;
+        }
+
         const service = {
           sdkCode: api.code,
           atlasPlanCode: '',
-          licenseConfigs: [],
+          licenseConfigs: apiLicenseConfigs,
           roles: []
         };
         createOAuthS2SIntegrationReqBody.services.push(service);

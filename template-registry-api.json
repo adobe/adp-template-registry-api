@@ -1159,6 +1159,33 @@
           "type": "object",
           "description": "Key value pairs of credential metadata like allowed domains, redirect uris etc",
           "additionalProperties": {}
+        },
+        "apis": {
+          "type": "array",
+          "description": "Optional field to include license configs to be assigned to a technical account for an individual API",
+            "items": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                      "type": "string",
+                      "description": "API code"
+                  },
+                  "credentialType": {
+                      "type": "string",
+                      "description": "Credential type"
+                  },
+                  "FlowType": {
+                      "type": "string",
+                      "description": "Flow type"
+                  },
+                  "licenseConfigs": {
+                      "type": "array",
+                      "items": {
+                          "type": "object"
+                      }
+                  }
+                }
+            }
         }
       }
     },
