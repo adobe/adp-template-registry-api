@@ -325,14 +325,16 @@ describe('POST Install template: Core business logic specific tests', () => {
     };
     findTemplateById.mockReturnValueOnce(mockTemplate);
     const mockOAuthS2SIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
     mockConsoleSDKInstance.createOauthS2SCredentialIntegration.mockResolvedValue(mockOAuthS2SIntegrationResponse);
@@ -411,14 +413,16 @@ describe('POST Install template: Core business logic specific tests', () => {
     };
     findTemplateById.mockReturnValueOnce(mockTemplate);
     const mockOAuthS2SIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
     mockConsoleSDKInstance.createOauthS2SCredentialIntegration.mockResolvedValue(mockOAuthS2SIntegrationResponse);
@@ -497,14 +501,16 @@ describe('POST Install template: Core business logic specific tests', () => {
     };
     findTemplateById.mockReturnValueOnce(mockTemplate);
     const mockAdobeIdIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
     mockConsoleSDKInstance.createAdobeIdIntegration.mockResolvedValue(mockAdobeIdIntegrationResponse);
@@ -589,14 +595,16 @@ describe('POST Install template: Core business logic specific tests', () => {
     };
     findTemplateById.mockReturnValueOnce(mockTemplate);
     const mockAdobeIdIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
     mockConsoleSDKInstance.createAdobeIdIntegration.mockResolvedValue(mockAdobeIdIntegrationResponse);
@@ -725,14 +733,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       ]
     };
     const mockAdobeIdIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
     findTemplateById.mockReturnValueOnce(mockTemplate);
@@ -808,14 +818,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       ]
     };
     const mockAdobeIdIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
 
@@ -871,5 +883,99 @@ describe('POST Install template: Core business logic specific tests', () => {
         }
       }
     });
+  });
+
+  test('should create AdobeId integration if template has AdobeId flow, test uppercase credential/api type and flow type', async () => {
+    const mockTemplate = {
+      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
+      author: 'John doe',
+      name: '@adobe/developer-console-template',
+      description: 'Developer Console template',
+      latestVersion: '1.0.0',
+      adobeRecommended: true,
+      status: 'Approved',
+      links: {
+        consoleProject: 'https://developer-stage.adobe.com/console/projects/1234'
+      },
+      credentials: [
+        {
+          type: 'APIKEY',
+          flowType: 'ADOBEID'
+        }
+      ],
+      apis: [
+        {
+          code: 'AssetComputeSDK',
+          productProfiles: [
+            {
+              id: '123456',
+              productId: 'AB12CD34EF56',
+              name: 'Default product profile'
+            }
+          ],
+          credentialType: 'APIKEY',
+          flowType: 'ADOBEID'
+        },
+        {
+          code: 'PhotoshopSDK',
+          productProfiles: [
+            {
+              id: '123456',
+              productId: 'AB12CD34EF56',
+              name: 'Default product profile'
+            }
+          ],
+          credentialType: 'APIKEY',
+          flowType: 'ADOBEID'
+        },
+        {
+          code: 'IllustratorSDK',
+          productProfiles: [
+            {
+              id: '123456',
+              productId: 'AB12CD34EF56',
+              name: 'Default product profile'
+            }
+          ],
+          credentialType: 'OAUTHNATIVEAPP',
+          flowType: 'ADOBEID'
+        }
+      ],
+      codeSamples: [
+        {
+          language: 'node',
+          link: 'https://developer-stage.adobe.com/sample.zip'
+        }
+      ]
+    };
+    findTemplateById.mockReturnValueOnce(mockTemplate);
+    const mockAdobeIdIntegrationResponse = {
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
+      }
+    };
+    mockConsoleSDKInstance.createAdobeIdIntegration.mockResolvedValue(mockAdobeIdIntegrationResponse);
+    process.env.__OW_API_HOST = 'https://controller-gw-ns-team-ethos651prodjpn3-runtime-prod-b.ethos651-prod-jpn3.ethos.adobe.net';
+    mockParams.metadata = {
+      domain: 'mockDomain',
+      urlScheme: 'mockUrlScheme',
+      redirectUriList: 'mockRedirectUriList',
+      defaultRedirectUri: 'mockDefaultRedirectUri'
+    };
+    delete mockParams.description;
+    await action.main(mockParams);
+    expect(mockConsoleSDKInstance.createAdobeIdIntegration).toHaveBeenCalled();
+    expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).not.toHaveBeenCalled();
+    expect(mockConsoleSDKInstance.createAdobeIdIntegration).toHaveBeenCalledWith('mockOrgId', { name: 'mockProjectName', description: 'Created from template @adobe/developer-console-template', platform: 'apiKey', services: [{ sdkCode: 'AssetComputeSDK', atlasPlanCode: '', licenseConfigs: [], roles: [] }, { atlasPlanCode: '', licenseConfigs: [], roles: [], sdkCode: 'PhotoshopSDK' }], templateId: 'mockTemplateId', domain: 'mockDomain', urlScheme: 'mockUrlScheme', redirectUriList: 'mockRedirectUriList', defaultRedirectUri: 'mockDefaultRedirectUri' });
+    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalled();
+    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalledWith('mockOrgId', 'mockProjectId', 'mockWorkspaceId');
   });
 });

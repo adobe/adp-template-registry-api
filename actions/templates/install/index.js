@@ -18,7 +18,8 @@ const consoleLib = require('@adobe/aio-lib-console');
 
 const HTTP_METHOD = 'post';
 const POST_PARAM_NAME = 'templateId';
-
+const CREDENTIAL_FLOW_TYPE_ADOBEID = 'adobeid';
+const CREDENTIAL_FLOW_TYPE_ENTP = 'entp';
 /**
  * Serialize the request body of Install template action
  * @param {object} params action params
@@ -145,12 +146,12 @@ async function main (params) {
     const credentialFlowType = credentials[0].flowType;
     let createIntegrationResponse = {};
 
-    if (credentialFlowType === 'adobeid') {
+    if (credentialFlowType.toLowerCase() === CREDENTIAL_FLOW_TYPE_ADOBEID) {
       // form integration request body
       const createAdobeIdIntegrationReqBody = {
         name: String(body.projectName),
         description: String(body.description ? body.description : `Created from template ${template.name}`),
-        platform: String(mapAdobeIdCredentialTypeToPlatformType[credentialType]),
+        platform: String(mapAdobeIdCredentialTypeToPlatformType[credentialType.toLowerCase()]),
         ...(body.metadata?.urlScheme && { urlScheme: body.metadata.urlScheme }), // Include urlScheme if it exists
         ...(body.metadata?.redirectUriList && { redirectUriList: body.metadata.redirectUriList }), // Include redirectUriList if it exists
         ...(body.metadata?.defaultRedirectUri && { defaultRedirectUri: body.metadata.defaultRedirectUri }), // Include defaultRedirectUri if it exists
@@ -161,7 +162,9 @@ async function main (params) {
 
       // iterate over APIs and add APIs to request body services array
       for (const api of apis) {
-        if (api.flowType !== 'adobeid' || api.credentialType !== credentialType) {
+        const apiFlowType = api.flowType;
+        const apiCredentialType = api.credentialType;
+        if (apiFlowType.toLowerCase() !== CREDENTIAL_FLOW_TYPE_ADOBEID || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
           continue;
         }
         const service = {
@@ -178,7 +181,7 @@ async function main (params) {
       // create AdobeID integration
       createIntegrationResponse = await consoleClient.createAdobeIdIntegration(body.orgId, createAdobeIdIntegrationReqBody);
       logger.debug(`AdobeID Integration created: ${JSON.stringify(createIntegrationResponse)}`);
-    } else if (credentialFlowType === 'entp') {
+    } else if (credentialFlowType.toLowerCase() === CREDENTIAL_FLOW_TYPE_ENTP) {
       // form integration request body
       const createOAuthS2SIntegrationReqBody = {
         name: String(body.projectName),
@@ -188,7 +191,9 @@ async function main (params) {
       };
 
       for (const api of apis) {
-        if (api.flowType !== 'entp' || api.credentialType !== credentialType) {
+        const apiFlowType = api.flowType;
+        const apiCredentialType = api.credentialType;
+        if (apiFlowType.toLowerCase() !== CREDENTIAL_FLOW_TYPE_ENTP || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
           continue;
         }
         const service = {
@@ -208,7 +213,7 @@ async function main (params) {
       logger.error(`Credential flow type "${credentialFlowType}" not supported for template install.`);
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, `Credential flow type "${credentialFlowType}" not supported for template install`)], logger);
     }
-    const { projectId, workspaceId } = createIntegrationResponse;
+    const { projectId, workspaceId } = createIntegrationResponse.body;
     logger.debug(`ProjectId: ${projectId}, WorkspaceId: ${workspaceId}`);
 
     // call download workspace config API to get the config
