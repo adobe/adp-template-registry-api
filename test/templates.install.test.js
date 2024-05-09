@@ -325,14 +325,16 @@ describe('POST Install template: Core business logic specific tests', () => {
     };
     findTemplateById.mockReturnValueOnce(mockTemplate);
     const mockOAuthS2SIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
     mockConsoleSDKInstance.createOauthS2SCredentialIntegration.mockResolvedValue(mockOAuthS2SIntegrationResponse);
@@ -411,14 +413,16 @@ describe('POST Install template: Core business logic specific tests', () => {
     };
     findTemplateById.mockReturnValueOnce(mockTemplate);
     const mockOAuthS2SIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
     mockConsoleSDKInstance.createOauthS2SCredentialIntegration.mockResolvedValue(mockOAuthS2SIntegrationResponse);
@@ -497,14 +501,16 @@ describe('POST Install template: Core business logic specific tests', () => {
     };
     findTemplateById.mockReturnValueOnce(mockTemplate);
     const mockAdobeIdIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
     mockConsoleSDKInstance.createAdobeIdIntegration.mockResolvedValue(mockAdobeIdIntegrationResponse);
@@ -589,14 +595,16 @@ describe('POST Install template: Core business logic specific tests', () => {
     };
     findTemplateById.mockReturnValueOnce(mockTemplate);
     const mockAdobeIdIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
     mockConsoleSDKInstance.createAdobeIdIntegration.mockResolvedValue(mockAdobeIdIntegrationResponse);
@@ -725,14 +733,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       ]
     };
     const mockAdobeIdIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
     findTemplateById.mockReturnValueOnce(mockTemplate);
@@ -808,14 +818,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       ]
     };
     const mockAdobeIdIntegrationResponse = {
-      id: 'mockId',
-      apikey: 'mockApiKey',
-      orgId: 'mockOrgId',
-      projectId: 'mockProjectId',
-      workspaceId: 'mockWorkspaceId',
-      subscriptionResult: {
-        sdkList: [],
-        errorList: []
+      body: {
+        id: 'mockId',
+        apikey: 'mockApiKey',
+        orgId: 'mockOrgId',
+        projectId: 'mockProjectId',
+        workspaceId: 'mockWorkspaceId',
+        subscriptionResult: {
+          sdkList: [],
+          errorList: []
+        }
       }
     };
 
