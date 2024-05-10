@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST, ERR_RC_INVALID_TEMPLATE_ID, getConsoleEnv } = require('../../utils');
+const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST, ERR_RC_INVALID_TEMPLATE_ID, getEnv } = require('../../utils');
 const { validateAccessToken } = require('../../ims');
 const { findTemplateById } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
@@ -135,7 +135,7 @@ async function main (params) {
       oauthsinglepageapp: 'SinglePageApp'
     };
 
-    const env = getConsoleEnv(logger);
+    const env = getEnv(logger);
     const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, env);
 
     // Console APIs only support creating one type of credential at a time

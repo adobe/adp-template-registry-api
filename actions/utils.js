@@ -143,7 +143,7 @@ function getHeaderValue (params, key) {
  * @param {object} logger the logger instance.
  * @returns {string} the environment.
  */
-function getConsoleEnv (logger) {
+function getEnv (logger) {
   // set env based on apiHost
   const apiHost = process.env.__OW_API_HOST;
   logger.debug('apiHost:', apiHost);
@@ -231,5 +231,5 @@ module.exports = {
   ERR_RC_PERMISSION_DENIED,
   ERR_RC_INVALID_TEMPLATE_ID,
   getHeaderValue,
-  getConsoleEnv
+  getEnv
 };

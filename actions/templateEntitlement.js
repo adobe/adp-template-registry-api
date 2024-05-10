@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 const consoleLib = require('@adobe/aio-lib-console');
-const { getBearerToken, getHeaderValue, getConsoleEnv } = require('./utils');
+const { getBearerToken, getHeaderValue, getEnv } = require('./utils');
 
 /**
  * Evaluate entitlements for a set of templates. This function will check if the user is entitled to use the templates.
@@ -34,7 +34,7 @@ async function evaluateEntitlements (templates, params, logger) {
 
   logger.debug(`Evaluating entitlements for ${templates.length} templates, orgId: ${orgId}`);
 
-  const env = getConsoleEnv(logger);
+  const env = getEnv(logger);
   const consoleClient = await consoleLib.init(userToken, params.IMS_CLIENT_ID, env);
 
   const sdkCodesSet = new Set(templates.flatMap((template) => template.apis.map((api) => api.code)));
