@@ -181,6 +181,7 @@
         "adp-template-registry-service",
         "adp-template-registry-service-stage",
         "UDPWeb1",
+        "UDPService1",
         "stage_adobe_io",
         "aio-cli-console-auth",
         "aio-cli-console-auth-stage"
@@ -194,7 +195,8 @@
         "template_registry.write": "Access to modify the template registry"
       },
       "x-client-ids": [
-        "adp-template-registry-service"
+        "adp-template-registry-service",
+        "UDPService1"
       ]
     }
   },
@@ -955,6 +957,13 @@
                 "type": "string",
                 "description": "The sdk code of the service",
                 "example": "AdobeAnalyticsSDK"
+              },
+              "licenseConfigs": {
+                "type": "array",
+                "description": "List of available license configs (product profiles) for the API",
+                "items": {
+                  "type": "object"
+                }
               }
             }
           }
@@ -1037,6 +1046,34 @@
               "$ref": "#/definitions/DeveloperConsoleUrl"
             }
           }
+        },
+        "orgEntitled": {
+          "type": "boolean",
+          "description": "Whether the organization is entitled to use the template",
+          "example": true
+        },
+        "userEntitled": {
+          "type": "boolean",
+          "description": "Whether the user is entitled to use the template",
+          "example": true
+        },
+        "canRequestAccess": {
+          "type": "boolean",
+          "description": "Whether the user can request access to the template",
+          "example": true
+        },
+        "disEntitledReasons": {
+          "type": "array",
+          "description": "A list of reasons why the user is not entitled to use the template",
+          "items": {
+            "type": "string"
+          },
+          "example": [
+            "USER_MISSING_DEV_ROLE",
+            "ORG_MISSING_FIS",
+            "USER_MISSING_PRIVATE_BETA",
+            "USER_MISSING_PUBLIC_BETA"
+          ]
         },
         "_links": {
           "$ref": "#/definitions/Links"

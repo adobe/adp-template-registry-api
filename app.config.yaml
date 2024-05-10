@@ -28,6 +28,7 @@ application:
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
             annotations:
               require-adobe-auth: false
+              require-gw-validation: true
               final: true
           templates-put:
             function: actions/templates/put/index.js
@@ -48,6 +49,7 @@ application:
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
             annotations:
               require-adobe-auth: false
+              require-gw-validation: true
               final: true
           templates-get:
             function: actions/templates/get/index.js
@@ -57,6 +59,7 @@ application:
               - ["template-registry-api.json"]
             inputs:
               LOG_LEVEL: debug
+              IMS_CLIENT_ID: $IMS_CLIENT_ID
               TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
               TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
@@ -80,6 +83,7 @@ application:
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
             annotations:
               require-adobe-auth: false
+              require-gw-validation: true
               final: true
           templates-list:
             function: actions/templates/list/index.js

@@ -17,6 +17,8 @@ const { validateAccessToken, isAdmin, generateAccessToken, isValidServiceToken }
 jest.mock('@heyputer/kv.js');
 jest.mock('@adobe/aio-lib-ims');
 
+const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
+
 process.env = {
   IMS_URL: 'https://ims-na1-stg1.adobelogin.com',
   IMS_CLIENT_ID: 'test'
@@ -127,13 +129,13 @@ describe('Verify communication with IMS', () => {
       }))
     }));
 
-    await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid'))
+    await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid', mockLoggerInstance))
       .resolves.toBe('my-access-token');
   });
 
   test('Verify generate access token with a cached token', async () => {
     jest.spyOn(Kvjs.prototype, 'get').mockImplementation(() => 'cached-access--token');
-    await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid'))
+    await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid', mockLoggerInstance))
       .resolves.toBe('cached-access--token');
   });
 
