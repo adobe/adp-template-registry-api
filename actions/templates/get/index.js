@@ -165,7 +165,7 @@ async function main (params) {
     // log any server errors
     logger.error(error);
     // return with 500
-    return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.')], logger);
+    return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, error.message)], logger);
   }
 }
 

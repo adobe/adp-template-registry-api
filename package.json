@@ -33,7 +33,8 @@
   },
   "scripts": {
     "test": "npm run lint:check && npm run unit-tests",
-    "unit-tests": "jest --ci",
+    "test:smoke": "jest --ci --testPathPattern=smoke --collectCoverage=false --runInBand --detectOpenHandles --setupFilesAfterEnv",
+    "unit-tests": "jest --ci --testPathIgnorePatterns=smoke",
     "lint:check": "eslint --ext .js .",
     "lint:fix": "eslint --ext .js --fix .",
     "api:spec:lint": "redocly lint template-registry-api.json",
