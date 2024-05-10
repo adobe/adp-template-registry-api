@@ -14,6 +14,7 @@ const { errorResponse, errorMessage, stringParameters, ERR_RC_SERVER_ERROR, ERR_
 const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED, findTemplateById } =
   require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
+const { evaluateEntitlements } = require('../../templateEntitlement');
 
 // GET operation is available to everyone, no IMS access token is required
 const HTTP_METHOD = 'get';
@@ -150,6 +151,12 @@ async function main (params) {
         return response;
       }
     }
+
+    const evaluatedTemplates = await evaluateEntitlements([response], params, logger);
+    if (evaluatedTemplates?.length > 0) {
+      response = evaluatedTemplates[0];
+    }
+
     // validate the response data to be sure it complies with OpenApi Schema
     const [res, error] = req.response(200, response);
     if (error) {

@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST, ERR_RC_INVALID_TEMPLATE_ID } = require('../../utils');
+const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST, ERR_RC_INVALID_TEMPLATE_ID, getConsoleEnv } = require('../../utils');
 const { validateAccessToken } = require('../../ims');
 const { findTemplateById } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
@@ -135,11 +135,7 @@ async function main (params) {
       oauthsinglepageapp: 'SinglePageApp'
     };
 
-    // set env based on apiHost
-    const apiHost = process.env.__OW_API_HOST;
-    logger.debug('apiHost:', apiHost);
-    const env = apiHost.includes('prod') ? 'prod' : 'stage';
-    logger.debug('env: ', env);
+    const env = getConsoleEnv(logger);
     const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, env);
 
     // Console APIs only support creating one type of credential at a time
