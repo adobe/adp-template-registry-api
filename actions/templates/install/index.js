@@ -182,9 +182,12 @@ async function main (params) {
           continue;
         }
         // extract api license config from the api info map
+        // Note: adobeid type credentials do not support license configs because they do not have a technical account.
+        // TR Install API doesn't need to know this distinction between credential types and console will simply ignore in case license configs are included.
+
         let apiLicenseConfigs = [];
         const apiInfo = mapApiCodeToApiInfo[api.code];
-        if (apiInfo && apiInfo.credentialType.toLowerCase() === apiCredentialType.toLowerCase() && apiInfo.flowType.toLowerCase() === apiFlowType.toLowerCase()) {
+        if (apiInfo?.credentialType?.toLowerCase() === apiCredentialType.toLowerCase() && apiInfo?.flowType?.toLowerCase() === apiFlowType.toLowerCase()) {
           apiLicenseConfigs = apiInfo.licenseConfigs;
         }
         const service = {
@@ -220,7 +223,7 @@ async function main (params) {
         // extract api license config from the api info map
         let apiLicenseConfigs = [];
         const apiInfo = mapApiCodeToApiInfo[api.code];
-        if (apiInfo && apiInfo.credentialType.toLowerCase() === apiCredentialType.toLowerCase() && apiInfo.flowType.toLowerCase() === apiFlowType.toLowerCase()) {
+        if (apiInfo?.credentialType?.toLowerCase() === apiCredentialType.toLowerCase() && apiInfo?.flowType?.toLowerCase() === apiFlowType.toLowerCase()) {
           apiLicenseConfigs = apiInfo.licenseConfigs;
         }
 
