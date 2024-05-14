@@ -12,6 +12,7 @@ governing permissions and limitations under the License.
 const axios = require('axios').default;
 const { Ims, getTokenData } = require('@adobe/aio-lib-ims');
 const Kvjs = require('@heyputer/kv.js');
+const { getEnv } = require('./utils');
 const kv = new Kvjs();
 const CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
 
@@ -111,9 +112,10 @@ async function requestImsResource (url, accessToken, headers = {}, params = {}) 
  * @param {string} imsClientId - IMS Client ID
  * @param {string} imsClientSecret - IMS Client Secret
  * @param {string} imsScopes - List of space-separated scopes
+ * @param {object} logger - Logger object
  * @returns {Promise<string>} - IMS access token
  */
-async function generateAccessToken (imsAuthCode, imsClientId, imsClientSecret, imsScopes) {
+async function generateAccessToken (imsAuthCode, imsClientId, imsClientSecret, imsScopes, logger) {
   // Check if we have a cached access token
   const cachedAccessToken = kv.get('authorization');
   if (cachedAccessToken) {
@@ -121,7 +123,7 @@ async function generateAccessToken (imsAuthCode, imsClientId, imsClientSecret, i
   }
 
   // If not, generate a new one and cache it
-  const ims = new Ims('stage');
+  const ims = new Ims(getEnv(logger));
 
   const { payload } = await ims.getAccessToken(
     imsAuthCode,

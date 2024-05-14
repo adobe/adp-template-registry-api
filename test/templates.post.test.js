@@ -386,7 +386,7 @@ describe('POST templates', () => {
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
-    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
+    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
     expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
       name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
@@ -474,7 +474,7 @@ describe('POST templates', () => {
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
-    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
+    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
     expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
       name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
@@ -577,7 +577,7 @@ describe('POST templates', () => {
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
-    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
+    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
     expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
       name: DEVELOPER_CONSOLE_TEMPLATE_NAME,
@@ -682,7 +682,7 @@ describe('POST templates', () => {
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
-    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
+    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
     expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
       name: DEVELOPER_CONSOLE_TEMPLATE_NAME,

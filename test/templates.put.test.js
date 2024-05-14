@@ -578,7 +578,7 @@ describe('PUT templates', () => {
       }
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
-    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
+    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" executed successfully');
   });
@@ -656,7 +656,7 @@ describe('PUT templates', () => {
       }
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
-    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES);
+    expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" executed successfully');
   });
