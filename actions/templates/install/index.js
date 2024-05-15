@@ -246,7 +246,6 @@ async function main (params) {
     // call download workspace config API to get the config
     const response = await consoleClient.downloadWorkspaceJson(body.orgId, projectId, workspaceId);
     logger.debug(`Workspace config: ${JSON.stringify(response)}`);
-
     // validate the response data to be sure it complies with OpenApi Schema
     const [res, resError] = req.response(201, response);
     if (resError) {
@@ -256,7 +255,7 @@ async function main (params) {
     logger.info('"POST Install templates" executed successfully');
     return {
       statusCode: 201,
-      body: res.body
+      body: res.body.body
     };
   } catch (error) {
     logger.error(error);
