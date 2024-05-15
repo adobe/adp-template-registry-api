@@ -1228,6 +1228,7 @@
     },
     "TemplateInstallationResponseBody": {
       "type": "object",
+      "required": ["project"],
       "properties": {
         "project": {
           "type": "object",
