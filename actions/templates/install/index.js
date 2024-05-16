@@ -27,13 +27,14 @@ const CREDENTIAL_FLOW_TYPE_ENTP = 'entp';
  */
 const serializeRequestBody = (params) => {
   // Extracting required properties
-  const { orgId, projectName, description, metadata } = params;
+  const { orgId, projectName, description, metadata, apis } = params;
   // Constructing the serialized object
   return {
     orgId,
     projectName,
     ...(description && { description }), // Include description if it exists
-    metadata // Include metadata object
+    metadata, // Include metadata object
+    ...(apis && { apis }) // Include apis array if it exists
   };
 };
 
@@ -135,6 +136,15 @@ async function main (params) {
       oauthsinglepageapp: 'SinglePageApp'
     };
 
+    const apisInfoArray = body.apis;
+    // create map for api code and api info body
+    const mapApiCodeToApiInfo = {};
+    if (apisInfoArray) {
+      for (const api of apisInfoArray) {
+        mapApiCodeToApiInfo[api.code] = api;
+      }
+    }
+
     const env = getEnv(logger);
     const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, env);
 
@@ -167,10 +177,19 @@ async function main (params) {
         if (apiFlowType.toLowerCase() !== CREDENTIAL_FLOW_TYPE_ADOBEID || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
           continue;
         }
+        // extract api license config from the api info map
+        // Note: adobeid type credentials do not support license configs because they do not have a technical account.
+        // TR Install API doesn't need to know this distinction between credential types and console will simply ignore in case license configs are included.
+
+        let apiLicenseConfigs = [];
+        const apiInfo = mapApiCodeToApiInfo[api.code];
+        if (apiInfo?.credentialType?.toLowerCase() === apiCredentialType.toLowerCase() && apiInfo?.flowType?.toLowerCase() === apiFlowType.toLowerCase()) {
+          apiLicenseConfigs = apiInfo.licenseConfigs;
+        }
         const service = {
           sdkCode: api.code,
           atlasPlanCode: '',
-          licenseConfigs: [],
+          licenseConfigs: apiLicenseConfigs,
           roles: []
         };
         createAdobeIdIntegrationReqBody.services.push(service);
@@ -196,10 +215,18 @@ async function main (params) {
         if (apiFlowType.toLowerCase() !== CREDENTIAL_FLOW_TYPE_ENTP || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
           continue;
         }
+
+        // extract api license config from the api info map
+        let apiLicenseConfigs = [];
+        const apiInfo = mapApiCodeToApiInfo[api.code];
+        if (apiInfo?.credentialType?.toLowerCase() === apiCredentialType.toLowerCase() && apiInfo?.flowType?.toLowerCase() === apiFlowType.toLowerCase()) {
+          apiLicenseConfigs = apiInfo.licenseConfigs;
+        }
+
         const service = {
           sdkCode: api.code,
           atlasPlanCode: '',
-          licenseConfigs: [],
+          licenseConfigs: apiLicenseConfigs,
           roles: []
         };
         createOAuthS2SIntegrationReqBody.services.push(service);
@@ -218,10 +245,13 @@ async function main (params) {
 
     // call download workspace config API to get the config
     const response = await consoleClient.downloadWorkspaceJson(body.orgId, projectId, workspaceId);
+    if (!response) {
+      logger.error(`Workspace config not found for project ${projectId} and workspace ${workspaceId}`);
+      return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, `Workspace config not found for project ${projectId} and workspace ${workspaceId}`)], logger);
+    }
     logger.debug(`Workspace config: ${JSON.stringify(response)}`);
-
     // validate the response data to be sure it complies with OpenApi Schema
-    const [res, resError] = req.response(201, response);
+    const [res, resError] = req.response(201, response.body);
     if (resError) {
       throw new Error(resError.toString());
     }
