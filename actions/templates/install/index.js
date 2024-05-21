@@ -241,7 +241,6 @@ async function main (params) {
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, `Credential flow type "${credentialFlowType}" not supported for template install`)], logger);
     }
 
-    logger.debug(`Workspace config: ${JSON.stringify(createIntegrationResponse.body)}`);
     // validate the response data to be sure it complies with OpenApi Schema
     const [res, resError] = req.response(201, createIntegrationResponse.body);
     if (resError) {
