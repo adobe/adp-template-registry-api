@@ -13,7 +13,7 @@ const { Core } = require('@adobe/aio-sdk');
 const { validateAccessToken, isAdmin, isValidServiceToken } = require('../actions/ims');
 const utils = require('../actions/utils');
 const action = require('../actions/templates/delete/index');
-const { fetchUrl, findTemplateByName, removeTemplateByName } = require('../actions/templateRegistry');
+const { findTemplateByName, removeTemplateById, removeTemplateByName } = require('../actions/templateRegistry');
 
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
 Core.Logger.mockReturnValue(mockLoggerInstance);
@@ -190,7 +190,7 @@ describe('DELETE templates', () => {
     const orgName = '@adobe';
     const templateName = 'app-builder-template-none';
     const fullTemplateName = `${orgName}/${templateName}`;
-    findTemplateByName.mockReturnValue(null);
+    removeTemplateByName.mockReturnValue({ deletedCount: 0 });
     const response = await action.main({
       IMS_URL: process.env.IMS_URL,
       IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
@@ -207,50 +207,18 @@ describe('DELETE templates', () => {
       statusCode: 404
     });
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
-    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"DELETE templates" executed successfully');
+    expect(removeTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 
   test('Admin token, should return 200', async () => {
     isAdmin.mockReturnValue(true);
 
     const templateName = 'app-builder-template';
-    const fullTemplateName = templateName;
-    const template = {
-      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
-      author: 'Adobe Inc.',
-      name: fullTemplateName,
-      description: 'A template for testing purposes [1.0.9]',
-      latestVersion: '1.0.9',
-      publishDate: '2022-05-01T03:50:39.658Z',
-      apis: [
-        {
-          code: 'CampaignStandard'
-        },
-        {
-          code: 'Runtime'
-        }
-      ],
-      adobeRecommended: false,
-      keywords: [
-        'aio',
-        'adobeio',
-        'app',
-        'templates',
-        'aio-app-builder-template'
-      ],
-      status: 'Approved',
-      links: {
-        npm: 'https://www.npmjs.com/package/@adobe/app-builder-template',
-        github: 'https://github.com/adobe/app-builder-template'
-      },
-      categories: [
-        'action',
-        'ui'
-      ]
-    };
-    findTemplateByName.mockReturnValue(template);
-    fetchUrl.mockReturnValue(`>${fullTemplateName}<`);
+    const orgName = '@adobe';
+    const fullTemplateName = orgName + '/' + templateName;
+    removeTemplateByName.mockReturnValue({ deletedCount: 1 });
+
     const response = await action.main({
       IMS_URL: process.env.IMS_URL,
       IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
@@ -259,6 +227,7 @@ describe('DELETE templates', () => {
       TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
       ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
       __ow_method: HTTP_METHOD,
+      orgName,
       templateName,
       ...fakeParams
     });
@@ -268,7 +237,6 @@ describe('DELETE templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
     expect(isAdmin).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.ADMIN_IMS_ORGANIZATIONS.split(','));
-    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(removeTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
@@ -278,41 +246,12 @@ describe('DELETE templates', () => {
 
     const templateName = 'app-builder-template';
     const fullTemplateName = templateName;
-    const template = {
-      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
-      author: 'Adobe Inc.',
-      name: fullTemplateName,
-      description: 'A template for testing purposes [1.0.9]',
-      latestVersion: '1.0.9',
-      publishDate: '2022-05-01T03:50:39.658Z',
-      apis: [
-        {
-          code: 'CampaignStandard'
-        },
-        {
-          code: 'Runtime'
-        }
-      ],
-      adobeRecommended: false,
-      keywords: [
-        'aio',
-        'adobeio',
-        'app',
-        'templates',
-        'aio-app-builder-template'
-      ],
-      status: 'Approved',
-      links: {
-        npm: 'https://www.npmjs.com/package/@adobe/app-builder-template',
-        github: 'https://github.com/adobe/app-builder-template'
-      },
-      categories: [
-        'action',
-        'ui'
-      ]
-    };
-    findTemplateByName.mockReturnValue(template);
-    fetchUrl.mockReturnValue(`>${fullTemplateName}<`);
+
+    // const templateName = 'app-builder-template';
+    // const orgName = '@adobe';
+    // const fullTemplateName = orgName + '/' + templateName;
+    removeTemplateByName.mockReturnValue({ deletedCount: 1 });
+
     const response = await action.main({
       IMS_URL: process.env.IMS_URL,
       IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
@@ -330,8 +269,109 @@ describe('DELETE templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
     expect(isValidServiceToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, ['template_registry.write']);
-    expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(removeTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
+  });
+
+  test('Should Delete By Template Id : Admin token, should return 200', async () => {
+    isAdmin.mockReturnValue(true);
+
+    const templateId = '66392ba097b141e102e8cff6';
+    removeTemplateById.mockReturnValue({ deletedCount: 1 });
+
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      __ow_method: HTTP_METHOD,
+      templateId,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      statusCode: 200
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
+    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
+    // expect(isAdmin).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.ADMIN_IMS_ORGANIZATIONS.split(','));
+    expect(removeTemplateById).toHaveBeenCalledWith({}, templateId);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
+  });
+
+  // eslint-disable-next-line jest/no-focused-tests
+  test('Should Delete By Template Id : Service token, should return 200', async () => {
+    isValidServiceToken.mockReturnValue(true);
+    const templateId = '66392ba097b141e102e8cff6';
+    removeTemplateById.mockReturnValue({ deletedCount: 1 });
+
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      __ow_method: HTTP_METHOD,
+      templateId,
+      ...fakeParams
+    });
+
+    expect(response).toEqual({
+      statusCode: 200
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
+    expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
+    expect(isValidServiceToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, ['template_registry.write']);
+    expect(removeTemplateById).toHaveBeenCalledWith({}, templateId);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
+  });
+
+  test('Template Id Scenario : TemplateId cannot be null, should return 404', async () => {
+    isAdmin.mockReturnValue(true);
+
+    const templateId = null;
+    removeTemplateById.mockReturnValue({ deletedCount: 0 });
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      __ow_method: HTTP_METHOD,
+      templateId,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      statusCode: 404
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
+  });
+
+  test('Template Id Scenario : Template does not exist, should return 404', async () => {
+    isAdmin.mockReturnValue(true);
+
+    const templateId = '66392ba097b141e102e8cff6';
+    removeTemplateById.mockReturnValue({ deletedCount: 0 });
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      ACCESS_TOKEN_GITHUB: process.env.ACCESS_TOKEN_GITHUB,
+      __ow_method: HTTP_METHOD,
+      templateId,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      statusCode: 404
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
+    expect(removeTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 });

@@ -1,5 +1,5 @@
 /*
-Copyright 2022 Adobe. All rights reserved.
+Copyright 2024 Adobe. All rights reserved.
 This file is licensed to you under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License. You may obtain a copy
 of the License at http://www.apache.org/licenses/LICENSE-2.0
@@ -10,49 +10,42 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST } =
+const { errorResponse, errorMessage, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INCORRECT_REQUEST, ERR_RC_MISSING_REQUIRED_PARAMETER, getEnv } =
   require('../../utils');
-const { validateAccessToken, generateAccessToken } = require('../../ims');
-const { findTemplateByName, addTemplate } = require('../../templateRegistry');
+const { generateAccessToken } = require('../../ims');
+const { findTemplateById, updateTemplate } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const consoleLib = require('@adobe/aio-lib-console');
 
-const HTTP_METHOD = 'post';
-const POST_PARAM_NAME = 'name';
+const HTTP_METHOD = 'put';
+const PUT_PARAM_NAME = 'templateId';
 
-/**
- * Serialize the request body
- * @param {object} params action params
- * @returns {object} serialized request body
- */
 const serializeRequestBody = (params) => {
   return {
-    name: params.name,
     ...(params.description && { description: params.description }), // developer console only
     ...(params.latestVersion && { latestVersion: params.latestVersion }), // developer console only
-    ...(params.createdBy && { createdBy: params.createdBy }),
-    ...(params.author && { author: params.author }), // developer console only
-    ...(params.status && { status: params.status }), // developer console only
-    ...(params.adobeRecommended && { adobeRecommended: params.adobeRecommended }), // developer console only
-    ...(params.codeSamples && { codeSamples: params.codeSamples }), // developer console only
-    links: {
-      ...(params?.links?.consoleProject && { consoleProject: params.links.consoleProject }), // developer console only
-      ...(params?.links?.github && { github: params.links.github }) // app builder only
-    }
+    ...(params.updatedBy && { updatedBy: params.updatedBy }),
+    ...('adobeRecommended' in params && { adobeRecommended: params.adobeRecommended }),
+    ...('keywords' in params && params.keywords.length && { keywords: params.keywords }),
+    ...('categories' in params && params.categories.length && { categories: params.categories }),
+    ...('extensions' in params && params.extensions.length && { extensions: params.extensions }),
+    ...('credentials' in params && params.credentials.length && { credentials: params.credentials }),
+    ...('codeSamples' in params && params.codeSamples.length && { codeSamples: params.codeSamples }),
+    ...('apis' in params && params.apis.length && { apis: params.apis }),
+    ...('status' in params && { status: params.status }),
+    ...('runtime' in params && { runtime: params.runtime }),
+    ...('links' in params && { links: params.links })
   };
 };
 
 /**
- * Create a new template in the Template Registry.
+ * Updates a new template in the Template Registry.
  * @param {object} params request parameters
  * @returns {object} response
  */
 async function main (params) {
   // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
-
-  const imsUrl = params.IMS_URL;
-  const imsClientId = params.IMS_CLIENT_ID;
 
   const dbParams = {
     MONGODB_URI: params.MONGODB_URI,
@@ -61,7 +54,7 @@ async function main (params) {
 
   try {
     // 'info' is the default level if not set
-    logger.info('Calling "POST templates"');
+    logger.info('Calling "PUT templates"');
 
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
@@ -72,26 +65,14 @@ async function main (params) {
 
     // check for missing request input parameters and headers
     const requiredHeaders = ['Authorization'];
-    let errorMessages = checkMissingRequestInputs(params, [], requiredHeaders);
+    const errorMessages = checkMissingRequestInputs(params, [], requiredHeaders);
     if (errorMessages) {
       return errorResponse(401, errorMessages, logger);
     }
-    const requiredParams = [
-      POST_PARAM_NAME
-    ];
-    errorMessages = checkMissingRequestInputs(params, requiredParams);
-    if (errorMessages) {
-      return errorResponse(400, errorMessages, logger);
-    }
 
-    // extract the user Bearer token from the Authorization header
-    const accessToken = getBearerToken(params);
-
-    try {
-      // validate the token, an exception will be thrown for a non-valid token
-      await validateAccessToken(accessToken, imsUrl, imsClientId);
-    } catch (error) {
-      return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
+    const isTemplateIdValid = PUT_PARAM_NAME in params && typeof params[PUT_PARAM_NAME] === 'string' && params[PUT_PARAM_NAME].length > 0;
+    if (!isTemplateIdValid) {
+      return errorResponse(400, [errorMessage(ERR_RC_MISSING_REQUIRED_PARAMETER, `The "${PUT_PARAM_NAME}" parameter is not set.`)], logger);
     }
 
     Enforcer.v3_0.Schema.defineDataTypeFormat('string', 'uuid', null);
@@ -105,34 +86,40 @@ async function main (params) {
 
     const [req, reqError] = openapi.request({
       method: HTTP_METHOD,
-      path: '/templates',
+      path: `/templates/{${PUT_PARAM_NAME}}`,
+      params: {
+        templateId: params[PUT_PARAM_NAME]
+      },
       body
     });
     if (reqError) {
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, reqError.toString().split('\n').map(line => line.trim()).join(' => '))], logger);
     }
 
-    const templateName = params.name;
+    const templateId = params.templateId;
     const consoleProjectUrl = params?.links?.consoleProject;
 
-    const result = await findTemplateByName(dbParams, templateName);
-    if (result !== null) {
-      return {
-        statusCode: 409
-      };
-    }
+    const hasCredentialsOrApiInParams = (('credentials' in params && params.credentials.length > 0) || ('apis' in params && params.apis.length > 0));
 
-    if (consoleProjectUrl) {
+    if (hasCredentialsOrApiInParams) {
+      // scenario 1 :  if apis or credentials, just overwrite the template
+      const dbResponse = await updateTemplate(dbParams, templateId, body);
+      if (dbResponse.matchedCount < 1) {
+        return {
+          statusCode: 404
+        };
+      }
+    } else if (consoleProjectUrl) {
+      // scenario 2 :  if consoleProject in payload, replace apis and credentials
       const projectId = consoleProjectUrl.split('/').at(-2);
       const accessToken = await generateAccessToken(params.IMS_AUTH_CODE, params.IMS_CLIENT_ID, params.IMS_CLIENT_SECRET, params.IMS_SCOPES, logger);
-      const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, 'stage'); // Dev console templates can only be added from stage
+      const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, getEnv(logger));
       const { body: installConfig } = await consoleClient.getProjectInstallConfig(projectId);
 
       // We have to get the install config in this format to maintain backwards
       // compatibility with current template registry
       const credentials = [];
       const apis = [];
-
       for (const credential of installConfig.credentials) {
         credentials.push({
           type: credential.type,
@@ -151,27 +138,27 @@ async function main (params) {
         }
       }
 
-      body = {
-        ...body,
-        credentials,
-        apis
+      body = { ...body, credentials, apis };
+    }
+
+    // an app builder template scenario
+    const dbResponse = await updateTemplate(dbParams, templateId, body);
+    if (dbResponse.matchedCount < 1) {
+      logger.info('"PUT templates" not executed successfully');
+      return {
+        statusCode: 404
       };
     }
 
-    const template = await addTemplate(dbParams, body);
-    // TODO: Uncomment this when we support App Builder templates again
-    // const issueNumber = await createReviewIssue(templateName, githubRepoUrl, params.ACCESS_TOKEN_GITHUB, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
+    // fetch the updated template from the database
+    const template = await findTemplateById(dbParams, templateId);
+
     const response = {
       ...template,
       _links: {
         self: {
-          href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+          href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template?.name}`
         }
-        // TODO: Uncomment this when we support App Builder templates again
-        // 'review': {
-        //   'href': `https://github.com/${params.TEMPLATE_REGISTRY_ORG}/${params.TEMPLATE_REGISTRY_REPOSITORY}/issues/${issueNumber}`,
-        //   'description': 'A link to the "Template Review Request" Github issue.'
-        // }
       }
     };
 
@@ -181,7 +168,7 @@ async function main (params) {
       throw new Error(resError.toString());
     }
 
-    logger.info('"POST templates" executed successfully');
+    logger.info('"PUT templates" executed successfully');
     return {
       statusCode: 200,
       body: res.body

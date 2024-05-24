@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST, ERR_RC_INVALID_TEMPLATE_ID } = require('../../utils');
+const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST, ERR_RC_INVALID_TEMPLATE_ID, getEnv } = require('../../utils');
 const { validateAccessToken } = require('../../ims');
 const { findTemplateById } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
@@ -18,7 +18,8 @@ const consoleLib = require('@adobe/aio-lib-console');
 
 const HTTP_METHOD = 'post';
 const POST_PARAM_NAME = 'templateId';
-
+const CREDENTIAL_FLOW_TYPE_ADOBEID = 'adobeid';
+const CREDENTIAL_FLOW_TYPE_ENTP = 'entp';
 /**
  * Serialize the request body of Install template action
  * @param {object} params action params
@@ -26,13 +27,14 @@ const POST_PARAM_NAME = 'templateId';
  */
 const serializeRequestBody = (params) => {
   // Extracting required properties
-  const { orgId, projectName, description, metadata } = params;
+  const { orgId, projectName, description, metadata, apis } = params;
   // Constructing the serialized object
   return {
     orgId,
     projectName,
     ...(description && { description }), // Include description if it exists
-    metadata // Include metadata object
+    metadata, // Include metadata object
+    ...(apis && { apis }) // Include apis array if it exists
   };
 };
 
@@ -134,11 +136,16 @@ async function main (params) {
       oauthsinglepageapp: 'SinglePageApp'
     };
 
-    // set env based on apiHost
-    const apiHost = process.env.__OW_API_HOST;
-    logger.debug('apiHost:', apiHost);
-    const env = apiHost.includes('prod') ? 'prod' : 'stage';
-    logger.debug('env: ', env);
+    const apisInfoArray = body.apis;
+    // create map for api code and api info body
+    const mapApiCodeToApiInfo = {};
+    if (apisInfoArray) {
+      for (const api of apisInfoArray) {
+        mapApiCodeToApiInfo[api.code] = api;
+      }
+    }
+
+    const env = getEnv(logger);
     const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, env);
 
     // Console APIs only support creating one type of credential at a time
@@ -149,12 +156,12 @@ async function main (params) {
     const credentialFlowType = credentials[0].flowType;
     let createIntegrationResponse = {};
 
-    if (credentialFlowType === 'adobeid') {
+    if (credentialFlowType.toLowerCase() === CREDENTIAL_FLOW_TYPE_ADOBEID) {
       // form integration request body
       const createAdobeIdIntegrationReqBody = {
         name: String(body.projectName),
         description: String(body.description ? body.description : `Created from template ${template.name}`),
-        platform: String(mapAdobeIdCredentialTypeToPlatformType[credentialType]),
+        platform: String(mapAdobeIdCredentialTypeToPlatformType[credentialType.toLowerCase()]),
         ...(body.metadata?.urlScheme && { urlScheme: body.metadata.urlScheme }), // Include urlScheme if it exists
         ...(body.metadata?.redirectUriList && { redirectUriList: body.metadata.redirectUriList }), // Include redirectUriList if it exists
         ...(body.metadata?.defaultRedirectUri && { defaultRedirectUri: body.metadata.defaultRedirectUri }), // Include defaultRedirectUri if it exists
@@ -165,13 +172,24 @@ async function main (params) {
 
       // iterate over APIs and add APIs to request body services array
       for (const api of apis) {
-        if (api.flowType !== 'adobeid' || api.credentialType !== credentialType) {
+        const apiFlowType = api.flowType;
+        const apiCredentialType = api.credentialType;
+        if (apiFlowType.toLowerCase() !== CREDENTIAL_FLOW_TYPE_ADOBEID || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
           continue;
+        }
+        // extract api license config from the api info map
+        // Note: adobeid type credentials do not support license configs because they do not have a technical account.
+        // TR Install API doesn't need to know this distinction between credential types and console will simply ignore in case license configs are included.
+
+        let apiLicenseConfigs = [];
+        const apiInfo = mapApiCodeToApiInfo[api.code];
+        if (apiInfo?.credentialType?.toLowerCase() === apiCredentialType.toLowerCase() && apiInfo?.flowType?.toLowerCase() === apiFlowType.toLowerCase()) {
+          apiLicenseConfigs = apiInfo.licenseConfigs;
         }
         const service = {
           sdkCode: api.code,
           atlasPlanCode: '',
-          licenseConfigs: [],
+          licenseConfigs: apiLicenseConfigs,
           roles: []
         };
         createAdobeIdIntegrationReqBody.services.push(service);
@@ -182,7 +200,7 @@ async function main (params) {
       // create AdobeID integration
       createIntegrationResponse = await consoleClient.createAdobeIdIntegration(body.orgId, createAdobeIdIntegrationReqBody);
       logger.debug(`AdobeID Integration created: ${JSON.stringify(createIntegrationResponse)}`);
-    } else if (credentialFlowType === 'entp') {
+    } else if (credentialFlowType.toLowerCase() === CREDENTIAL_FLOW_TYPE_ENTP) {
       // form integration request body
       const createOAuthS2SIntegrationReqBody = {
         name: String(body.projectName),
@@ -192,13 +210,23 @@ async function main (params) {
       };
 
       for (const api of apis) {
-        if (api.flowType !== 'entp' || api.credentialType !== credentialType) {
+        const apiFlowType = api.flowType;
+        const apiCredentialType = api.credentialType;
+        if (apiFlowType.toLowerCase() !== CREDENTIAL_FLOW_TYPE_ENTP || apiCredentialType.toLowerCase() !== credentialType.toLowerCase()) {
           continue;
         }
+
+        // extract api license config from the api info map
+        let apiLicenseConfigs = [];
+        const apiInfo = mapApiCodeToApiInfo[api.code];
+        if (apiInfo?.credentialType?.toLowerCase() === apiCredentialType.toLowerCase() && apiInfo?.flowType?.toLowerCase() === apiFlowType.toLowerCase()) {
+          apiLicenseConfigs = apiInfo.licenseConfigs;
+        }
+
         const service = {
           sdkCode: api.code,
           atlasPlanCode: '',
-          licenseConfigs: [],
+          licenseConfigs: apiLicenseConfigs,
           roles: []
         };
         createOAuthS2SIntegrationReqBody.services.push(service);
@@ -212,15 +240,18 @@ async function main (params) {
       logger.error(`Credential flow type "${credentialFlowType}" not supported for template install.`);
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, `Credential flow type "${credentialFlowType}" not supported for template install`)], logger);
     }
-    const { projectId, workspaceId } = createIntegrationResponse;
+    const { projectId, workspaceId } = createIntegrationResponse.body;
     logger.debug(`ProjectId: ${projectId}, WorkspaceId: ${workspaceId}`);
 
     // call download workspace config API to get the config
     const response = await consoleClient.downloadWorkspaceJson(body.orgId, projectId, workspaceId);
+    if (!response) {
+      logger.error(`Workspace config not found for project ${projectId} and workspace ${workspaceId}`);
+      return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, `Workspace config not found for project ${projectId} and workspace ${workspaceId}`)], logger);
+    }
     logger.debug(`Workspace config: ${JSON.stringify(response)}`);
-
     // validate the response data to be sure it complies with OpenApi Schema
-    const [res, resError] = req.response(201, response);
+    const [res, resError] = req.response(201, response.body);
     if (resError) {
       throw new Error(resError.toString());
     }

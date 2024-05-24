@@ -11,13 +11,98 @@ governing permissions and limitations under the License.
 
 const { Core } = require('@adobe/aio-sdk');
 const { errorResponse, errorMessage, stringParameters, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED } = require('../../utils');
-const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED } =
+const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED, findTemplateById } =
   require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
+const { evaluateEntitlements } = require('../../templateEntitlement');
 
 // GET operation is available to everyone, no IMS access token is required
-
 const HTTP_METHOD = 'get';
+
+/**
+ *
+ * @param {object} params - object with request input
+ * @param {object} dbParams - database connection parameters
+ * @param {object} logger - logger object
+ * @returns {object} response object
+ */
+async function fetchTemplateById (params, dbParams, logger) {
+  const templateId = params.templateId;
+  if (templateId === undefined || templateId === null) {
+    return {
+      statusCode: 404
+    };
+  }
+  const template = await findTemplateById(dbParams, templateId);
+  if (template === null || template === undefined) {
+    return {
+      statusCode: 404
+    };
+  }
+  const response = {
+    ...template,
+    _links: {
+      self: {
+        href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template.name}`
+      }
+    }
+  };
+  const templateStatuses = [TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED];
+  if (templateStatuses.includes(template.status)) {
+    const reviewIssue = await getReviewIssueByTemplateName(template.name, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
+    if (reviewIssue !== null) {
+      response._links.review = {
+        href: reviewIssue,
+        description: 'A link to the "Template Review Request" Github issue.'
+      };
+    }
+  }
+  return response;
+}
+
+/**
+ *
+ * @param {object} params - object with request input
+ * @param {object} dbParams - database connection parameters
+ * @param {object} logger - logger object
+ * @returns {object} response object
+ */
+async function fetchTemplateByName (params, dbParams, logger) {
+  const orgName = params.orgName;
+  const templateName = params.templateName;
+  if ((orgName === undefined) && (templateName === undefined)) {
+    return {
+      statusCode: 404
+    };
+  }
+  const fullTemplateName = (orgName !== undefined) ? orgName + '/' + templateName : templateName;
+  const template = await findTemplateByName(dbParams, fullTemplateName);
+  if (template === null) {
+    return {
+      statusCode: 404
+    };
+  }
+  const response = {
+    ...template,
+    _links: {
+      self: {
+        href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
+      }
+    }
+  };
+  const templateStatuses = [TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED];
+  if (templateStatuses.includes(template.status)) {
+    const reviewIssue = await getReviewIssueByTemplateName(fullTemplateName, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
+    if (reviewIssue !== null) {
+      response._links.review = {
+        href: reviewIssue,
+        description: 'A link to the "Template Review Request" Github issue.'
+      };
+    }
+  }
+
+  return response;
+}
 
 /**
  * Get a template from the Template Registry.
@@ -35,14 +120,14 @@ async function main (params) {
   try {
     // 'info' is the default level if not set
     logger.info('Calling "GET templates"');
-
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
-
+    // checking for valid method
     if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
       return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
     }
-
+    // checking for validation based on params call.
+    const paramField = 'templateId' in params ? 'templateId' : 'templateName';
     Enforcer.v3_0.Schema.defineDataTypeFormat('string', 'uuid', null);
     Enforcer.v3_0.Schema.defineDataTypeFormat('string', 'uri', null);
 
@@ -51,40 +136,25 @@ async function main (params) {
     const openapi = await Enforcer('./template-registry-api.json', { componentOptions: { exceptionSkipCodes: ['WPAR002'] } });
     const [req] = openapi.request({
       method: HTTP_METHOD,
-      path: '/templates/{templateName}'
+      path: `/templates/{${paramField}}`
     });
 
-    const orgName = params.orgName;
-    const templateName = params.templateName;
-    if ((orgName === undefined) && (templateName === undefined)) {
-      return {
-        statusCode: 404
-      };
-    }
-    const fullTemplateName = (orgName !== undefined) ? orgName + '/' + templateName : templateName;
-    const template = await findTemplateByName(dbParams, fullTemplateName);
-    if (template === null) {
-      return {
-        statusCode: 404
-      };
-    }
-    const response = {
-      ...template,
-      _links: {
-        self: {
-          href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
-        }
+    let response = {};
+    if (paramField === 'templateId') {
+      response = await fetchTemplateById(params, dbParams, logger);
+      if (response.statusCode === 404) {
+        return response;
       }
-    };
-    const templateStatuses = [TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED];
-    if (templateStatuses.includes(template.status)) {
-      const reviewIssue = await getReviewIssueByTemplateName(fullTemplateName, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
-      if (reviewIssue !== null) {
-        response._links.review = {
-          href: reviewIssue,
-          description: 'A link to the "Template Review Request" Github issue.'
-        };
+    } else {
+      response = await fetchTemplateByName(params, dbParams, logger);
+      if (response.statusCode === 404) {
+        return response;
       }
+    }
+
+    const evaluatedTemplates = await evaluateEntitlements([response], params, logger);
+    if (evaluatedTemplates?.length > 0) {
+      response = evaluatedTemplates[0];
     }
 
     // validate the response data to be sure it complies with OpenApi Schema
