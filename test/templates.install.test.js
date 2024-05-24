@@ -37,8 +37,7 @@ jest.mock('../actions/templateRegistry', () => ({
 jest.mock('@adobe/aio-lib-console');
 const mockConsoleSDKInstance = {
   createAdobeIdIntegration: jest.fn(),
-  createOauthS2SCredentialIntegration: jest.fn(),
-  downloadWorkspaceJson: jest.fn()
+  createOauthS2SCredentialIntegration: jest.fn()
 };
 consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance);
 
@@ -345,8 +344,6 @@ describe('POST Install template: Core business logic specific tests', () => {
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).not.toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).toHaveBeenCalledWith('mockOrgId', { description: 'Created from template @adobe/developer-console-template', name: 'mockProjectName', services: [{ atlasPlanCode: '', licenseConfigs: [], roles: [], sdkCode: 'PhotoshopSDK' }], templateId: 'mockTemplateId' });
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalled();
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalledWith('mockOrgId', 'mockProjectId', 'mockWorkspaceId');
   });
 
   test('should create Oauth S2S integration if template has Oauth S2S flow, with description set', async () => {
@@ -433,8 +430,6 @@ describe('POST Install template: Core business logic specific tests', () => {
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).not.toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).toHaveBeenCalledWith('mockOrgId', { description: 'mockDescription', name: 'mockProjectName', services: [{ atlasPlanCode: '', licenseConfigs: [], roles: [], sdkCode: 'PhotoshopSDK' }], templateId: 'mockTemplateId' });
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalled();
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalledWith('mockOrgId', 'mockProjectId', 'mockWorkspaceId');
   });
 
   test('should create AdobeId integration if template has AdobeId flow', async () => {
@@ -527,8 +522,6 @@ describe('POST Install template: Core business logic specific tests', () => {
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).not.toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).toHaveBeenCalledWith('mockOrgId', { name: 'mockProjectName', description: 'Created from template @adobe/developer-console-template', platform: 'apiKey', services: [{ sdkCode: 'AssetComputeSDK', atlasPlanCode: '', licenseConfigs: [], roles: [] }, { atlasPlanCode: '', licenseConfigs: [], roles: [], sdkCode: 'PhotoshopSDK' }], templateId: 'mockTemplateId', domain: 'mockDomain', urlScheme: 'mockUrlScheme', redirectUriList: 'mockRedirectUriList', defaultRedirectUri: 'mockDefaultRedirectUri' });
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalled();
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalledWith('mockOrgId', 'mockProjectId', 'mockWorkspaceId');
   });
 
   test('should create AdobeId integration if template has AdobeId flow, with description set', async () => {
@@ -621,8 +614,6 @@ describe('POST Install template: Core business logic specific tests', () => {
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).not.toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).toHaveBeenCalledWith('mockOrgId', { name: 'mockProjectName', description: 'mockDescription', platform: 'apiKey', services: [{ sdkCode: 'AssetComputeSDK', atlasPlanCode: '', licenseConfigs: [], roles: [] }, { atlasPlanCode: '', licenseConfigs: [], roles: [], sdkCode: 'PhotoshopSDK' }], templateId: 'mockTemplateId', domain: 'mockDomain', urlScheme: 'mockUrlScheme', redirectUriList: 'mockRedirectUriList', defaultRedirectUri: 'mockDefaultRedirectUri' });
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalled();
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalledWith('mockOrgId', 'mockProjectId', 'mockWorkspaceId');
   });
 
   test('should throw error if template has invalid flowType', async () => {
@@ -668,92 +659,6 @@ describe('POST Install template: Core business logic specific tests', () => {
     findTemplateById.mockReturnValueOnce(mockTemplate);
     await action.main(mockParams);
     expect(Core.Logger().error).toHaveBeenCalledWith('Credential flow type "analytics" not supported for template install.');
-  });
-
-  test('should throw error if download workspace api response is null, 500', async () => {
-    const mockTemplate = {
-      id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
-      author: 'John doe',
-      name: '@adobe/developer-console-template',
-      description: 'Developer Console template',
-      latestVersion: '1.0.0',
-      adobeRecommended: true,
-      status: 'Approved',
-      links: {
-        consoleProject: 'https://developer-stage.adobe.com/console/projects/1234'
-      },
-      credentials: [
-        {
-          type: 'apikey',
-          flowType: 'adobeid'
-        }
-      ],
-      apis: [
-        {
-          code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
-          credentialType: 'apikey',
-          flowType: 'adobeid'
-        },
-        {
-          code: 'PhotoshopSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
-          credentialType: 'apikey',
-          flowType: 'adobeid'
-        },
-        {
-          code: 'IllustratorSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
-          credentialType: 'oauthnativeapp',
-          flowType: 'adobeid'
-        }
-      ],
-      codeSamples: [
-        {
-          language: 'node',
-          link: 'https://developer-stage.adobe.com/sample.zip'
-        }
-      ]
-    };
-    const mockAdobeIdIntegrationResponse = {
-      body: {
-        id: 'mockId',
-        apikey: 'mockApiKey',
-        orgId: 'mockOrgId',
-        projectId: 'mockProjectId',
-        workspaceId: 'mockWorkspaceId',
-        subscriptionResult: {
-          sdkList: [],
-          errorList: []
-        }
-      }
-    };
-    findTemplateById.mockReturnValueOnce(mockTemplate);
-    mockConsoleSDKInstance.createAdobeIdIntegration.mockResolvedValue(mockAdobeIdIntegrationResponse);
-    mockConsoleSDKInstance.downloadWorkspaceJson.mockResolvedValue(null);
-    process.env.__OW_API_HOST = 'https://controller-gw-ns-team-ethos651stagejpn3-runtime-stage-b.ethos651-stage-jpn3.ethos.adobe.net';
-    const response = await action.main(mockParams);
-    expect(response.error.statusCode).toBe(500);
-    expect(response.error.body.errors[0].code).toBe(utils.ERR_RC_SERVER_ERROR);
-    expect(response.error.body.errors[0].message).toContain('Workspace config not found for project mockProjectId and workspace mockWorkspaceId');
   });
 
   test('should throw error if response is invalid, 500', async () => {
@@ -819,27 +724,14 @@ describe('POST Install template: Core business logic specific tests', () => {
         }
       ]
     };
-    const mockAdobeIdIntegrationResponse = {
-      body: {
-        id: 'mockId',
-        apikey: 'mockApiKey',
-        orgId: 'mockOrgId',
-        projectId: 'mockProjectId',
-        workspaceId: 'mockWorkspaceId',
-        subscriptionResult: {
-          sdkList: [],
-          errorList: []
-        }
-      }
-    };
+    const mockAdobeIdIntegrationResponse = { body: {} };
     findTemplateById.mockReturnValueOnce(mockTemplate);
     mockConsoleSDKInstance.createAdobeIdIntegration.mockResolvedValue(mockAdobeIdIntegrationResponse);
-    mockConsoleSDKInstance.downloadWorkspaceJson.mockResolvedValue({ body: {} });
     process.env.__OW_API_HOST = 'https://controller-gw-ns-team-ethos651stagejpn3-runtime-stage-b.ethos651-stage-jpn3.ethos.adobe.net';
     const response = await action.main(mockParams);
     expect(response.error.statusCode).toBe(500);
     expect(response.error.body.errors[0].code).toBe(utils.ERR_RC_SERVER_ERROR);
-    expect(response.error.body.errors[0].message).toContain('Response invalid\n' + '  at: body\n' + '    One or more required properties missing: project');
+    expect(response.error.body.errors[0].message).toContain('Response invalid\n' + '  at: body\n' + '    One or more required properties missing: id, apiKey, orgId');
   });
 
   test('should return response as expected, 201', async () => {
@@ -907,7 +799,7 @@ describe('POST Install template: Core business logic specific tests', () => {
     const mockAdobeIdIntegrationResponse = {
       body: {
         id: 'mockId',
-        apikey: 'mockApiKey',
+        apiKey: 'mockApiKey',
         orgId: 'mockOrgId',
         projectId: 'mockProjectId',
         workspaceId: 'mockWorkspaceId',
@@ -917,61 +809,12 @@ describe('POST Install template: Core business logic specific tests', () => {
         }
       }
     };
-
-    const mockWorkspaceJson = {
-      body: {
-        project: {
-          id: 'mockProjectId',
-          name: 'mockProjectName',
-          description: 'mockDescription',
-          org: {
-            id: 'mockOrgId',
-            name: 'mockOrgName',
-            ims_org_id: 'mockImsOrgId',
-            workspace: {
-              id: 'mockWorkspaceId',
-              name: 'mockWorkspaceName',
-              description: 'mockWorkspaceDescription',
-              details: {
-                credentials: [],
-                apis: [],
-                services: [],
-                runtime: {}
-              }
-            }
-          }
-        }
-      }
-    };
     findTemplateById.mockReturnValueOnce(mockTemplate);
     mockConsoleSDKInstance.createAdobeIdIntegration.mockResolvedValue(mockAdobeIdIntegrationResponse);
-    mockConsoleSDKInstance.downloadWorkspaceJson.mockResolvedValue(mockWorkspaceJson);
     process.env.__OW_API_HOST = 'https://controller-gw-ns-team-ethos651prodjpn3-runtime-prod-b.ethos651-prod-jpn3.ethos.adobe.net';
     const response = await action.main(mockParams);
     expect(response.statusCode).toBe(201);
-    expect(response.body).toEqual({
-      project: {
-        id: 'mockProjectId',
-        name: 'mockProjectName',
-        description: 'mockDescription',
-        org: {
-          id: 'mockOrgId',
-          name: 'mockOrgName',
-          ims_org_id: 'mockImsOrgId',
-          workspace: {
-            id: 'mockWorkspaceId',
-            name: 'mockWorkspaceName',
-            description: 'mockWorkspaceDescription',
-            details: {
-              credentials: [],
-              apis: [],
-              services: [],
-              runtime: {}
-            }
-          }
-        }
-      }
-    });
+    expect(response.body).toEqual(mockAdobeIdIntegrationResponse.body);
   });
 
   test('should create AdobeId integration if template has AdobeId flow, test uppercase credential/api type and flow type', async () => {
@@ -1064,8 +907,6 @@ describe('POST Install template: Core business logic specific tests', () => {
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).not.toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).toHaveBeenCalledWith('mockOrgId', { name: 'mockProjectName', description: 'Created from template @adobe/developer-console-template', platform: 'apiKey', services: [{ sdkCode: 'AssetComputeSDK', atlasPlanCode: '', licenseConfigs: [], roles: [] }, { atlasPlanCode: '', licenseConfigs: [], roles: [], sdkCode: 'PhotoshopSDK' }], templateId: 'mockTemplateId', domain: 'mockDomain', urlScheme: 'mockUrlScheme', redirectUriList: 'mockRedirectUriList', defaultRedirectUri: 'mockDefaultRedirectUri' });
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalled();
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalledWith('mockOrgId', 'mockProjectId', 'mockWorkspaceId');
   });
 
   test('should set license config for APIs if present in request body, adobeid credential type', async () => {
@@ -1183,8 +1024,6 @@ describe('POST Install template: Core business logic specific tests', () => {
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).not.toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).toHaveBeenCalledWith('mockOrgId', { name: 'mockProjectName', description: 'Created from template @adobe/developer-console-template', platform: 'apiKey', services: [{ sdkCode: 'AssetComputeSDK', atlasPlanCode: '', licenseConfigs: [{ id: '1', productId: 'A', op: 'mockOp' }], roles: [] }, { atlasPlanCode: '', licenseConfigs: [{ id: '2', productId: 'B', op: 'mockOp' }], roles: [], sdkCode: 'PhotoshopSDK' }], templateId: 'mockTemplateId', domain: 'mockDomain', urlScheme: 'mockUrlScheme', redirectUriList: 'mockRedirectUriList', defaultRedirectUri: 'mockDefaultRedirectUri' });
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalled();
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalledWith('mockOrgId', 'mockProjectId', 'mockWorkspaceId');
   });
 
   test('should set license config for APIs if present in request body, entp credential type', async () => {
@@ -1297,7 +1136,5 @@ describe('POST Install template: Core business logic specific tests', () => {
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).not.toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).toHaveBeenCalledWith('mockOrgId', { description: 'Created from template @adobe/developer-console-template', name: 'mockProjectName', services: [{ atlasPlanCode: '', licenseConfigs: [{ id: '2', productId: 'B', op: 'mockOp' }], roles: [], sdkCode: 'PhotoshopSDK' }], templateId: 'mockTemplateId' });
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalled();
-    expect(mockConsoleSDKInstance.downloadWorkspaceJson).toHaveBeenCalledWith('mockOrgId', 'mockProjectId', 'mockWorkspaceId');
   });
 });
