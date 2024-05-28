@@ -308,7 +308,10 @@ describe('PUT templates', () => {
 
   test('Incorrect response, should throw error', async () => {
     fetchUrl.mockReturnValue('');
-    findTemplateById.mockReturnValue(null);
+    findTemplateById.mockReturnValue({
+      name: 'fake-template-name',
+      bad: 'field'
+    });
     updateTemplate.mockReturnValue({ matchedCount: 1 });
     const response = await action.main({
       IMS_URL: process.env.IMS_URL,

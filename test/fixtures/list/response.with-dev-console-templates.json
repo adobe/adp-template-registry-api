@@ -50,11 +50,11 @@
                         "href": "https://github.com/adobe/aio-templates/issues/100"
                     },
                     "self": {
-                        "href": "https://template-registry-api.tbd/apis/v1/templates/@author/app-builder-template-6"
+                        "href": "https://template-registry-api.tbd/apis/v1/templates/d1dc1000-f32e-4172-a0ac-9b2f3ef6ac48"
                     }
                 },
                 "id": "d1dc1000-f32e-4172-a0ac-9b2f3ef6ac48",
-                "name": "@author/app-builder-template-6",
+                "name": "app-builder-template-6",
                 "status": "Rejected",
                 "links": {
                     "consoleProject": "https://developer-stage.adobe.com/console/projects/1234"
