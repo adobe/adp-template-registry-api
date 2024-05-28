@@ -661,7 +661,7 @@
         }
       }
     },
-    "/templates/{templateId}/install": {
+    "/templates/install/{templateId}": {
       "post": {
         "summary": "Install a template",
         "operationId": "template-registry-api/templates-install.http",
@@ -692,7 +692,7 @@
         "responses": {
           "201": {
             "description": "Template installed - Console Project created successfully.",
-            "schema": {
+            "schema":   {
               "$ref": "#/definitions/TemplateInstallationResponseBody"
             }
           },
