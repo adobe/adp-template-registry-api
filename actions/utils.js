@@ -41,7 +41,8 @@ function stringParameters (params) {
   if (headers.authorization) {
     headers = {
       ...headers,
-      authorization: '<hidden>'
+      authorization: '<hidden>',
+      cookie: '<hidden>'
     };
   }
   return JSON.stringify({ ...newParams, __ow_headers: headers });

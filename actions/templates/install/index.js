@@ -104,7 +104,7 @@ async function main (params) {
 
     const [req, reqError] = openapi.request({
       method: 'POST',
-      path: '/templates/{templateId}/install',
+      path: '/templates/install/{templateId}',
       body
     });
     if (reqError) {
@@ -240,18 +240,9 @@ async function main (params) {
       logger.error(`Credential flow type "${credentialFlowType}" not supported for template install.`);
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, `Credential flow type "${credentialFlowType}" not supported for template install`)], logger);
     }
-    const { projectId, workspaceId } = createIntegrationResponse.body;
-    logger.debug(`ProjectId: ${projectId}, WorkspaceId: ${workspaceId}`);
 
-    // call download workspace config API to get the config
-    const response = await consoleClient.downloadWorkspaceJson(body.orgId, projectId, workspaceId);
-    if (!response) {
-      logger.error(`Workspace config not found for project ${projectId} and workspace ${workspaceId}`);
-      return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, `Workspace config not found for project ${projectId} and workspace ${workspaceId}`)], logger);
-    }
-    logger.debug(`Workspace config: ${JSON.stringify(response)}`);
     // validate the response data to be sure it complies with OpenApi Schema
-    const [res, resError] = req.response(201, response.body);
+    const [res, resError] = req.response(201, createIntegrationResponse.body);
     if (resError) {
       throw new Error(resError.toString());
     }

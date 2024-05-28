@@ -3,7 +3,7 @@
   "basePath": "/v1",
   "info": {
     "title": "Template Registry API",
-    "version": "0.2.0",
+    "version": "0.6.0",
     "license": {
       "name": "Apache-2.0 License",
       "url": "https://github.com/adobe/adp-template-registry-api?tab=Apache-2.0-1-ov-file"
@@ -661,7 +661,7 @@
         }
       }
     },
-    "/templates/{templateId}/install": {
+    "/templates/install/{templateId}": {
       "post": {
         "summary": "Install a template",
         "operationId": "template-registry-api/templates-install.http",
@@ -692,7 +692,7 @@
         "responses": {
           "201": {
             "description": "Template installed - Console Project created successfully.",
-            "schema": {
+            "schema":   {
               "$ref": "#/definitions/TemplateInstallationResponseBody"
             }
           },
@@ -1205,360 +1205,71 @@
         "apis": {
           "type": "array",
           "description": "Optional field to include license configs to be assigned to a technical account for an individual API",
-            "items": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                      "type": "string",
-                      "description": "API code"
-                  },
-                  "credentialType": {
-                      "type": "string",
-                      "description": "Credential type"
-                  },
-                  "FlowType": {
-                      "type": "string",
-                      "description": "Flow type"
-                  },
-                  "licenseConfigs": {
-                      "type": "array",
-                      "items": {
-                          "type": "object"
-                      }
-                  }
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "API code"
+              },
+              "credentialType": {
+                "type": "string",
+                "description": "Credential type"
+              },
+              "FlowType": {
+                "type": "string",
+                "description": "Flow type"
+              },
+              "licenseConfigs": {
+                "type": "array",
+                "items": {
+                  "type": "object"
                 }
+              }
             }
+          }
         }
       }
     },
     "TemplateInstallationResponseBody": {
       "type": "object",
-      "required": ["project"],
+      "required": [
+        "id",
+        "apiKey",
+        "orgId"
+      ],
       "properties": {
-        "project": {
+        "id": {
+          "type": "string"
+        },
+        "apiKey": {
+          "type": "string"
+        },
+        "orgId": {
+          "type": "string"
+        },
+        "technicalAccountId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "workspaceId": {
+          "type": "string"
+        },
+        "subscriptionResult": {
           "type": "object",
-          "required": ["id", "name", "org"],
-          "description": "Root element",
           "properties": {
-            "id": {
-              "type": "string",
-              "description": "Project id"
+            "sdkList": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
-            "name": {
-              "type": "string",
-              "description": "Project name"
-            },
-            "title": {
-              "type": "string",
-              "description": "Project title"
-            },
-            "description": {
-              "type": "string",
-              "description": "Project description"
-            },
-            "org": {
-              "type": "object",
-              "description": "Organization info",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "Organization id"
-                },
-                "name": {
-                  "type": "string",
-                  "description": "Organization name"
-                },
-                "ims_org_id": {
-                  "type": "string",
-                  "description": "Ims organization id"
-                },
-                "workspace": {
-                  "type": "object",
-                  "description": "Workspace info",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "Workspace id"
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "Workspace name"
-                    },
-                    "title": {
-                      "type": "string",
-                      "description": "Workspace title"
-                    },
-                    "description": {
-                      "type": "string",
-                      "description": "Workspace description"
-                    },
-                    "details": {
-                      "type": "object",
-                      "description": "Workspace details",
-                      "properties": {
-                        "credentials": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "description": "Credential id"
-                              },
-                              "name": {
-                                "type": "string",
-                                "description": "Credential name"
-                              },
-                              "apiKey": {
-                                "type": "string",
-                                "description": "Api key / client Id"
-                              },
-                              "integration_type": {
-                                "type": "string",
-                                "description": "Credential type, possible values (service, oauthweb, oauthandroid, oauthios)"
-                              },
-                              "jwt": {
-                                "type": "object",
-                                "description": "jwt credential details",
-                                "properties": {
-                                  "client_id": {
-                                    "type": "string",
-                                    "description": "Client id"
-                                  },
-                                  "client_secret": {
-                                    "type": "string",
-                                    "description": "Client secret"
-                                  },
-                                  "technical_account_email": {
-                                    "type": "string",
-                                    "description": "Technical account email"
-                                  },
-                                  "technical_account_id": {
-                                    "type": "string",
-                                    "description": "Technical account id"
-                                  },
-                                  "meta_scopes": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string",
-                                      "description": "Credential meta scope"
-                                    }
-                                  }
-                                }
-                              },
-                              "oauth_server_to_server": {
-                                "type": "object",
-                                "description": "OAuth server to server credential details",
-                                "properties": {
-                                  "client_id": {
-                                    "type": "string",
-                                    "description": "Client id"
-                                  },
-                                  "client_secrets": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string",
-                                      "description": "client secrets"
-                                    }
-                                  },
-                                  "technical_account_email": {
-                                    "type": "string",
-                                    "description": "Technical account email"
-                                  },
-                                  "technical_account_id": {
-                                    "type": "string",
-                                    "description": "Technical account id"
-                                  },
-                                  "scopes": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string",
-                                      "description": "Credential scopes"
-                                    }
-                                  }
-                                }
-                              },
-                              "oauth2": {
-                                "type": "object",
-                                "description": "oauth2 credential details",
-                                "properties": {
-                                  "client_id": {
-                                    "type": "string",
-                                    "description": "Client id"
-                                  },
-                                  "client_secret": {
-                                    "type": "string",
-                                    "description": "Client secret"
-                                  },
-                                  "redirect_uri": {
-                                    "type": "array",
-                                    "description": "Redirect urls list",
-                                    "items": {
-                                      "type": "string",
-                                      "description": "Redirect url"
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "services": {
-                          "type": "array",
-                          "description": "Workspace services",
-                          "items": {
-                            "type": "object",
-                            "description": "Service details",
-                            "properties": {
-                              "code": {
-                                "type": "string",
-                                "description": "Service code"
-                              },
-                              "name": {
-                                "type": "string",
-                                "description": "Service name"
-                              }
-                            }
-                          }
-                        },
-                        "runtime": {
-                          "type": "object",
-                          "description": "Workspace runtime",
-                          "properties": {
-                            "namespaces": {
-                              "type": "array",
-                              "description": "Runtime namespaces",
-                              "items": {
-                                "type": "object",
-                                "description": "Runtime details",
-                                "properties": {
-                                  "name": {
-                                    "type": "string",
-                                    "description": "Namespace name"
-                                  },
-                                  "auth": {
-                                    "type": "string",
-                                    "description": "Namespace auth token"
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "mesh": {
-                          "type": "object",
-                          "description": "Mesh configuration"
-                        },
-                        "events": {
-                          "type": "object",
-                          "description": "Events details",
-                          "properties": {
-                            "registrations": {
-                              "type": "array",
-                              "description": "Event registrations",
-                              "items": {
-                                "type": "object",
-                                "description": "Event registrations details",
-                                "properties": {
-                                  "id": {
-                                    "type": "string",
-                                    "description": "id"
-                                  },
-                                  "name": {
-                                    "type": "string",
-                                    "description": "name"
-                                  },
-                                  "description": {
-                                    "type": "string",
-                                    "description": "registration description"
-                                  },
-                                  "enabled": {
-                                    "type": "string",
-                                    "description": "enabled"
-                                  },
-                                  "client_id": {
-                                    "type": "string",
-                                    "description": "client id"
-                                  },
-                                  "registration_id": {
-                                    "type": "string",
-                                    "description": "registration id"
-                                  },
-                                  "webhook_status": {
-                                    "type": "string",
-                                    "description": "webhook status"
-                                  },
-                                  "created_date": {
-                                    "type": "string",
-                                    "description": "create date"
-                                  },
-                                  "updated_date": {
-                                    "type": "string",
-                                    "description": "update date"
-                                  },
-                                  "webhook_url": {
-                                    "type": "string",
-                                    "description": "webhook url"
-                                  },
-                                  "delivery_type": {
-                                    "type": "string",
-                                    "description": "delivery type"
-                                  },
-                                  "events_url": {
-                                    "type": "string",
-                                    "description": "events url"
-                                  },
-                                  "trace_url": {
-                                    "type": "string",
-                                    "description": "trace url"
-                                  },
-                                  "events_of_interest": {
-                                    "type": "array",
-                                    "description": "events of interested",
-                                    "items": {
-                                      "type": "object",
-                                      "description": "events of interested details",
-                                      "properties": {
-                                        "event_code": {
-                                          "type": "string",
-                                          "description": "event code"
-                                        },
-                                        "provider_id": {
-                                          "type": "string",
-                                          "description": "provider id"
-                                        },
-                                        "event_label": {
-                                          "type": "string",
-                                          "description": "event label"
-                                        },
-                                        "event_description": {
-                                          "type": "string",
-                                          "description": "event description"
-                                        },
-                                        "provider_label": {
-                                          "type": "string",
-                                          "description": "provider label"
-                                        },
-                                        "event_delivery_format": {
-                                          "type": "string",
-                                          "description": "event delivery format"
-                                        },
-                                        "provider_metadata": {
-                                          "type": "string",
-                                          "description": "provider metadata"
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
+            "errorList": {
+              "type": "array",
+              "items": {
+                "type": "string"
               }
             }
           }
@@ -1567,7 +1278,9 @@
     },
     "UpdateTemplate": {
       "type": "object",
-      "required": ["updatedBy"],
+      "required": [
+        "updatedBy"
+      ],
       "additionalProperties": false,
       "properties": {
         "updatedBy": {
