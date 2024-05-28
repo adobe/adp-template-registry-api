@@ -394,8 +394,7 @@ describe('POST templates', () => {
         {
           credentialType: 'serviceAccount',
           flowType: 'oauth2',
-          code: 'AdobeIO',
-          productProfiles: undefined
+          code: 'AdobeIO'
         }
       ],
       credentials: [
@@ -585,8 +584,7 @@ describe('POST templates', () => {
         {
           credentialType: 'serviceAccount',
           flowType: 'oauth2',
-          code: 'AdobeIO',
-          productProfiles: undefined
+          code: 'AdobeIO'
         }
       ],
       credentials: [
@@ -690,8 +688,7 @@ describe('POST templates', () => {
         {
           credentialType: 'serviceAccount',
           flowType: 'oauth2',
-          code: 'AdobeIO',
-          productProfiles: undefined
+          code: 'AdobeIO'
         }
       ],
       credentials: [
