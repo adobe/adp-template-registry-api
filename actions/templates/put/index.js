@@ -131,8 +131,7 @@ async function main (params) {
             return {
               credentialType: credential.type,
               flowType: credential.flowType,
-              code: api.code,
-              productProfiles: api?.productProfiles
+              code: api.code
             };
           }));
         }
@@ -157,7 +156,8 @@ async function main (params) {
       ...template,
       _links: {
         self: {
-          href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template?.name}`
+          // if name is npm package name (i.e. @adobe/template), then use the name, otherwise use the id
+          href: template.name.includes('/') ? `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template.name}` : `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template.id}`
         }
       }
     };

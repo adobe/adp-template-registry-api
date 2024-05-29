@@ -308,7 +308,10 @@ describe('PUT templates', () => {
 
   test('Incorrect response, should throw error', async () => {
     fetchUrl.mockReturnValue('');
-    findTemplateById.mockReturnValue(null);
+    findTemplateById.mockReturnValue({
+      name: 'fake-template-name',
+      bad: 'field'
+    });
     updateTemplate.mockReturnValue({ matchedCount: 1 });
     const response = await action.main({
       IMS_URL: process.env.IMS_URL,
@@ -502,14 +505,7 @@ describe('PUT templates', () => {
             flowType: 'fake-flowType',
             apis: [
               {
-                code: 'fake-code',
-                productProfiles: [
-                  {
-                    id: 'fake-id',
-                    productId: 'fake-productId',
-                    name: 'fake-name'
-                  }
-                ]
+                code: 'fake-code'
               }
             ]
           }
@@ -534,14 +530,7 @@ describe('PUT templates', () => {
       apis: [{
         credentialType: 'fake-type',
         flowType: 'fake - flowType',
-        code: 'fake-code',
-        productProfiles: [
-          {
-            id: 'fake-id',
-            productId: 'fake-productId',
-            name: 'fake-name'
-          }
-        ]
+        code: 'fake-code'
       }]
     };
     findTemplateById.mockReturnValue(template);
@@ -612,14 +601,7 @@ describe('PUT templates', () => {
       apis: [{
         credentialType: 'fake-type',
         flowType: 'fake - flowType',
-        code: 'fake-code',
-        productProfiles: [
-          {
-            id: 'fake-id',
-            productId: 'fake-productId',
-            name: 'fake-name'
-          }
-        ]
+        code: 'fake-code'
       }]
     };
     findTemplateById.mockReturnValue(template);

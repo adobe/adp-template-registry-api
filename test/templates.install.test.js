@@ -226,13 +226,6 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         }
@@ -248,7 +241,7 @@ describe('POST Install template: Core business logic specific tests', () => {
     findTemplateById.mockReturnValueOnce(mockTemplate);
     await action.main(mockParams);
     expect(Core.Logger().debug).toHaveBeenNthCalledWith(3, 'Credentials found: [{"type":"apikey","flowtype":"adobeid"}]');
-    expect(Core.Logger().debug).toHaveBeenNthCalledWith(4, 'APIs found: [{"code":"AssetComputeSDK","productProfiles":[{"id":"123456","productId":"AB12CD34EF56","name":"Default product profile"}],"credentialType":"apikey","flowType":"adobeid"}]');
+    expect(Core.Logger().debug).toHaveBeenNthCalledWith(4, 'APIs found: [{"code":"AssetComputeSDK","credentialType":"apikey","flowType":"adobeid"}]');
   });
 
   test('should initialize console lib with correct parameters', async () => {
@@ -281,37 +274,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'PhotoshopSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauth_server_to_server',
           flowType: 'entp'
         },
         {
           code: 'IllustratorSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauthnativeapp',
           flowType: 'adobeid'
         }
@@ -367,37 +339,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'PhotoshopSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauth_server_to_server',
           flowType: 'entp'
         },
         {
           code: 'IllustratorSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauthnativeapp',
           flowType: 'adobeid'
         }
@@ -453,37 +404,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'PhotoshopSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'IllustratorSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauthnativeapp',
           flowType: 'adobeid'
         }
@@ -545,37 +475,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'PhotoshopSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'IllustratorSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauthnativeapp',
           flowType: 'adobeid'
         }
@@ -637,13 +546,6 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'analytics'
         }
@@ -682,37 +584,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'PhotoshopSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'IllustratorSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauthnativeapp',
           flowType: 'adobeid'
         }
@@ -754,37 +635,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'PhotoshopSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'IllustratorSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauthnativeapp',
           flowType: 'adobeid'
         }
@@ -838,37 +698,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'APIKEY',
           flowType: 'ADOBEID'
         },
         {
           code: 'PhotoshopSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'APIKEY',
           flowType: 'ADOBEID'
         },
         {
           code: 'IllustratorSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'OAUTHNATIVEAPP',
           flowType: 'ADOBEID'
         }
@@ -930,37 +769,17 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'PhotoshopSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
+
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'IllustratorSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauthnativeapp',
           flowType: 'adobeid'
         }
@@ -1047,37 +866,16 @@ describe('POST Install template: Core business logic specific tests', () => {
       apis: [
         {
           code: 'AssetComputeSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'apikey',
           flowType: 'adobeid'
         },
         {
           code: 'PhotoshopSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauth_server_to_server',
           flowType: 'entp'
         },
         {
           code: 'IllustratorSDK',
-          productProfiles: [
-            {
-              id: '123456',
-              productId: 'AB12CD34EF56',
-              name: 'Default product profile'
-            }
-          ],
           credentialType: 'oauthnativeapp',
           flowType: 'adobeid'
         }

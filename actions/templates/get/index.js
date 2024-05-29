@@ -43,10 +43,12 @@ async function fetchTemplateById (params, dbParams, logger) {
     ...template,
     _links: {
       self: {
-        href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template.name}`
+        href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template.id}`
       }
     }
   };
+
+  // dev console templates are auto-approved by default, so this block will only be true for app builder templates
   const templateStatuses = [TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED];
   if (templateStatuses.includes(template.status)) {
     const reviewIssue = await getReviewIssueByTemplateName(template.name, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
@@ -90,6 +92,8 @@ async function fetchTemplateByName (params, dbParams, logger) {
       }
     }
   };
+
+  // dev console templates are auto-approved by default, so this block will only be true for app builder templates
   const templateStatuses = [TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED];
   if (templateStatuses.includes(template.status)) {
     const reviewIssue = await getReviewIssueByTemplateName(fullTemplateName, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);

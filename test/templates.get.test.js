@@ -418,7 +418,7 @@ describe('GET templates', () => {
         ...template,
         _links: {
           self: {
-            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateId}`
           }
         }
       }
@@ -457,7 +457,7 @@ describe('GET templates', () => {
         ...template,
         _links: {
           self: {
-            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateId}`
           },
           review: {
             href: reviewIssue,
@@ -500,7 +500,7 @@ describe('GET templates', () => {
         ...template,
         _links: {
           self: {
-            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${fullTemplateName}`
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateId}`
           }
         }
       }
