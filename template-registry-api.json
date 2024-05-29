@@ -892,6 +892,11 @@
           "description": "The name of the user who created the template",
           "example": "Lazarus"
         },
+        "updatedBy": {
+          "type": "string",
+          "description": "The name of the user who last updated the template",
+          "example": "Lazarus"
+        },
         "description": {
           "type": "string",
           "description": "A description of the template",
@@ -1459,9 +1464,14 @@
           "description": "The name of the template",
           "example": "@adobe/app-builder-template"
         },
-        "updatedBy": {
+        "createdBy": {
           "type": "string",
           "description": "The name of the user who created the template",
+          "example": "Lazarus"
+        },
+        "updatedBy": {
+          "type": "string",
+          "description": "The name of the user who updated the template",
           "example": "Lazarus"
         },
         "description": {
