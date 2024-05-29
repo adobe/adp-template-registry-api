@@ -342,7 +342,7 @@ describe('PUT templates', () => {
           errors: [
             {
               code: 'server_error',
-              message: 'Response invalid\n  at: body\n    One or more required properties missing: id, name, status, links'
+              message: 'Response invalid\n  at: body\n    at: bad\n      Property not allowed\n    One or more required properties missing: id, status, links'
             }
           ]
         },
