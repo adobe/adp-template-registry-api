@@ -165,7 +165,8 @@ async function main (params) {
       ...template,
       _links: {
         self: {
-          href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+          // if name is npm package name (i.e. @adobe/template), then use the name, otherwise use the id
+          href: template.name.includes('/') ? `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template.name}` : `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template.id}`
         }
         // TODO: Uncomment this when we support App Builder templates again
         // 'review': {

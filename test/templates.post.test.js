@@ -642,7 +642,7 @@ describe('POST templates', () => {
 
     findTemplateByName.mockReturnValue(null);
     fetchUrl.mockReturnValue('');
-    const templateName = '@adobe/developer-console-template';
+    const templateName = 'developer-console-template';
     const template = {
       id: '56bf8211-d92d-44ef-b98b-6ee89812e1d7',
       name: templateName,
@@ -682,7 +682,7 @@ describe('POST templates', () => {
         ...template,
         _links: {
           self: {
-            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${templateName}`
+            href: `${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${template.id}`
           }
         }
       }
