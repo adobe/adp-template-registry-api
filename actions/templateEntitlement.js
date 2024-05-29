@@ -64,7 +64,8 @@ async function evaluateEntitlements (templates, params, logger) {
   }, {});
 
   logger.debug(`Retrieved services for org ${orgId}`);
-  return templates.map((template) => {
+  let checkForPendingRequests = false;
+  templates = templates.map((template) => {
     logger.debug(`Evaluating entitlements for template ${template.name}`);
     let userEntitled = true;
     let orgEntitled = true;
@@ -88,6 +89,12 @@ async function evaluateEntitlements (templates, params, logger) {
     });
 
     logger.debug(`Entitlements for orgId: ${orgId} template ${template.name}: userEntitled: ${userEntitled}, orgEntitled: ${orgEntitled}, canRequestAccess: ${canRequestAccess}, disEntitledReasons: ${JSON.stringify(disEntitledReasons)}`);
+
+    // if user can request access and an app id has been defined for this template, we check whether there are any pending requests
+    if (canRequestAccess && template.requestAccessAppId) {
+      checkForPendingRequests = true;
+    }
+
     return {
       ...template,
       userEntitled,
@@ -96,7 +103,58 @@ async function evaluateEntitlements (templates, params, logger) {
       disEntitledReasons: [...disEntitledReasons]
     };
   });
+
+  // if no need to check for pending requests, return the already evaluated templates
+  if (!checkForPendingRequests) {
+    return templates;
+  }
+
+  const appIdsWithPendingRequests = await fetchAppIdsWithPendingRequests(userToken, orgId, env, logger);
+
+  return templates.map(template => {
+    if (template.requestAccessAppId && appIdsWithPendingRequests.has(template.requestAccessAppId)) {
+      template.isRequestPending = true;
+    }
+
+    return template;
+  });
 }
+
+/**
+ * Calls ACRS to fetch all requests for the user in the org. Collects all the app ids with a pending status
+ * in a set and returns that in the response. In case of an error, the error is caught and logged and an empty
+ * Set is returned
+ * @param {string} userToken Token belonging to the logged in user
+ * @param {string} orgId IMS org id for the org to be checked
+ * @param {string} env Service environment - stage or prod
+ * @param {string} apiKey API key of the service
+ * @param {object} logger logger instance
+ * @returns {Set<string>} a Set of app ids which have a pending request
+ */
+async function fetchAppIdsWithPendingRequests (userToken, orgId, env, apiKey, logger) {
+  try {
+    const url = `https://acrs${env === 'stage' ? '-stage' : ''}.adobe.io/organization/${orgId}/app_auth_requests?userAccountId=self`;
+    logger.debug(`Fetching pending requests from acrs url:${url}`);
+    const headers = {
+      Authorization: 'Bearer ' + userToken,
+      'x-api-key': apiKey
+    };
+    const response = await fetch(url, { headers });
+    const accessRequests = await response.json();
+    const pendingAppIds = new Set();
+    accessRequests.forEach(accessRequest => {
+      if (accessRequest.status !== 'PENDING') {
+        return;
+      }
+
+      accessRequest.applicationIds.forEach(applicationId => pendingAppIds.add(applicationId));
+    });
+    return pendingAppIds;
+  } catch (error) {
+    logger.error(`Error while fetching pending requests from acrs for org ${orgId}. Error: ${error.stack}`);
+    throw new Error(`Failed to fetch pending requests from ACRS for org ${orgId}`);
+  }
+};
 
 module.exports = {
   evaluateEntitlements
