@@ -10,6 +10,7 @@ on:
 
 jobs:
   smoke:
+    environment: Production
     # we would like to avoid running this workflow in forked repos
     if: github.repository == 'adobe/adp-template-registry-api'
     runs-on: ${{ matrix.os }}
