@@ -328,7 +328,7 @@ describe('GET templates', () => {
           errors: [
             {
               code: utils.ERR_RC_SERVER_ERROR,
-              message: 'An error occurred, please try again later.'
+              message: 'Response invalid\n  at: body\n    One or more required properties missing: status'
             }
           ]
         }

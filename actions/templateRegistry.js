@@ -118,7 +118,7 @@ async function removeTemplateByName (dbParams, templateName) {
  */
 async function removeTemplateById (dbParams, templateId) {
   const collection = await mongoConnection(dbParams, collectionName);
-  const response = await collection.deleteOne({ _id: templateId });
+  const response = await collection.deleteOne({ _id: new ObjectId(templateId) });
   return response;
 }
 

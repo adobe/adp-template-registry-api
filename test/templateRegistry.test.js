@@ -251,7 +251,7 @@ describe('Template Registry Mongodb CRUD Actions', () => {
   });
 
   test('should remove template from the collection by id', async () => {
-    const templateId = 'my-template';
+    const templateId = new ObjectId('6618567c770086a68ee56fca');
 
     await removeTemplateById(dbParams, templateId);
 

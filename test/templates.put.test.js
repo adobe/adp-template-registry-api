@@ -259,7 +259,7 @@ describe('PUT templates', () => {
           errors: [
             {
               code: 'server_error',
-              message: 'An error occurred, please try again later.'
+              message: 'Internal Server Error'
             }
           ]
         },
@@ -342,7 +342,7 @@ describe('PUT templates', () => {
           errors: [
             {
               code: 'server_error',
-              message: 'An error occurred, please try again later.'
+              message: 'Response invalid\n  at: body\n    at: bad\n      Property not allowed\n    One or more required properties missing: id, status, links'
             }
           ]
         },

@@ -1,0 +1,30 @@
+{
+    "name": "test-template-smoke-tests",
+    "description": "Test template",
+    "latestVersion": "0.0.1",
+    "links": {
+        "consoleProject": "https://developer-stage.adobe.com/console/projects/918/4566206088344750634/overview"
+    },
+    "createdBy": "GitHub Actions",
+    "codeSamples": [
+        {
+            "language": "javascript",
+            "link": "https://developer-stage.adobe.com/package.zip"
+        }
+    ],
+    "adobeRecommended": false,
+    "author": "Adobe, Inc. Test",
+    "status": "Approved",
+    "apis": [
+        {
+            "code": "AssetComputeSDK",
+            "credentialType": "oauth"
+        }
+    ],
+    "credentials": [ 
+        {
+            "type": "oauth",
+            "flowType": "adobeid"
+        }
+    ]
+}
