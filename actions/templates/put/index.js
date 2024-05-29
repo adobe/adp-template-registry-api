@@ -131,8 +131,7 @@ async function main (params) {
             return {
               credentialType: credential.type,
               flowType: credential.flowType,
-              code: api.code,
-              productProfiles: api?.productProfiles
+              code: api.code
             };
           }));
         }
