@@ -350,7 +350,8 @@ describe('POST templates', () => {
       latestVersion: '1.0.0',
       links: {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
-      }
+      },
+      requestAccessAppId: 'requestAccessAppId'
     };
     addTemplate.mockReturnValue(template);
     const response = await action.main({
@@ -371,6 +372,7 @@ describe('POST templates', () => {
       description: 'Developer Console template',
       latestVersion: '1.0.0',
       createdBy: 'Capernicus',
+      requestAccessAppId: 'requestAccessAppId',
       ...fakeParams
     });
     expect(response).toEqual({
@@ -408,7 +410,8 @@ describe('POST templates', () => {
       },
       description: 'Developer Console template',
       latestVersion: '1.0.0',
-      createdBy: 'Capernicus'
+      createdBy: 'Capernicus',
+      requestAccessAppId: 'requestAccessAppId'
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
@@ -438,7 +441,8 @@ describe('POST templates', () => {
       latestVersion: '1.0.0',
       links: {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
-      }
+      },
+      requestAccessAppId: 'requestAccessAppId'
     };
     addTemplate.mockReturnValue(template);
     const response = await action.main({
@@ -458,6 +462,7 @@ describe('POST templates', () => {
       },
       description: 'Developer Console template',
       latestVersion: '1.0.0',
+      requestAccessAppId: 'requestAccessAppId',
       ...fakeParams
     });
     expect(response).toEqual({
@@ -488,7 +493,8 @@ describe('POST templates', () => {
         consoleProject: DEVELOPER_CONSOLE_PROJECT
       },
       description: 'Developer Console template',
-      latestVersion: '1.0.0'
+      latestVersion: '1.0.0',
+      requestAccessAppId: 'requestAccessAppId'
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
@@ -531,7 +537,8 @@ describe('POST templates', () => {
           language: 'node',
           link: 'https://developer-stage.adobe.com/sample.zip'
         }
-      ]
+      ],
+      requestAccessAppId: 'requestAccessAppId'
     };
     addTemplate.mockReturnValue(template);
     const response = await action.main({
@@ -561,6 +568,7 @@ describe('POST templates', () => {
           link: 'https://developer-stage.adobe.com/sample.zip'
         }
       ],
+      requestAccessAppId: 'requestAccessAppId',
       ...fakeParams
     });
     expect(response).toEqual({
@@ -607,7 +615,8 @@ describe('POST templates', () => {
           language: 'node',
           link: 'https://developer-stage.adobe.com/sample.zip'
         }
-      ]
+      ],
+      requestAccessAppId: 'requestAccessAppId'
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);

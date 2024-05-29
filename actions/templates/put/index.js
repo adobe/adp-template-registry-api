@@ -31,6 +31,7 @@ const serializeRequestBody = (params) => {
     ...('extensions' in params && params.extensions.length && { extensions: params.extensions }),
     ...('credentials' in params && params.credentials.length && { credentials: params.credentials }),
     ...('codeSamples' in params && params.codeSamples.length && { codeSamples: params.codeSamples }),
+    ...('requestAccessAppId' in params && { requestAccessAppId: params.requestAccessAppId }),
     ...('apis' in params && params.apis.length && { apis: params.apis }),
     ...('status' in params && { status: params.status }),
     ...('runtime' in params && { runtime: params.runtime }),

@@ -35,6 +35,7 @@ const serializeRequestBody = (params) => {
     ...(params.status && { status: params.status }), // developer console only
     ...(params.adobeRecommended && { adobeRecommended: params.adobeRecommended }), // developer console only
     ...(params.codeSamples && { codeSamples: params.codeSamples }), // developer console only
+    ...(params.requestAccessAppId && { requestAccessAppId: params.requestAccessAppId }), // developer console only
     links: {
       ...(params?.links?.consoleProject && { consoleProject: params.links.consoleProject }), // developer console only
       ...(params?.links?.github && { github: params.links.github }) // app builder only

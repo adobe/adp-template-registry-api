@@ -372,6 +372,7 @@ describe('PUT templates', () => {
           link: 'fake-link' // link to the zip file containing the code sample
         }
       ],
+      requestAccessAppId: 'requestAccessAppId',
       status: 'Approved'
     };
     findTemplateById.mockReturnValue(template);
@@ -402,6 +403,7 @@ describe('PUT templates', () => {
           language: 'fake-language', // programming language for the code sample
           link: 'fake-link' // link to the zip file containing the code sample
         }],
+      requestAccessAppId: 'requestAccessAppId',
       status: 'Approved',
       ...fakeParams
     });
@@ -444,7 +446,8 @@ describe('PUT templates', () => {
       extensions: [{
         extensionPointId: 'fake-extensionPointId'
       }],
-      runtime: false
+      runtime: false,
+      requestAccessAppId: 'requestAccessAppId'
     };
     findTemplateById.mockReturnValue(template);
     updateTemplate.mockReturnValue({ matchedCount: 1 });
@@ -478,6 +481,7 @@ describe('PUT templates', () => {
         extensionPointId: 'fake-extensionPointId'
       }],
       runtime: true,
+      requestAccessAppId: 'requestAccessAppId',
       ...fakeParams
     });
     expect(response).toEqual({
@@ -528,7 +532,8 @@ describe('PUT templates', () => {
         credentialType: 'fake-type',
         flowType: 'fake - flowType',
         code: 'fake-code'
-      }]
+      }],
+      requestAccessAppId: 'requestAccessAppId'
     };
     findTemplateById.mockReturnValue(template);
     updateTemplate.mockReturnValue({ matchedCount: 1 });
@@ -550,6 +555,7 @@ describe('PUT templates', () => {
       },
       updatedBy: 'fake-user',
       status: 'Approved',
+      requestAccessAppId: 'requestAccessAppId',
       ...fakeParams
     });
     expect(response).toEqual({
@@ -599,7 +605,8 @@ describe('PUT templates', () => {
         credentialType: 'fake-type',
         flowType: 'fake - flowType',
         code: 'fake-code'
-      }]
+      }],
+      requestAccessAppId: 'requestAccessAppId'
     };
     findTemplateById.mockReturnValue(template);
     updateTemplate.mockReturnValue({ matchedCount: 1 });
@@ -621,6 +628,7 @@ describe('PUT templates', () => {
       },
       updatedBy: 'fake-user',
       status: 'Approved',
+      requestAccessAppId: 'requestAccessAppId',
       ...fakeParams
     });
     expect(response).toEqual({
