@@ -531,7 +531,7 @@
           "200": {
             "description": "Information about a newly added template.",
             "schema": {
-              "$ref": "#/definitions/UpdateTemplateResponse"
+              "$ref": "#/definitions/Template"
             }
           },
           "400": {
