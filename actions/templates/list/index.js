@@ -207,10 +207,13 @@ async function main (params) {
         ...templates[i],
         _links: {
           self: {
-            href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${templates[i].name}`
+            // if name is npm package name (i.e. @adobe/template), then use the name, otherwise use the id
+            href: templates[i].name.includes('/') ? `${params.TEMPLATE_REGISTRY_API_URL}/templates/${templates[i].name}` : `${params.TEMPLATE_REGISTRY_API_URL}/templates/${templates[i].id}`
           }
         }
       };
+
+      // dev console templates are auto-approved by default, so this block will only be true for app builder templates
       const templateStatuses = [TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED];
       if (templateStatuses.includes(templates[i].status)) {
         const reviewIssue = await getReviewIssueByTemplateName(templates[i].name, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
