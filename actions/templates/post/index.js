@@ -10,7 +10,7 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST } =
+const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, getEnv, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST } =
   require('../../utils');
 const { validateAccessToken, generateAccessToken } = require('../../ims');
 const { findTemplateByName, addTemplate } = require('../../templateRegistry');
@@ -126,7 +126,7 @@ async function main (params) {
     if (consoleProjectUrl) {
       const projectId = consoleProjectUrl.split('/').at(-2);
       const accessToken = await generateAccessToken(params.IMS_AUTH_CODE, params.IMS_CLIENT_ID, params.IMS_CLIENT_SECRET, params.IMS_SCOPES, logger);
-      const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, 'stage'); // Dev console templates can only be added from stage
+      const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, getEnv(logger));
       const { body: installConfig } = await consoleClient.getProjectInstallConfig(projectId);
 
       // We have to get the install config in this format to maintain backwards
