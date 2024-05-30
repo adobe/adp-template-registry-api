@@ -119,16 +119,15 @@ async function requestImsResource (url, accessToken, headers = {}, params = {}) 
  * @returns {Promise<string>} - IMS access token
  */
 async function generateAccessToken (imsAuthCode, imsClientId, imsClientSecret, imsScopes, logger) {
-  // Return token if it's cached and not expired, otherwise generate a new token and cache it
-  if (credentialCache.token && credentialCache.expiration > Date.now()) {
-    return credentialCache.token;
+  // If the token is not cached or has expired, generate a new one
+  if (!credentialCache.token || credentialCache.expiration <= Date.now()) {
+    const ims = new Ims(getEnv(logger));
+    const { payload } = await ims.getAccessToken(imsAuthCode, imsClientId, imsClientSecret, imsScopes);
+    credentialCache.token = payload.access_token;
+    credentialCache.expiration = Date.now() + CACHE_MAX_AGE;
+    logger.debug('Generated IMS access token');
   }
 
-  const ims = new Ims(getEnv(logger));
-  const { payload } = await ims.getAccessToken(imsAuthCode, imsClientId, imsClientSecret, imsScopes);
-  credentialCache.token = payload.access_token;
-  credentialCache.expiration = Date.now() + CACHE_MAX_AGE;
-  logger.debug('Generated IMS access token');
   return credentialCache.token;
 }
 
