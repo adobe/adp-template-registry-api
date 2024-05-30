@@ -273,6 +273,11 @@
                 "codeSamples": {
                   "$ref": "#/definitions/CodeSamples"
                 },
+                "requestAccessAppId": {
+                  "type": "string",
+                  "description": "Access Platform app id which can be used to request access to services in this template.",
+                  "example": "FireflySDKEnterprise1"
+                },
                 "links": {
                   "type": "object",
                   "description": "A link to the Github repository containing the package's source code",
@@ -889,7 +894,7 @@
         },
         "updatedBy": {
           "type": "string",
-          "description": "The name of the user who created the template",
+          "description": "The name of the user who last updated the template",
           "example": "Lazarus"
         },
         "description": {
@@ -1026,6 +1031,16 @@
         },
         "codeSamples": {
           "$ref": "#/definitions/CodeSamples"
+        },
+        "requestAccessAppId": {
+          "type": "string",
+          "description": "Access Platform app id which can be used to request access to services in this template.",
+          "example": "FireflySDKEnterprise1"
+        },
+        "isRequestPending": {
+          "type": "boolean",
+          "description": "Indicates whether a request for access is already pending for the user in a given org",
+          "example": "true"
         },
         "links": {
           "type": "object",
@@ -1387,6 +1402,11 @@
         },
         "codeSamples": {
           "$ref": "#/definitions/CodeSamples"
+        },
+        "requestAccessAppId": {
+          "type": "string",
+          "description": "Access Platform app id which can be used to request access to services in this template.",
+          "example": "FireflySDKEnterprise1"
         },
         "apis": {
           "type": "array",

@@ -11,6 +11,7 @@ governing permissions and limitations under the License.
 
 const consoleLib = require('@adobe/aio-lib-console');
 const { getBearerToken, getHeaderValue, getEnv } = require('./utils');
+const { fetchAppIdsWithPendingRequests } = require('./acrs');
 
 /**
  * Evaluate entitlements for a set of templates. This function will check if the user is entitled to use the templates.
@@ -22,6 +23,7 @@ const { getBearerToken, getHeaderValue, getEnv } = require('./utils');
 async function evaluateEntitlements (templates, params, logger) {
   const orgId = getHeaderValue(params, 'x-org-id');
   const userToken = getBearerToken(params);
+  const callerApiKey = getHeaderValue(params, 'x-api-key');
 
   if (!orgId || !templates || templates.length === 0) {
     logger.debug('No org id or templates specified. Skipping entitlement check.');
@@ -64,7 +66,8 @@ async function evaluateEntitlements (templates, params, logger) {
   }, {});
 
   logger.debug(`Retrieved services for org ${orgId}`);
-  return templates.map((template) => {
+  let checkForPendingRequests = false;
+  templates = templates.map((template) => {
     logger.debug(`Evaluating entitlements for template ${template.name}`);
     let userEntitled = true;
     let orgEntitled = true;
@@ -88,13 +91,35 @@ async function evaluateEntitlements (templates, params, logger) {
     });
 
     logger.debug(`Entitlements for orgId: ${orgId} template ${template.name}: userEntitled: ${userEntitled}, orgEntitled: ${orgEntitled}, canRequestAccess: ${canRequestAccess}, disEntitledReasons: ${JSON.stringify(disEntitledReasons)}`);
+
+    // if user can request access and an app id has been defined for this template, we check whether there are any pending requests
+    if (canRequestAccess && template.requestAccessAppId) {
+      checkForPendingRequests = true;
+    }
+
     return {
       ...template,
       userEntitled,
       orgEntitled,
       canRequestAccess,
-      disEntitledReasons: [...disEntitledReasons]
+      disEntitledReasons: [...disEntitledReasons],
+      isRequestPending: false
     };
+  });
+
+  // if no need to check for pending requests, return the already evaluated templates
+  if (!checkForPendingRequests) {
+    return templates;
+  }
+
+  const appIdsWithPendingRequests = await fetchAppIdsWithPendingRequests(userToken, orgId, env, callerApiKey, logger);
+
+  return templates.map(template => {
+    if (template.requestAccessAppId && appIdsWithPendingRequests.has(template.requestAccessAppId)) {
+      template.isRequestPending = true;
+    }
+
+    return template;
   });
 }
 
