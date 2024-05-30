@@ -11,10 +11,13 @@ governing permissions and limitations under the License.
 
 const axios = require('axios').default;
 const { Ims, getTokenData } = require('@adobe/aio-lib-ims');
-const Kvjs = require('@heyputer/kv.js');
 const { getEnv } = require('./utils');
-const kv = new Kvjs();
+
 const CACHE_MAX_AGE = 10 * 60 * 1000; // 10 minutes
+const credentialCache = {
+  token: null,
+  expiration: null
+};
 
 /**
  * Checks that the provided token is a valid IMS access token.
@@ -116,23 +119,17 @@ async function requestImsResource (url, accessToken, headers = {}, params = {}) 
  * @returns {Promise<string>} - IMS access token
  */
 async function generateAccessToken (imsAuthCode, imsClientId, imsClientSecret, imsScopes, logger) {
-  // Check if we have a cached access token
-  const cachedAccessToken = kv.get('authorization');
-  if (cachedAccessToken) {
-    return cachedAccessToken;
+  // Return token if it's cached and not expired, otherwise generate a new token and cache it
+  if (credentialCache.token && credentialCache.expiration > Date.now()) {
+    return credentialCache.token;
   }
 
-  // If not, generate a new one and cache it
   const ims = new Ims(getEnv(logger));
-
-  const { payload } = await ims.getAccessToken(
-    imsAuthCode,
-    imsClientId,
-    imsClientSecret,
-    imsScopes
-  );
-  kv.set('authorization', payload.access_token, { PX: CACHE_MAX_AGE });
-  return payload.access_token;
+  const { payload } = await ims.getAccessToken(imsAuthCode, imsClientId, imsClientSecret, imsScopes);
+  credentialCache.token = payload.access_token;
+  credentialCache.expiration = Date.now() + CACHE_MAX_AGE;
+  logger.debug('Generated IMS access token');
+  return credentialCache.token;
 }
 
 module.exports = {
