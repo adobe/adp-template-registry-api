@@ -41,7 +41,6 @@ jest.mock('../actions/templateRegistry', () => {
   };
 });
 jest.mock('../actions/ims');
-jest.mock('@heyputer/kv.js');
 
 beforeEach(() => {
   jest.clearAllMocks();
