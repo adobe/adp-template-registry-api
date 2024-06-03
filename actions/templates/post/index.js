@@ -31,6 +31,7 @@ const serializeRequestBody = (params) => {
     ...(params.description && { description: params.description }), // developer console only
     ...(params.latestVersion && { latestVersion: params.latestVersion }), // developer console only
     ...(params.createdBy && { createdBy: params.createdBy }),
+    ...(params.updatedBy && { updatedBy: params.updatedBy }),
     ...(params.author && { author: params.author }), // developer console only
     ...(params.status && { status: params.status }), // developer console only
     ...(params.adobeRecommended && { adobeRecommended: params.adobeRecommended }), // developer console only
@@ -39,7 +40,20 @@ const serializeRequestBody = (params) => {
     links: {
       ...(params?.links?.consoleProject && { consoleProject: params.links.consoleProject }), // developer console only
       ...(params?.links?.github && { github: params.links.github }) // app builder only
-    }
+    },
+    ...(params.keywords && params.keywords.length && { keywords: params.keywords }),
+    ...(params.categories && params.categories.length && { categories: params.categories }),
+    ...(params.extensions && params.extensions.length && { extensions: params.extensions }),
+    ...(params.credentials && params.credentials.length && { credentials: params.credentials }),
+    ...(params.apis && params.apis.length && { apis: params.apis }),
+    ...(params.runtime && { runtime: params.runtime }),
+    ...(params.publishDate && { publishDate: params.publishDate }),
+    ...(params.events && params.events.length && { events: params.events }),
+    ...(params.isRequestPending && { isRequestPending: params.isRequestPending }),
+    ...(params.orgEntitled && { orgEntitled: params.orgEntitled }),
+    ...(params.userEntitled && { userEntitled: params.userEntitled }),
+    ...(params.canRequestAccess && { canRequestAccess: params.canRequestAccess }),
+    ...(params.disEntitledReasons && params.disEntitledReasons.length && { disEntitledReasons: params.disEntitledReasons })
   };
 };
 
@@ -123,7 +137,14 @@ async function main (params) {
       };
     }
 
-    if (consoleProjectUrl) {
+    const hasCredentialsOrApiInParams = (('credentials' in params && params.credentials.length > 0) || ('apis' in params && params.apis.length > 0));
+    let template = null;
+
+    if (hasCredentialsOrApiInParams) {
+      // scenario 1 :  if apis or credentials are provided, skip the get install config step and just save the provided template
+      template = await addTemplate(dbParams, body);
+    } else if (consoleProjectUrl) {
+      // scenario 2 :  if consoleProject in payload, replace apis and credentials with the ones from the install config
       const projectId = consoleProjectUrl.split('/').at(-2);
       const accessToken = await generateAccessToken(params.IMS_AUTH_CODE, params.IMS_CLIENT_ID, params.IMS_CLIENT_SECRET, params.IMS_SCOPES, logger);
       const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, getEnv(logger));
@@ -156,9 +177,9 @@ async function main (params) {
         credentials,
         apis
       };
+      template = await addTemplate(dbParams, body);
     }
 
-    const template = await addTemplate(dbParams, body);
     // TODO: Uncomment this when we support App Builder templates again
     // const issueNumber = await createReviewIssue(templateName, githubRepoUrl, params.ACCESS_TOKEN_GITHUB, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
     const response = {
