@@ -137,12 +137,11 @@ async function main (params) {
       };
     }
 
-    const hasCredentialsOrApiInParams = (('credentials' in params && params.credentials.length > 0) || ('apis' in params && params.apis.length > 0));
-    let template = null;
+    const hasCredentialsOrApisInParams = (('credentials' in params && params.credentials.length > 0) || ('apis' in params && params.apis.length > 0));
 
-    if (hasCredentialsOrApiInParams) {
+    if (hasCredentialsOrApisInParams) {
       // scenario 1 :  if apis or credentials are provided, skip the get install config step and just save the provided template
-      template = await addTemplate(dbParams, body);
+      // do nothing
     } else if (consoleProjectUrl) {
       // scenario 2 :  if consoleProject in payload, replace apis and credentials with the ones from the install config
       const projectId = consoleProjectUrl.split('/').at(-2);
@@ -177,9 +176,9 @@ async function main (params) {
         credentials,
         apis
       };
-      template = await addTemplate(dbParams, body);
     }
 
+    const template = await addTemplate(dbParams, body);
     // TODO: Uncomment this when we support App Builder templates again
     // const issueNumber = await createReviewIssue(templateName, githubRepoUrl, params.ACCESS_TOKEN_GITHUB, params.TEMPLATE_REGISTRY_ORG, params.TEMPLATE_REGISTRY_REPOSITORY);
     const response = {
