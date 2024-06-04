@@ -315,12 +315,13 @@
                         "description": "The sdk code of the service",
                         "example": "AdobeAnalyticsSDK"
                       },
-                      "licenseConfigs": {
-                        "type": "array",
-                        "description": "List of available license configs (product profiles) for the API",
-                        "items": {
-                          "type": "object"
-                        }
+                      "credentialType": {
+                        "type": "string",
+                        "description": "Credential type"
+                      },
+                      "flowType": {
+                        "type": "string",
+                        "description": "Flow type"
                       }
                     }
                   }
@@ -1115,12 +1116,13 @@
                 "description": "The sdk code of the service",
                 "example": "AdobeAnalyticsSDK"
               },
-              "licenseConfigs": {
-                "type": "array",
-                "description": "List of available license configs (product profiles) for the API",
-                "items": {
-                  "type": "object"
-                }
+              "credentialType": {
+                "type": "string",
+                "description": "Credential type"
+              },
+              "flowType": {
+                "type": "string",
+                "description": "Flow type"
               }
             }
           }
@@ -1383,7 +1385,7 @@
                 "type": "string",
                 "description": "Credential type"
               },
-              "FlowType": {
+              "flowType": {
                 "type": "string",
                 "description": "Flow type"
               },
