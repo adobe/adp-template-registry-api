@@ -5,7 +5,6 @@
     "@adobe/aio-lib-console": "^5.1.0",
     "@adobe/aio-lib-ims": "^7.0.1",
     "@adobe/aio-sdk": "^5.0.1",
-    "@heyputer/kv.js": "^0.1.6",
     "@octokit/rest": "^20.0.2",
     "axios": "^0.27.2",
     "lodash.orderby": "^4.6.0",
@@ -43,7 +42,7 @@
     "release": "np --no-publish"
   },
   "engines": {
-    "node": "^18"
+    "node": "^18 || ^20 || ^22"
   },
   "jest": {
     "rootDir": ".",

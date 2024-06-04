@@ -32,7 +32,6 @@ const mockConsoleSDKInstance = {
 consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance);
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
-jest.mock('@heyputer/kv.js');
 
 process.env = {
   TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'

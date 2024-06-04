@@ -10,11 +10,9 @@ governing permissions and limitations under the License.
 */
 
 const nock = require('nock');
-const Kvjs = require('@heyputer/kv.js');
 const { Ims, getTokenData } = require('@adobe/aio-lib-ims');
 const { validateAccessToken, isAdmin, generateAccessToken, isValidServiceToken } = require('../actions/ims');
 
-jest.mock('@heyputer/kv.js');
 jest.mock('@adobe/aio-lib-ims');
 
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
@@ -23,6 +21,11 @@ process.env = {
   IMS_URL: 'https://ims-na1-stg1.adobelogin.com',
   IMS_CLIENT_ID: 'test'
 };
+
+beforeEach(() => {
+  jest.clearAllMocks();
+  jest.resetAllMocks();
+});
 
 describe('Verify communication with IMS', () => {
   test('Verify checking that provided IMS access token is valid', async () => {
@@ -119,24 +122,54 @@ describe('Verify communication with IMS', () => {
   });
 
   test('Verify generate access token', async () => {
-    Ims.mockImplementation(() => ({
-      validateTokenAllowList: jest.fn(() => ({ valid: true })),
-      getAccessToken: jest.fn(() => ({
-        payload: {
-          access_token: 'my-access-token',
-          refresh_token: 'my-refresh-token'
-        }
-      }))
+    const getAccessTokenMock = jest.fn(() => ({
+      payload: {
+        access_token: 'my-access-token',
+        refresh_token: 'my-refresh-token'
+      }
     }));
+    Ims.mockImplementation(() => ({
+      getAccessToken: getAccessTokenMock
+    }));
+
+    // Initial call that should fetch the token
+    await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid', mockLoggerInstance))
+      .resolves.toBe('my-access-token');
+    expect(getAccessTokenMock).toHaveBeenCalledTimes(1);
+
+    // Subsequent call that should use the cached token
+    await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid', mockLoggerInstance))
+      .resolves.toBe('my-access-token');
+    expect(getAccessTokenMock).toHaveBeenCalledTimes(1);
+  });
+
+  test('Verify cached token expiration', async () => {
+    const getAccessTokenMock = jest.fn(() => ({
+      payload: {
+        access_token: 'my-access-token',
+        refresh_token: 'my-refresh-token'
+      }
+    }));
+    Ims.mockImplementation(() => ({
+      getAccessToken: getAccessTokenMock
+    }));
+
+    // Initial call that should
+    await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid', mockLoggerInstance))
+      .resolves.toBe('my-access-token');
+    expect(getAccessTokenMock).toHaveBeenCalledTimes(0);
+
+    // Move time forward by 11 minutes
+    jest
+      .useFakeTimers()
+      .setSystemTime(new Date(Date.now() + 1000 * 60 * 11));
 
     await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid', mockLoggerInstance))
       .resolves.toBe('my-access-token');
-  });
+    expect(getAccessTokenMock).toHaveBeenCalledTimes(1);
 
-  test('Verify generate access token with a cached token', async () => {
-    jest.spyOn(Kvjs.prototype, 'get').mockImplementation(() => 'cached-access--token');
-    await expect(generateAccessToken('', process.env.IMS_CLIENT_ID, 'client-secret', 'adobeid', mockLoggerInstance))
-      .resolves.toBe('cached-access--token');
+    // Reset system time
+    jest.useRealTimers();
   });
 
   test('Verify checking that provided IMS access token is a service token with no required scopes', () => {
