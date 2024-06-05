@@ -230,29 +230,146 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "description": "The name of the package implementing the template on npmjs.com",
+                  "description": "The name of the template on npmjs.com",
                   "example": "@adobe/app-builder-template",
                   "x-nullable": false
                 },
-                "description": {
+                "author": {
                   "type": "string",
-                  "description": "A description of the template",
-                  "example": "This is a template for Adobe App Builder"
+                  "description": "The name of the template's author on npmjs.com",
+                  "example": "Adobe Inc."
                 },
                 "createdBy": {
                   "type": "string",
                   "description": "The name of the user who created the template",
                   "example": "Lazarus"
                 },
+                "updatedBy": {
+                  "type": "string",
+                  "description": "The name of the user who last updated the template",
+                  "example": "Lazarus"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of the template",
+                  "example": "AppBuilder template"
+                },
+                "adobeRecommended": {
+                  "type": "boolean",
+                  "description": "Whether the template is recommended by Adobe",
+                  "example": true
+                },
                 "latestVersion": {
                   "type": "string",
                   "description": "The version of the template in the semver format",
-                  "example": "1.0.0"
+                  "example": "1.0.10"
                 },
-                "author": {
+                "publishDate": {
                   "type": "string",
-                  "description": "The name of the template's author",
-                  "example": "Adobe Inc."
+                  "description": "The date the template was published in the ISO 8601 format",
+                  "example": "2022-04-20T19:54:41.495Z"
+                },
+                "extensions": {
+                  "type": "array",
+                  "description": "Extension points that a template implements",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "extensionPointId"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "extensionPointId": {
+                        "type": "string",
+                        "description": "Extension Point Id",
+                        "example": "dx/excshell/1"
+                      }
+                    }
+                  }
+                },
+                "categories": {
+                  "type": "array",
+                  "description": "A list of categories the template belongs to",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "graphql-mesh"
+                  ]
+                },
+                "apis": {
+                  "type": "array",
+                  "description": "A list of Adobe APIs required by the template",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "code"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "description": "The sdk code of the service",
+                        "example": "AdobeAnalyticsSDK"
+                      },
+                      "credentialType": {
+                        "type": "string",
+                        "description": "Credential type"
+                      },
+                      "flowType": {
+                        "type": "string",
+                        "description": "Flow type"
+                      }
+                    }
+                  }
+                },
+                "credentials": {
+                  "type": "array",
+                  "description": "A list of credentials required by the template",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "flowType"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "description": "The type of the credential",
+                        "example": "OAUTH_SERVER_TO_SERVER"
+                      },
+                      "flowType": {
+                        "type": "string",
+                        "description": "The flow type of the credential",
+                        "example": "ENTP"
+                      }
+                    }
+                  }
+                },
+                "runtime": {
+                  "type": "boolean",
+                  "description": "Whether to add Runtime to App Builder application or not.",
+                  "default": false
+                },
+                "event": {
+                  "type": "object",
+                  "description": "event configuration for the template"
+                },
+                "keywords": {
+                  "type": "array",
+                  "description": "A list of keywords specified in the packages.json file",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "aio-app-builder-template",
+                    "aio"
+                  ]
                 },
                 "status": {
                   "type": "string",
@@ -265,11 +382,6 @@
                   ],
                   "example": "Approved"
                 },
-                "adobeRecommended": {
-                  "type": "boolean",
-                  "description": "Whether the template is recommended by Adobe",
-                  "example": true
-                },
                 "codeSamples": {
                   "$ref": "#/definitions/CodeSamples"
                 },
@@ -278,13 +390,25 @@
                   "description": "Access Platform app id which can be used to request access to services in this template.",
                   "example": "FireflySDKEnterprise1"
                 },
+                "isRequestPending": {
+                  "type": "boolean",
+                  "description": "Indicates whether a request for access is already pending for the user in a given org",
+                  "example": "true"
+                },
                 "links": {
                   "type": "object",
-                  "description": "A link to the Github repository containing the package's source code",
+                  "description": "A list of locations where the package's code can be found",
                   "additionalProperties": false,
                   "minProperties": 1,
                   "x-nullable": false,
                   "properties": {
+                    "npm": {
+                      "type": "string",
+                      "format": "uri",
+                      "pattern": "^https://www\\.npmjs\\.com/",
+                      "description": "A link to the package on npmjs.com",
+                      "example": "https://www.npmjs.com/package/@adobe/app-builder-template"
+                    },
                     "github": {
                       "$ref": "#/definitions/GithubUrl"
                     },
@@ -292,6 +416,34 @@
                       "$ref": "#/definitions/DeveloperConsoleUrl"
                     }
                   }
+                },
+                "orgEntitled": {
+                  "type": "boolean",
+                  "description": "Whether the organization is entitled to use the template",
+                  "example": true
+                },
+                "userEntitled": {
+                  "type": "boolean",
+                  "description": "Whether the user is entitled to use the template",
+                  "example": true
+                },
+                "canRequestAccess": {
+                  "type": "boolean",
+                  "description": "Whether the user can request access to the template",
+                  "example": true
+                },
+                "disEntitledReasons": {
+                  "type": "array",
+                  "description": "A list of reasons why the user is not entitled to use the template",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "USER_MISSING_DEV_ROLE",
+                    "ORG_MISSING_FIS",
+                    "USER_MISSING_PRIVATE_BETA",
+                    "USER_MISSING_PUBLIC_BETA"
+                  ]
                 }
               },
               "example": {
@@ -963,12 +1115,13 @@
                 "description": "The sdk code of the service",
                 "example": "AdobeAnalyticsSDK"
               },
-              "licenseConfigs": {
-                "type": "array",
-                "description": "List of available license configs (product profiles) for the API",
-                "items": {
-                  "type": "object"
-                }
+              "credentialType": {
+                "type": "string",
+                "description": "Credential type"
+              },
+              "flowType": {
+                "type": "string",
+                "description": "Flow type"
               }
             }
           }
@@ -1231,7 +1384,7 @@
                 "type": "string",
                 "description": "Credential type"
               },
-              "FlowType": {
+              "flowType": {
                 "type": "string",
                 "description": "Flow type"
               },

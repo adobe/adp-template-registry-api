@@ -31,15 +31,29 @@ const serializeRequestBody = (params) => {
     ...(params.description && { description: params.description }), // developer console only
     ...(params.latestVersion && { latestVersion: params.latestVersion }), // developer console only
     ...(params.createdBy && { createdBy: params.createdBy }),
+    ...(params.updatedBy && { updatedBy: params.updatedBy }),
     ...(params.author && { author: params.author }), // developer console only
     ...(params.status && { status: params.status }), // developer console only
-    ...(params.adobeRecommended && { adobeRecommended: params.adobeRecommended }), // developer console only
+    ...(params.adobeRecommended != null && { adobeRecommended: params.adobeRecommended }), // developer console only
     ...(params.codeSamples && { codeSamples: params.codeSamples }), // developer console only
     ...(params.requestAccessAppId && { requestAccessAppId: params.requestAccessAppId }), // developer console only
     links: {
       ...(params?.links?.consoleProject && { consoleProject: params.links.consoleProject }), // developer console only
       ...(params?.links?.github && { github: params.links.github }) // app builder only
-    }
+    },
+    ...(params.keywords && params.keywords.length && { keywords: params.keywords }),
+    ...(params.categories && params.categories.length && { categories: params.categories }),
+    ...(params.extensions && params.extensions.length && { extensions: params.extensions }),
+    ...(params.credentials && params.credentials.length && { credentials: params.credentials }),
+    ...(params.apis && params.apis.length && { apis: params.apis }),
+    ...(params.runtime != null && { runtime: params.runtime }),
+    ...(params.publishDate && { publishDate: params.publishDate }),
+    ...(params.event && { event: params.event }),
+    ...(params.isRequestPending != null && { isRequestPending: params.isRequestPending }),
+    ...(params.orgEntitled != null && { orgEntitled: params.orgEntitled }),
+    ...(params.userEntitled != null && { userEntitled: params.userEntitled }),
+    ...(params.canRequestAccess != null && { canRequestAccess: params.canRequestAccess }),
+    ...(params.disEntitledReasons && params.disEntitledReasons.length && { disEntitledReasons: params.disEntitledReasons })
   };
 };
 
@@ -123,7 +137,13 @@ async function main (params) {
       };
     }
 
-    if (consoleProjectUrl) {
+    const hasCredentialsOrApisInParams = (('credentials' in params && params.credentials.length > 0) || ('apis' in params && params.apis.length > 0));
+
+    if (hasCredentialsOrApisInParams) {
+      // scenario 1 :  if apis or credentials are provided, skip the get install config step and just save the provided template
+      // do nothing here
+    } else if (consoleProjectUrl) {
+      // scenario 2 :  if consoleProject in payload, replace apis and credentials with the ones from the install config
       const projectId = consoleProjectUrl.split('/').at(-2);
       const accessToken = await generateAccessToken(params.IMS_AUTH_CODE, params.IMS_CLIENT_ID, params.IMS_CLIENT_SECRET, params.IMS_SCOPES, logger);
       const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, getEnv(logger));
