@@ -43,7 +43,7 @@ describe('smoke tests', () => {
       const template = await response.json();
       newTemplateId = template.id;
       expect(template.name).toBe('test-template-smoke-tests');
-    });
+    }, 30000); // Set timeout to 30 seconds, creating a new template can take a while
 
     it('should fetch the new template', async () => {
       const response = await fetch(`${process.env.TEMPLATE_REGISTRY_API_URL}/templates/${newTemplateId}`, {
