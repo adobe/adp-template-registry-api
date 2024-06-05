@@ -34,7 +34,7 @@ const serializeRequestBody = (params) => {
     ...(params.updatedBy && { updatedBy: params.updatedBy }),
     ...(params.author && { author: params.author }), // developer console only
     ...(params.status && { status: params.status }), // developer console only
-    ...(params.adobeRecommended && { adobeRecommended: params.adobeRecommended }), // developer console only
+    ...(params.adobeRecommended != null && { adobeRecommended: params.adobeRecommended }), // developer console only
     ...(params.codeSamples && { codeSamples: params.codeSamples }), // developer console only
     ...(params.requestAccessAppId && { requestAccessAppId: params.requestAccessAppId }), // developer console only
     links: {
@@ -46,13 +46,13 @@ const serializeRequestBody = (params) => {
     ...(params.extensions && params.extensions.length && { extensions: params.extensions }),
     ...(params.credentials && params.credentials.length && { credentials: params.credentials }),
     ...(params.apis && params.apis.length && { apis: params.apis }),
-    ...(params.runtime && { runtime: params.runtime }),
+    ...(params.runtime != null && { runtime: params.runtime }),
     ...(params.publishDate && { publishDate: params.publishDate }),
-    ...(params.events && params.events.length && { events: params.events }),
-    ...(params.isRequestPending && { isRequestPending: params.isRequestPending }),
-    ...(params.orgEntitled && { orgEntitled: params.orgEntitled }),
-    ...(params.userEntitled && { userEntitled: params.userEntitled }),
-    ...(params.canRequestAccess && { canRequestAccess: params.canRequestAccess }),
+    ...(params.event && { event: params.event }),
+    ...(params.isRequestPending != null && { isRequestPending: params.isRequestPending }),
+    ...(params.orgEntitled != null && { orgEntitled: params.orgEntitled }),
+    ...(params.userEntitled != null && { userEntitled: params.userEntitled }),
+    ...(params.canRequestAccess != null && { canRequestAccess: params.canRequestAccess }),
     ...(params.disEntitledReasons && params.disEntitledReasons.length && { disEntitledReasons: params.disEntitledReasons })
   };
 };
@@ -141,7 +141,7 @@ async function main (params) {
 
     if (hasCredentialsOrApisInParams) {
       // scenario 1 :  if apis or credentials are provided, skip the get install config step and just save the provided template
-      // do nothing
+      // do nothing here
     } else if (consoleProjectUrl) {
       // scenario 2 :  if consoleProject in payload, replace apis and credentials with the ones from the install config
       const projectId = consoleProjectUrl.split('/').at(-2);

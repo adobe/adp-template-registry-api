@@ -399,6 +399,8 @@
                   "type": "object",
                   "description": "A list of locations where the package's code can be found",
                   "additionalProperties": false,
+                  "minProperties": 1,
+                  "x-nullable": false,
                   "properties": {
                     "npm": {
                       "type": "string",
@@ -442,9 +444,6 @@
                     "USER_MISSING_PRIVATE_BETA",
                     "USER_MISSING_PUBLIC_BETA"
                   ]
-                },
-                "_links": {
-                  "$ref": "#/definitions/Links"
                 }
               },
               "example": {
