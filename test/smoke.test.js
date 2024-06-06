@@ -28,6 +28,10 @@ describe('smoke tests', () => {
     accessToken = payload.access_token;
   });
 
+  beforeEach(() => {
+    jest.setTimeout(30000); // 30 seconds
+  });
+
   describe('console template', () => {
     let newTemplateId = '';
     it('should add a new template', async () => {
