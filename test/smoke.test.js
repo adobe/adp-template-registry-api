@@ -30,7 +30,7 @@ describe('smoke tests', () => {
 
   describe('console template', () => {
     let newTemplateId = '';
-    
+
     it('should add a new template', async () => {
       testConsoleTemplate.name = `${testConsoleTemplate.name}-${Math.random().toString(10).substring(2, 8)}`; // append random 6 numbers to the template name, avoid 409s on errors
       const response = await fetch(`${process.env.TEMPLATE_REGISTRY_API_URL}/templates`, {
