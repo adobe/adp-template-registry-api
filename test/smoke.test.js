@@ -28,13 +28,11 @@ describe('smoke tests', () => {
     accessToken = payload.access_token;
   });
 
-  beforeEach(() => {
-    jest.setTimeout(30000); // 30 seconds
-  });
-
   describe('console template', () => {
     let newTemplateId = '';
+    
     it('should add a new template', async () => {
+      testConsoleTemplate.name = `${testConsoleTemplate.name}-${Math.random().toString(10).substring(2, 8)}`; // append random 6 numbers to the template name, avoid 409s on errors
       const response = await fetch(`${process.env.TEMPLATE_REGISTRY_API_URL}/templates`, {
         method: 'POST',
         headers: {
@@ -46,7 +44,7 @@ describe('smoke tests', () => {
       expect(response.status).toBe(200);
       const template = await response.json();
       newTemplateId = template.id;
-      expect(template.name).toBe('test-template-smoke-tests');
+      expect(template.name).toBe(testConsoleTemplate.name);
     });
 
     it('should fetch the new template', async () => {
@@ -58,7 +56,7 @@ describe('smoke tests', () => {
       });
       expect(response.status).toBe(200);
       const template = await response.json();
-      expect(template.name).toBe('test-template-smoke-tests');
+      expect(template.name).toBe(testConsoleTemplate.name);
     });
 
     it('should fetch list of templates, should have the new template', async () => {

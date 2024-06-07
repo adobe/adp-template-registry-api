@@ -32,7 +32,7 @@
   },
   "scripts": {
     "test": "npm run lint:check && npm run unit-tests",
-    "test:smoke": "jest --ci --testPathPattern=smoke --collectCoverage=false --runInBand --detectOpenHandles --setupFilesAfterEnv",
+    "test:smoke": "jest --ci --testPathPattern=smoke --collectCoverage=false --runInBand --detectOpenHandles --setupFilesAfterEnv=./test/jest.setup.smoke.js",
     "unit-tests": "jest --ci --testPathIgnorePatterns=smoke",
     "lint:check": "eslint --ext .js .",
     "lint:fix": "eslint --ext .js --fix .",
