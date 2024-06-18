@@ -51,7 +51,7 @@ The output of the second command should provide you with the base URL for callin
 
 ## Functional Testing
 
-To functionally test the API, developers can import the Template Registry collection [template-registry-collection.json](https://github.com/adobe/adp-template-registry-api/blob/main/template-registry-api.json) into [Insomnia](https://insomnia.rest/) (or any API tooling forked from Insomnia).
+To functionally test the API, developers can import the Template Registry collection [template-registry-collection.json](https://github.com/adobe/adp-template-registry-api/blob/main/template-registry-collection.json) into [Insomnia](https://insomnia.rest/) (or any API tooling forked from Insomnia).
 
 ## Contributing
 
