@@ -13,7 +13,8 @@
       "semi": ["error", "always"],
       "quotes": ["error", "single"],
       "no-trailing-spaces": ["error"],
-      "node/no-unpublished-require": 0
+      "node/no-unpublished-require": 0,
+      "node/no-extraneous-require": 0
     },
     "env": {
       "es2021": true,

@@ -31,6 +31,7 @@ const serializeRequestBody = (params) => {
     ...('extensions' in params && params.extensions.length && { extensions: params.extensions }),
     ...('credentials' in params && params.credentials.length && { credentials: params.credentials }),
     ...('codeSamples' in params && params.codeSamples.length && { codeSamples: params.codeSamples }),
+    ...('requestAccessAppId' in params && { requestAccessAppId: params.requestAccessAppId }),
     ...('apis' in params && params.apis.length && { apis: params.apis }),
     ...('status' in params && { status: params.status }),
     ...('runtime' in params && { runtime: params.runtime }),
@@ -131,8 +132,7 @@ async function main (params) {
             return {
               credentialType: credential.type,
               flowType: credential.flowType,
-              code: api.code,
-              productProfiles: api?.productProfiles
+              code: api.code
             };
           }));
         }
@@ -157,7 +157,8 @@ async function main (params) {
       ...template,
       _links: {
         self: {
-          href: `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template?.name}`
+          // if name is npm package name (i.e. @adobe/template), then use the name, otherwise use the id
+          href: template.name.includes('/') ? `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template.name}` : `${params.TEMPLATE_REGISTRY_API_URL}/templates/${template.id}`
         }
       }
     };
@@ -177,7 +178,7 @@ async function main (params) {
     // log any server errors
     logger.error(error);
     // return with 500
-    return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.')], logger);
+    return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, error.message)], logger);
   }
 }
 

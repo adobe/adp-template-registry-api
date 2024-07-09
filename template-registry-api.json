@@ -3,7 +3,7 @@
   "basePath": "/v1",
   "info": {
     "title": "Template Registry API",
-    "version": "0.2.0",
+    "version": "0.6.0",
     "license": {
       "name": "Apache-2.0 License",
       "url": "https://github.com/adobe/adp-template-registry-api?tab=Apache-2.0-1-ov-file"
@@ -230,29 +230,146 @@
               "properties": {
                 "name": {
                   "type": "string",
-                  "description": "The name of the package implementing the template on npmjs.com",
+                  "description": "The name of the template on npmjs.com",
                   "example": "@adobe/app-builder-template",
                   "x-nullable": false
                 },
-                "description": {
+                "author": {
                   "type": "string",
-                  "description": "A description of the template",
-                  "example": "This is a template for Adobe App Builder"
+                  "description": "The name of the template's author on npmjs.com",
+                  "example": "Adobe Inc."
                 },
                 "createdBy": {
                   "type": "string",
                   "description": "The name of the user who created the template",
                   "example": "Lazarus"
                 },
+                "updatedBy": {
+                  "type": "string",
+                  "description": "The name of the user who last updated the template",
+                  "example": "Lazarus"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "A description of the template",
+                  "example": "AppBuilder template"
+                },
+                "adobeRecommended": {
+                  "type": "boolean",
+                  "description": "Whether the template is recommended by Adobe",
+                  "example": true
+                },
                 "latestVersion": {
                   "type": "string",
                   "description": "The version of the template in the semver format",
-                  "example": "1.0.0"
+                  "example": "1.0.10"
                 },
-                "author": {
+                "publishDate": {
                   "type": "string",
-                  "description": "The name of the template's author",
-                  "example": "Adobe Inc."
+                  "description": "The date the template was published in the ISO 8601 format",
+                  "example": "2022-04-20T19:54:41.495Z"
+                },
+                "extensions": {
+                  "type": "array",
+                  "description": "Extension points that a template implements",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "extensionPointId"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "extensionPointId": {
+                        "type": "string",
+                        "description": "Extension Point Id",
+                        "example": "dx/excshell/1"
+                      }
+                    }
+                  }
+                },
+                "categories": {
+                  "type": "array",
+                  "description": "A list of categories the template belongs to",
+                  "minItems": 1,
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "graphql-mesh"
+                  ]
+                },
+                "apis": {
+                  "type": "array",
+                  "description": "A list of Adobe APIs required by the template",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "code"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "code": {
+                        "type": "string",
+                        "description": "The sdk code of the service",
+                        "example": "AdobeAnalyticsSDK"
+                      },
+                      "credentialType": {
+                        "type": "string",
+                        "description": "Credential type"
+                      },
+                      "flowType": {
+                        "type": "string",
+                        "description": "Flow type"
+                      }
+                    }
+                  }
+                },
+                "credentials": {
+                  "type": "array",
+                  "description": "A list of credentials required by the template",
+                  "minItems": 1,
+                  "items": {
+                    "type": "object",
+                    "required": [
+                      "type",
+                      "flowType"
+                    ],
+                    "additionalProperties": true,
+                    "properties": {
+                      "type": {
+                        "type": "string",
+                        "description": "The type of the credential",
+                        "example": "OAUTH_SERVER_TO_SERVER"
+                      },
+                      "flowType": {
+                        "type": "string",
+                        "description": "The flow type of the credential",
+                        "example": "ENTP"
+                      }
+                    }
+                  }
+                },
+                "runtime": {
+                  "type": "boolean",
+                  "description": "Whether to add Runtime to App Builder application or not.",
+                  "default": false
+                },
+                "event": {
+                  "type": "object",
+                  "description": "event configuration for the template"
+                },
+                "keywords": {
+                  "type": "array",
+                  "description": "A list of keywords specified in the packages.json file",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "aio-app-builder-template",
+                    "aio"
+                  ]
                 },
                 "status": {
                   "type": "string",
@@ -265,21 +382,33 @@
                   ],
                   "example": "Approved"
                 },
-                "adobeRecommended": {
-                  "type": "boolean",
-                  "description": "Whether the template is recommended by Adobe",
-                  "example": true
-                },
                 "codeSamples": {
                   "$ref": "#/definitions/CodeSamples"
                 },
+                "requestAccessAppId": {
+                  "type": "string",
+                  "description": "Access Platform app id which can be used to request access to services in this template.",
+                  "example": "FireflySDKEnterprise1"
+                },
+                "isRequestPending": {
+                  "type": "boolean",
+                  "description": "Indicates whether a request for access is already pending for the user in a given org",
+                  "example": "true"
+                },
                 "links": {
                   "type": "object",
-                  "description": "A link to the Github repository containing the package's source code",
+                  "description": "A list of locations where the package's code can be found",
                   "additionalProperties": false,
                   "minProperties": 1,
                   "x-nullable": false,
                   "properties": {
+                    "npm": {
+                      "type": "string",
+                      "format": "uri",
+                      "pattern": "^https://www\\.npmjs\\.com/",
+                      "description": "A link to the package on npmjs.com",
+                      "example": "https://www.npmjs.com/package/@adobe/app-builder-template"
+                    },
                     "github": {
                       "$ref": "#/definitions/GithubUrl"
                     },
@@ -287,6 +416,34 @@
                       "$ref": "#/definitions/DeveloperConsoleUrl"
                     }
                   }
+                },
+                "orgEntitled": {
+                  "type": "boolean",
+                  "description": "Whether the organization is entitled to use the template",
+                  "example": true
+                },
+                "userEntitled": {
+                  "type": "boolean",
+                  "description": "Whether the user is entitled to use the template",
+                  "example": true
+                },
+                "canRequestAccess": {
+                  "type": "boolean",
+                  "description": "Whether the user can request access to the template",
+                  "example": true
+                },
+                "disEntitledReasons": {
+                  "type": "array",
+                  "description": "A list of reasons why the user is not entitled to use the template",
+                  "items": {
+                    "type": "string"
+                  },
+                  "example": [
+                    "USER_MISSING_DEV_ROLE",
+                    "ORG_MISSING_FIS",
+                    "USER_MISSING_PRIVATE_BETA",
+                    "USER_MISSING_PUBLIC_BETA"
+                  ]
                 }
               },
               "example": {
@@ -526,7 +683,7 @@
           "200": {
             "description": "Information about a newly added template.",
             "schema": {
-              "$ref": "#/definitions/UpdateTemplateResponse"
+              "$ref": "#/definitions/Template"
             }
           },
           "400": {
@@ -661,7 +818,7 @@
         }
       }
     },
-    "/templates/{templateId}/install": {
+    "/templates/install/{templateId}": {
       "post": {
         "summary": "Install a template",
         "operationId": "template-registry-api/templates-install.http",
@@ -692,7 +849,7 @@
         "responses": {
           "201": {
             "description": "Template installed - Console Project created successfully.",
-            "schema": {
+            "schema":   {
               "$ref": "#/definitions/TemplateInstallationResponseBody"
             }
           },
@@ -887,6 +1044,11 @@
           "description": "The name of the user who created the template",
           "example": "Lazarus"
         },
+        "updatedBy": {
+          "type": "string",
+          "description": "The name of the user who last updated the template",
+          "example": "Lazarus"
+        },
         "description": {
           "type": "string",
           "description": "A description of the template",
@@ -953,12 +1115,13 @@
                 "description": "The sdk code of the service",
                 "example": "AdobeAnalyticsSDK"
               },
-              "licenseConfigs": {
-                "type": "array",
-                "description": "List of available license configs (product profiles) for the API",
-                "items": {
-                  "type": "object"
-                }
+              "credentialType": {
+                "type": "string",
+                "description": "Credential type"
+              },
+              "flowType": {
+                "type": "string",
+                "description": "Flow type"
               }
             }
           }
@@ -1021,6 +1184,16 @@
         },
         "codeSamples": {
           "$ref": "#/definitions/CodeSamples"
+        },
+        "requestAccessAppId": {
+          "type": "string",
+          "description": "Access Platform app id which can be used to request access to services in this template.",
+          "example": "FireflySDKEnterprise1"
+        },
+        "isRequestPending": {
+          "type": "boolean",
+          "description": "Indicates whether a request for access is already pending for the user in a given org",
+          "example": "true"
         },
         "links": {
           "type": "object",
@@ -1200,360 +1373,71 @@
         "apis": {
           "type": "array",
           "description": "Optional field to include license configs to be assigned to a technical account for an individual API",
-            "items": {
-                "type": "object",
-                "properties": {
-                  "code": {
-                      "type": "string",
-                      "description": "API code"
-                  },
-                  "credentialType": {
-                      "type": "string",
-                      "description": "Credential type"
-                  },
-                  "FlowType": {
-                      "type": "string",
-                      "description": "Flow type"
-                  },
-                  "licenseConfigs": {
-                      "type": "array",
-                      "items": {
-                          "type": "object"
-                      }
-                  }
+          "items": {
+            "type": "object",
+            "properties": {
+              "code": {
+                "type": "string",
+                "description": "API code"
+              },
+              "credentialType": {
+                "type": "string",
+                "description": "Credential type"
+              },
+              "flowType": {
+                "type": "string",
+                "description": "Flow type"
+              },
+              "licenseConfigs": {
+                "type": "array",
+                "items": {
+                  "type": "object"
                 }
+              }
             }
+          }
         }
       }
     },
     "TemplateInstallationResponseBody": {
       "type": "object",
-      "required": ["project"],
+      "required": [
+        "id",
+        "apiKey",
+        "orgId"
+      ],
       "properties": {
-        "project": {
+        "id": {
+          "type": "string"
+        },
+        "apiKey": {
+          "type": "string"
+        },
+        "orgId": {
+          "type": "string"
+        },
+        "technicalAccountId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "workspaceId": {
+          "type": "string"
+        },
+        "subscriptionResult": {
           "type": "object",
-          "required": ["id", "name", "org"],
-          "description": "Root element",
           "properties": {
-            "id": {
-              "type": "string",
-              "description": "Project id"
+            "sdkList": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             },
-            "name": {
-              "type": "string",
-              "description": "Project name"
-            },
-            "title": {
-              "type": "string",
-              "description": "Project title"
-            },
-            "description": {
-              "type": "string",
-              "description": "Project description"
-            },
-            "org": {
-              "type": "object",
-              "description": "Organization info",
-              "properties": {
-                "id": {
-                  "type": "string",
-                  "description": "Organization id"
-                },
-                "name": {
-                  "type": "string",
-                  "description": "Organization name"
-                },
-                "ims_org_id": {
-                  "type": "string",
-                  "description": "Ims organization id"
-                },
-                "workspace": {
-                  "type": "object",
-                  "description": "Workspace info",
-                  "properties": {
-                    "id": {
-                      "type": "string",
-                      "description": "Workspace id"
-                    },
-                    "name": {
-                      "type": "string",
-                      "description": "Workspace name"
-                    },
-                    "title": {
-                      "type": "string",
-                      "description": "Workspace title"
-                    },
-                    "description": {
-                      "type": "string",
-                      "description": "Workspace description"
-                    },
-                    "details": {
-                      "type": "object",
-                      "description": "Workspace details",
-                      "properties": {
-                        "credentials": {
-                          "type": "array",
-                          "items": {
-                            "type": "object",
-                            "properties": {
-                              "id": {
-                                "type": "string",
-                                "description": "Credential id"
-                              },
-                              "name": {
-                                "type": "string",
-                                "description": "Credential name"
-                              },
-                              "apiKey": {
-                                "type": "string",
-                                "description": "Api key / client Id"
-                              },
-                              "integration_type": {
-                                "type": "string",
-                                "description": "Credential type, possible values (service, oauthweb, oauthandroid, oauthios)"
-                              },
-                              "jwt": {
-                                "type": "object",
-                                "description": "jwt credential details",
-                                "properties": {
-                                  "client_id": {
-                                    "type": "string",
-                                    "description": "Client id"
-                                  },
-                                  "client_secret": {
-                                    "type": "string",
-                                    "description": "Client secret"
-                                  },
-                                  "technical_account_email": {
-                                    "type": "string",
-                                    "description": "Technical account email"
-                                  },
-                                  "technical_account_id": {
-                                    "type": "string",
-                                    "description": "Technical account id"
-                                  },
-                                  "meta_scopes": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string",
-                                      "description": "Credential meta scope"
-                                    }
-                                  }
-                                }
-                              },
-                              "oauth_server_to_server": {
-                                "type": "object",
-                                "description": "OAuth server to server credential details",
-                                "properties": {
-                                  "client_id": {
-                                    "type": "string",
-                                    "description": "Client id"
-                                  },
-                                  "client_secrets": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string",
-                                      "description": "client secrets"
-                                    }
-                                  },
-                                  "technical_account_email": {
-                                    "type": "string",
-                                    "description": "Technical account email"
-                                  },
-                                  "technical_account_id": {
-                                    "type": "string",
-                                    "description": "Technical account id"
-                                  },
-                                  "scopes": {
-                                    "type": "array",
-                                    "items": {
-                                      "type": "string",
-                                      "description": "Credential scopes"
-                                    }
-                                  }
-                                }
-                              },
-                              "oauth2": {
-                                "type": "object",
-                                "description": "oauth2 credential details",
-                                "properties": {
-                                  "client_id": {
-                                    "type": "string",
-                                    "description": "Client id"
-                                  },
-                                  "client_secret": {
-                                    "type": "string",
-                                    "description": "Client secret"
-                                  },
-                                  "redirect_uri": {
-                                    "type": "array",
-                                    "description": "Redirect urls list",
-                                    "items": {
-                                      "type": "string",
-                                      "description": "Redirect url"
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "services": {
-                          "type": "array",
-                          "description": "Workspace services",
-                          "items": {
-                            "type": "object",
-                            "description": "Service details",
-                            "properties": {
-                              "code": {
-                                "type": "string",
-                                "description": "Service code"
-                              },
-                              "name": {
-                                "type": "string",
-                                "description": "Service name"
-                              }
-                            }
-                          }
-                        },
-                        "runtime": {
-                          "type": "object",
-                          "description": "Workspace runtime",
-                          "properties": {
-                            "namespaces": {
-                              "type": "array",
-                              "description": "Runtime namespaces",
-                              "items": {
-                                "type": "object",
-                                "description": "Runtime details",
-                                "properties": {
-                                  "name": {
-                                    "type": "string",
-                                    "description": "Namespace name"
-                                  },
-                                  "auth": {
-                                    "type": "string",
-                                    "description": "Namespace auth token"
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        },
-                        "mesh": {
-                          "type": "object",
-                          "description": "Mesh configuration"
-                        },
-                        "events": {
-                          "type": "object",
-                          "description": "Events details",
-                          "properties": {
-                            "registrations": {
-                              "type": "array",
-                              "description": "Event registrations",
-                              "items": {
-                                "type": "object",
-                                "description": "Event registrations details",
-                                "properties": {
-                                  "id": {
-                                    "type": "string",
-                                    "description": "id"
-                                  },
-                                  "name": {
-                                    "type": "string",
-                                    "description": "name"
-                                  },
-                                  "description": {
-                                    "type": "string",
-                                    "description": "registration description"
-                                  },
-                                  "enabled": {
-                                    "type": "string",
-                                    "description": "enabled"
-                                  },
-                                  "client_id": {
-                                    "type": "string",
-                                    "description": "client id"
-                                  },
-                                  "registration_id": {
-                                    "type": "string",
-                                    "description": "registration id"
-                                  },
-                                  "webhook_status": {
-                                    "type": "string",
-                                    "description": "webhook status"
-                                  },
-                                  "created_date": {
-                                    "type": "string",
-                                    "description": "create date"
-                                  },
-                                  "updated_date": {
-                                    "type": "string",
-                                    "description": "update date"
-                                  },
-                                  "webhook_url": {
-                                    "type": "string",
-                                    "description": "webhook url"
-                                  },
-                                  "delivery_type": {
-                                    "type": "string",
-                                    "description": "delivery type"
-                                  },
-                                  "events_url": {
-                                    "type": "string",
-                                    "description": "events url"
-                                  },
-                                  "trace_url": {
-                                    "type": "string",
-                                    "description": "trace url"
-                                  },
-                                  "events_of_interest": {
-                                    "type": "array",
-                                    "description": "events of interested",
-                                    "items": {
-                                      "type": "object",
-                                      "description": "events of interested details",
-                                      "properties": {
-                                        "event_code": {
-                                          "type": "string",
-                                          "description": "event code"
-                                        },
-                                        "provider_id": {
-                                          "type": "string",
-                                          "description": "provider id"
-                                        },
-                                        "event_label": {
-                                          "type": "string",
-                                          "description": "event label"
-                                        },
-                                        "event_description": {
-                                          "type": "string",
-                                          "description": "event description"
-                                        },
-                                        "provider_label": {
-                                          "type": "string",
-                                          "description": "provider label"
-                                        },
-                                        "event_delivery_format": {
-                                          "type": "string",
-                                          "description": "event delivery format"
-                                        },
-                                        "provider_metadata": {
-                                          "type": "string",
-                                          "description": "provider metadata"
-                                        }
-                                      }
-                                    }
-                                  }
-                                }
-                              }
-                            }
-                          }
-                        }
-                      }
-                    }
-                  }
-                }
+            "errorList": {
+              "type": "array",
+              "items": {
+                "type": "string"
               }
             }
           }
@@ -1562,7 +1446,9 @@
     },
     "UpdateTemplate": {
       "type": "object",
-      "required": ["updatedBy"],
+      "required": [
+        "updatedBy"
+      ],
       "additionalProperties": false,
       "properties": {
         "updatedBy": {
@@ -1670,159 +1556,10 @@
         "codeSamples": {
           "$ref": "#/definitions/CodeSamples"
         },
-        "apis": {
-          "type": "array",
-          "description": "A list of Adobe APIs required by the template",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "required": [
-              "code"
-            ],
-            "additionalProperties": true,
-            "properties": {
-              "code": {
-                "type": "string",
-                "description": "The sdk code of the service",
-                "example": "AdobeAnalyticsSDK"
-              }
-            }
-          }
-        },
-        "links": {
-          "type": "object",
-          "description": "A link to the Github repository containing the package's source code",
-          "additionalProperties": false,
-          "properties": {
-            "github": {
-              "$ref": "#/definitions/GithubUrl"
-            },
-            "consoleProject": {
-              "$ref": "#/definitions/DeveloperConsoleUrl"
-            }
-          }
-        }
-      }
-    },
-    "UpdateTemplateResponse": {
-      "type": "object",
-      "required": ["id", "name", "status", "links", "_links", "updatedBy"],
-      "additionalProperties": false,
-      "properties": {
-        "id": {
+        "requestAccessAppId": {
           "type": "string",
-          "description": "The id of the template",
-          "example": "template-uuid-1234"
-        },
-        "name": {
-          "type": "string",
-          "description": "The name of the template",
-          "example": "@adobe/app-builder-template"
-        },
-        "updatedBy": {
-          "type": "string",
-          "description": "The name of the user who created the template",
-          "example": "Lazarus"
-        },
-        "description": {
-          "type": "string",
-          "description": "A description of the template",
-          "example": "AppBuilder template"
-        },
-        "latestVersion": {
-          "type": "string",
-          "description": "The version of the template in the semver format",
-          "example": "1.0.10"
-        },
-        "categories": {
-          "type": "array",
-          "description": "A list of categories the template belongs to",
-          "minItems": 1,
-          "items": {
-            "type": "string"
-          },
-          "example": [
-            "graphql-mesh"
-          ]
-        },
-        "adobeRecommended": {
-          "type": "boolean",
-          "description": "Whether the template is recommended by Adobe",
-          "example": true
-        },
-        "keywords": {
-          "type": "array",
-          "description": "A list of keywords specified in the packages.json file",
-          "items": {
-            "type": "string"
-          },
-          "example": [
-            "aio-app-builder-template",
-            "aio"
-          ]
-        },
-        "status": {
-          "type": "string",
-          "description": "A status of a package in Template Registry.\n\"Error\" indicates that an application error occurred.\n",
-          "enum": [
-            "InVerification",
-            "Approved",
-            "Rejected",
-            "Error"
-          ],
-          "example": "Approved"
-        },
-        "extensions": {
-          "type": "array",
-          "description": "Extension points that a template implements",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "required": [
-              "extensionPointId"
-            ],
-            "additionalProperties": true,
-            "properties": {
-              "extensionPointId": {
-                "type": "string",
-                "description": "Extension Point Id",
-                "example": "dx/excshell/1"
-              }
-            }
-          }
-        },
-        "runtime": {
-          "type": "boolean",
-          "description": "Whether to add Runtime to App Builder application or not.",
-          "default": false
-        },
-        "credentials": {
-          "type": "array",
-          "description": "A list of credentials required by the template",
-          "minItems": 1,
-          "items": {
-            "type": "object",
-            "required": [
-              "type",
-              "flowType"
-            ],
-            "additionalProperties": true,
-            "properties": {
-              "type": {
-                "type": "string",
-                "description": "The type of the credential",
-                "example": "OAUTH_SERVER_TO_SERVER"
-              },
-              "flowType": {
-                "type": "string",
-                "description": "The flow type of the credential",
-                "example": "ENTP"
-              }
-            }
-          }
-        },
-        "codeSamples": {
-          "$ref": "#/definitions/CodeSamples"
+          "description": "Access Platform app id which can be used to request access to services in this template.",
+          "example": "FireflySDKEnterprise1"
         },
         "apis": {
           "type": "array",
@@ -1855,9 +1592,6 @@
               "$ref": "#/definitions/DeveloperConsoleUrl"
             }
           }
-        },
-        "_links": {
-          "$ref": "#/definitions/Links"
         }
       }
     }

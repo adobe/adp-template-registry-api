@@ -32,7 +32,6 @@ const mockConsoleSDKInstance = {
 consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance);
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
-jest.mock('@heyputer/kv.js');
 
 process.env = {
   TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'
@@ -259,7 +258,7 @@ describe('PUT templates', () => {
           errors: [
             {
               code: 'server_error',
-              message: 'An error occurred, please try again later.'
+              message: 'Internal Server Error'
             }
           ]
         },
@@ -308,7 +307,10 @@ describe('PUT templates', () => {
 
   test('Incorrect response, should throw error', async () => {
     fetchUrl.mockReturnValue('');
-    findTemplateById.mockReturnValue(null);
+    findTemplateById.mockReturnValue({
+      name: 'fake-template-name',
+      bad: 'field'
+    });
     updateTemplate.mockReturnValue({ matchedCount: 1 });
     const response = await action.main({
       IMS_URL: process.env.IMS_URL,
@@ -339,7 +341,7 @@ describe('PUT templates', () => {
           errors: [
             {
               code: 'server_error',
-              message: 'An error occurred, please try again later.'
+              message: 'Response invalid\n  at: body\n    at: bad\n      Property not allowed\n    One or more required properties missing: id, status, links'
             }
           ]
         },
@@ -372,6 +374,7 @@ describe('PUT templates', () => {
           link: 'fake-link' // link to the zip file containing the code sample
         }
       ],
+      requestAccessAppId: 'requestAccessAppId',
       status: 'Approved'
     };
     findTemplateById.mockReturnValue(template);
@@ -402,6 +405,7 @@ describe('PUT templates', () => {
           language: 'fake-language', // programming language for the code sample
           link: 'fake-link' // link to the zip file containing the code sample
         }],
+      requestAccessAppId: 'requestAccessAppId',
       status: 'Approved',
       ...fakeParams
     });
@@ -444,7 +448,8 @@ describe('PUT templates', () => {
       extensions: [{
         extensionPointId: 'fake-extensionPointId'
       }],
-      runtime: false
+      runtime: false,
+      requestAccessAppId: 'requestAccessAppId'
     };
     findTemplateById.mockReturnValue(template);
     updateTemplate.mockReturnValue({ matchedCount: 1 });
@@ -478,6 +483,7 @@ describe('PUT templates', () => {
         extensionPointId: 'fake-extensionPointId'
       }],
       runtime: true,
+      requestAccessAppId: 'requestAccessAppId',
       ...fakeParams
     });
     expect(response).toEqual({
@@ -502,14 +508,7 @@ describe('PUT templates', () => {
             flowType: 'fake-flowType',
             apis: [
               {
-                code: 'fake-code',
-                productProfiles: [
-                  {
-                    id: 'fake-id',
-                    productId: 'fake-productId',
-                    name: 'fake-name'
-                  }
-                ]
+                code: 'fake-code'
               }
             ]
           }
@@ -534,15 +533,9 @@ describe('PUT templates', () => {
       apis: [{
         credentialType: 'fake-type',
         flowType: 'fake - flowType',
-        code: 'fake-code',
-        productProfiles: [
-          {
-            id: 'fake-id',
-            productId: 'fake-productId',
-            name: 'fake-name'
-          }
-        ]
-      }]
+        code: 'fake-code'
+      }],
+      requestAccessAppId: 'requestAccessAppId'
     };
     findTemplateById.mockReturnValue(template);
     updateTemplate.mockReturnValue({ matchedCount: 1 });
@@ -564,6 +557,7 @@ describe('PUT templates', () => {
       },
       updatedBy: 'fake-user',
       status: 'Approved',
+      requestAccessAppId: 'requestAccessAppId',
       ...fakeParams
     });
     expect(response).toEqual({
@@ -612,15 +606,9 @@ describe('PUT templates', () => {
       apis: [{
         credentialType: 'fake-type',
         flowType: 'fake - flowType',
-        code: 'fake-code',
-        productProfiles: [
-          {
-            id: 'fake-id',
-            productId: 'fake-productId',
-            name: 'fake-name'
-          }
-        ]
-      }]
+        code: 'fake-code'
+      }],
+      requestAccessAppId: 'requestAccessAppId'
     };
     findTemplateById.mockReturnValue(template);
     updateTemplate.mockReturnValue({ matchedCount: 1 });
@@ -642,6 +630,7 @@ describe('PUT templates', () => {
       },
       updatedBy: 'fake-user',
       status: 'Approved',
+      requestAccessAppId: 'requestAccessAppId',
       ...fakeParams
     });
     expect(response).toEqual({

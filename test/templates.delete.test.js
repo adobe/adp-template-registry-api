@@ -24,7 +24,6 @@ jest.mock('@adobe/aio-sdk', () => ({
 }));
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
-jest.mock('@heyputer/kv.js');
 
 beforeEach(() => {
   jest.clearAllMocks();

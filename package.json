@@ -1,17 +1,15 @@
 {
   "name": "template-registry-api",
-  "version": "0.5.0",
+  "version": "0.8.0",
   "dependencies": {
     "@adobe/aio-lib-console": "^5.1.0",
     "@adobe/aio-lib-ims": "^7.0.1",
     "@adobe/aio-sdk": "^5.0.1",
-    "@heyputer/kv.js": "^0.1.6",
     "@octokit/rest": "^20.0.2",
     "axios": "^0.27.2",
     "lodash.orderby": "^4.6.0",
     "mongodb": "^6.5.0",
-    "openapi-enforcer": "^1.23.0",
-    "uuid": "^9.0.1"
+    "openapi-enforcer": "^1.23.0"
   },
   "devDependencies": {
     "@adobe/eslint-config-aio-lib-config": "^4.0.0",
@@ -33,7 +31,8 @@
   },
   "scripts": {
     "test": "npm run lint:check && npm run unit-tests",
-    "unit-tests": "jest --ci",
+    "test:smoke": "jest --ci --testPathPattern=smoke --collectCoverage=false --runInBand --detectOpenHandles --setupFilesAfterEnv=./test/jest.setup.smoke.js",
+    "unit-tests": "jest --ci --testPathIgnorePatterns=smoke",
     "lint:check": "eslint --ext .js .",
     "lint:fix": "eslint --ext .js --fix .",
     "api:spec:lint": "redocly lint template-registry-api.json",
@@ -42,7 +41,7 @@
     "release": "np --no-publish"
   },
   "engines": {
-    "node": "^18"
+    "node": "^18 || ^20 || ^22"
   },
   "jest": {
     "rootDir": ".",

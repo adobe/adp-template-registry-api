@@ -1,0 +1,49 @@
+name: Smoke Tests
+
+defaults:
+  run:
+    shell: bash
+
+on:
+  schedule:
+    - cron: '*/10 * * * *' # every 10 minutes
+
+jobs:
+  smoke:
+    environment: Production
+    # we would like to avoid running this workflow in forked repos
+    if: github.repository == 'adobe/adp-template-registry-api'
+    runs-on: ${{ matrix.os }}
+    strategy:
+      max-parallel: 1
+      matrix:
+        node-version: ['20']
+        os: [ubuntu-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install dependencies
+        run: npm i --package-lock --package-lock-only && npm ci
+      - name: Run smoke tests
+        env:
+          AIO_RUNTIME_APIHOST: ${{ secrets.AIO_RUNTIME_APIHOST }}
+          IMS_CLIENT_ID: ${{ secrets.IMS_CLIENT_ID }}
+          IMS_CLIENT_SECRET: ${{ secrets.IMS_CLIENT_SECRET }}
+          IMS_AUTH_CODE: ${{ secrets.IMS_AUTH_CODE }}
+          IMS_SCOPES: ${{ secrets.IMS_SCOPES }}
+          TEMPLATE_REGISTRY_API_URL: ${{ secrets.TEMPLATE_REGISTRY_API_URL }}
+        run: npm run test:smoke
+      - id: slacknotification
+        name: Slack Notification
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: 'Template Registry Smoke Tests Failed'
+          SLACK_MESSAGE: 'Node Version: ${{ matrix.node-version }}\n Runbook: https://git.corp.adobe.com/CNA/runbooks/tree/main/runbooks/template-registry-smoke-tests-failure.md'
+          SLACK_COLOR: ${{ job.status == 'success' && 'good' || job.status == 'cancelled' && '#808080' || 'danger' }}
+          ENABLE_ESCAPES: true
