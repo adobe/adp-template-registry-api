@@ -818,7 +818,7 @@
         }
       }
     },
-    "/templates/install/{templateId}": {
+    "/install/{templateId}": {
       "post": {
         "summary": "Install a template",
         "operationId": "template-registry-api/templates-install.http",
