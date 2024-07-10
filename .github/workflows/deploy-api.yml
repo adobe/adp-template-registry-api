@@ -5,6 +5,16 @@ defaults:
     shell: bash
 
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options: 
+          - stage
+          - prod
+        default: 'stage'
   release: # Prod
     types: [released]
   push: # Stage
@@ -13,8 +23,8 @@ on:
 
 jobs:
   deploy:
-    environment: ${{ github.event_name == 'release' && 'Production' || github.event_name == 'push' && 'Stage' }}
-    name: Deploy to ${{ github.event_name == 'release' && 'Production' || github.event_name == 'push' && 'Stage' }}
+    environment: ${{ inputs.environment || github.event_name == 'release' && 'Production' || github.event_name == 'push' && 'Stage' }}
+    name: Deploy to ${{ inputs.enviroment || github.event_name == 'release' && 'Production' || github.event_name == 'push' && 'Stage' }}
     # we would like to avoid running this workflow in forked repos
     if: github.repository == 'adobe/adp-template-registry-api'
     runs-on: ${{ matrix.os }}
