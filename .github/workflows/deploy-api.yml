@@ -12,9 +12,9 @@ on:
         required: true
         type: choice
         options: 
-          - stage
-          - prod
-        default: 'stage'
+          - Stage
+          - Production
+        default: 'Stage'
   release: # Prod
     types: [released]
   push: # Stage
