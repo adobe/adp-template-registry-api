@@ -104,7 +104,7 @@ async function main (params) {
 
     const [req, reqError] = openapi.request({
       method: 'POST',
-      path: '/templates/install/{templateId}',
+      path: '/install/{templateId}',
       body
     });
     if (reqError) {
