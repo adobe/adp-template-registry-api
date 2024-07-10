@@ -24,7 +24,7 @@ on:
 jobs:
   deploy:
     environment: ${{ inputs.environment || github.event_name == 'release' && 'Production' || github.event_name == 'push' && 'Stage' }}
-    name: Deploy to ${{ inputs.enviroment || github.event_name == 'release' && 'Production' || github.event_name == 'push' && 'Stage' }}
+    name: Deploy to ${{ inputs.environment || github.event_name == 'release' && 'Production' || github.event_name == 'push' && 'Stage' }}
     # we would like to avoid running this workflow in forked repos
     if: github.repository == 'adobe/adp-template-registry-api'
     runs-on: ${{ matrix.os }}
