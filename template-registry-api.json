@@ -3,7 +3,7 @@
   "basePath": "/v1",
   "info": {
     "title": "Template Registry API",
-    "version": "0.6.0",
+    "version": "0.8.1",
     "license": {
       "name": "Apache-2.0 License",
       "url": "https://github.com/adobe/adp-template-registry-api?tab=Apache-2.0-1-ov-file"
@@ -849,7 +849,7 @@
         "responses": {
           "201": {
             "description": "Template installed - Console Project created successfully.",
-            "schema":   {
+            "schema": {
               "$ref": "#/definitions/TemplateInstallationResponseBody"
             }
           },
