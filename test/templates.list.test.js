@@ -41,6 +41,11 @@ jest.mock('../actions/templateRegistry', () => {
   };
 });
 jest.mock('../actions/ims');
+jest.mock('../actions/metrics', () => {
+  return {
+    withMetrics: jest.fn().mockImplementation((fn) => fn)
+  };
+});
 
 beforeEach(() => {
   jest.clearAllMocks();

@@ -16,6 +16,10 @@ const { findTemplateById } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const consoleLib = require('@adobe/aio-lib-console');
 
+const { withMetrics } = require('../../metrics');
+const METRICS_KEY = 'recordtemplateregistrymetrics';
+const ENDPOINT = 'POST /install/{templateId}';
+
 const HTTP_METHOD = 'post';
 const POST_PARAM_NAME = 'templateId';
 const CREDENTIAL_FLOW_TYPE_ADOBEID = 'adobeid';
@@ -257,4 +261,4 @@ async function main (params) {
     return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, error.message)], logger);
   }
 }
-exports.main = main;
+exports.main = withMetrics(main, METRICS_KEY, ENDPOINT);

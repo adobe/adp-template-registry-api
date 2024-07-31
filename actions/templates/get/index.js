@@ -16,6 +16,10 @@ const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VER
 const Enforcer = require('openapi-enforcer');
 const { evaluateEntitlements } = require('../../templateEntitlement');
 
+const { withMetrics } = require('../../metrics');
+const METRICS_KEY = 'recordtemplateregistrymetrics';
+const ENDPOINT = 'GET /templates/{templateId}';
+
 // GET operation is available to everyone, no IMS access token is required
 const HTTP_METHOD = 'get';
 
@@ -180,4 +184,4 @@ async function main (params) {
   }
 }
 
-exports.main = main;
+exports.main = withMetrics(main, METRICS_KEY, ENDPOINT);

@@ -15,6 +15,10 @@ const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMiss
 const { validateAccessToken, isAdmin, isValidServiceToken } = require('../../ims');
 const { removeTemplateById, removeTemplateByName } = require('../../templateRegistry');
 
+const { withMetrics } = require('../../metrics');
+const METRICS_KEY = 'recordtemplateregistrymetrics';
+const ENDPOINT = 'DELETE /templates/{templateId}';
+
 const HTTP_METHOD = 'delete';
 const requiredScopes = ['template_registry.write'];
 
@@ -121,4 +125,4 @@ async function main (params) {
   }
 }
 
-exports.main = main;
+exports.main = withMetrics(main, METRICS_KEY, ENDPOINT);

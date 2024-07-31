@@ -16,6 +16,10 @@ const { validateAccessToken, isValidServiceToken } = require('../../ims');
 const Enforcer = require('openapi-enforcer');
 const orderBy = require('lodash.orderby');
 
+const { withMetrics } = require('../../metrics');
+const METRICS_KEY = 'recordtemplateregistrymetrics';
+const ENDPOINT = 'GET /templates';
+
 const HTTP_METHOD = 'get';
 const FILTER_VALUE_ANY = '*';
 const FILTER_VALUE_NONE = '';
@@ -349,4 +353,4 @@ function filter (templates, filterValues, field, filterType, subfield) {
   });
 }
 
-exports.main = main;
+exports.main = withMetrics(main, METRICS_KEY, ENDPOINT);

@@ -17,6 +17,10 @@ const { findTemplateById, updateTemplate } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const consoleLib = require('@adobe/aio-lib-console');
 
+const { withMetrics } = require('../../metrics');
+const METRICS_KEY = 'recordtemplateregistrymetrics';
+const ENDPOINT = 'PUT /templates/{templateId}';
+
 const HTTP_METHOD = 'put';
 const PUT_PARAM_NAME = 'templateId';
 
@@ -182,4 +186,4 @@ async function main (params) {
   }
 }
 
-exports.main = main;
+exports.main = withMetrics(main, METRICS_KEY, ENDPOINT);

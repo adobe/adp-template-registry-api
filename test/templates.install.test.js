@@ -40,6 +40,11 @@ const mockConsoleSDKInstance = {
   createOauthS2SCredentialIntegration: jest.fn()
 };
 consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance);
+jest.mock('../actions/metrics', () => {
+  return {
+    withMetrics: jest.fn().mockImplementation((fn) => fn)
+  };
+});
 
 const IMS_ACCESS_TOKEN = 'mockToken';
 const mockParams = {
