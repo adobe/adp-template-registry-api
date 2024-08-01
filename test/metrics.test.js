@@ -9,26 +9,27 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const { withMetrics } = require('../actions/metrics');
-
-jest.mock('../actions/utils');
+const metrics = require('../actions/metrics');
+const metricsLib = require('@adobe/aio-metrics-client');
 jest.mock('@adobe/aio-metrics-client');
-jest.mock('@adobe/aio-lib-ims');
 
 describe('metrics', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  test('withMetrics - Metrics URL set', async () => {
-    const fn = jest.fn(() => Promise.resolve({
-      statusCode: 200
-    }));
-    const wrappedFn = withMetrics(fn, 'test', 'GET /test');
-    await expect(wrappedFn({
-      METRICS_URL: 'http://localhost:8080'
-    })).resolves.toEqual({
-      statusCode: 200
-    });
+  test('setMetricsUrl no metrics-url in environment', async () => {
+    metrics.setMetricsUrl({ artist: 'Renoir', painting: 'Bal du moulin de la Galette' }, 'fake-metric');
+    expect(metricsLib.setMetricsURL).toHaveBeenCalledTimes(0);
+  });
+
+  test('setMetricsUrl metrics-url in environment', async () => {
+    metrics.setMetricsUrl({ 'metrics-url': 'https://devxmetricsservice-stage.adobe.io/', artist: 'Renoir', painting: 'Bal du moulin de la Galette' }, 'fake-metric');
+    expect(metricsLib.setMetricsURL).toHaveBeenCalledTimes(1);
+  });
+
+  test('setMetricsUrl metrics-url is not a valid url', async () => {
+    metrics.setMetricsUrl({ 'metrics-url': 'sillyhappybaby1', artist: 'Renoir', painting: 'Bal du moulin de la Galette' }, 'fake-metric');
+    expect(metricsLib.setMetricsURL).toHaveBeenCalledTimes(0);
   });
 });

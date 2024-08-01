@@ -29,14 +29,10 @@ jest.mock('@adobe/aio-lib-console');
 const mockConsoleSDKInstance = {
   getProjectInstallConfig: jest.fn()
 };
+jest.mock('@adobe/aio-metrics-client');
 consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance);
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
-jest.mock('../actions/metrics', () => {
-  return {
-    withMetrics: jest.fn().mockImplementation((fn) => fn)
-  };
-});
 
 process.env = {
   TEMPLATE_REGISTRY_API_URL: 'https://template-registry-api.tbd/apis/v1'

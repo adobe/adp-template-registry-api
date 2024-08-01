@@ -32,6 +32,7 @@ jest.mock('@adobe/aio-sdk', () => ({
     Logger: jest.fn()
   }
 }));
+jest.mock('@adobe/aio-metrics-client');
 jest.mock('../actions/templateRegistry', () => {
   const originalModule = jest.requireActual('../actions/templateRegistry');
   return {
@@ -41,11 +42,6 @@ jest.mock('../actions/templateRegistry', () => {
   };
 });
 jest.mock('../actions/ims');
-jest.mock('../actions/metrics', () => {
-  return {
-    withMetrics: jest.fn().mockImplementation((fn) => fn)
-  };
-});
 
 beforeEach(() => {
   jest.clearAllMocks();

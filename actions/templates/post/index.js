@@ -16,12 +16,13 @@ const { validateAccessToken, generateAccessToken } = require('../../ims');
 const { findTemplateByName, addTemplate } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const consoleLib = require('@adobe/aio-lib-console');
-
-const { withMetrics } = require('../../metrics');
-const METRICS_KEY = 'recordtemplateregistrymetrics';
-const ENDPOINT = 'POST /templates';
+const { incBatchCounter, incBatchCounterMultiLabel } = require('@adobe/aio-metrics-client');
+const { getTokenData } = require('@adobe/aio-lib-ims');
+const { setMetricsUrl } = require('../../metrics');
 
 const HTTP_METHOD = 'post';
+const ENDPOINT = 'POST /templates';
+const METRICS_KEY = 'recordtemplateregistrymetrics';
 const POST_PARAM_NAME = 'name';
 
 /**
@@ -78,6 +79,11 @@ async function main (params) {
     MONGODB_NAME: params.MONGODB_NAME
   };
 
+  let requester = 'unauth';
+  if (params?.METRICS_URL) {
+    setMetricsUrl(params.METRICS_URL, METRICS_KEY);
+  }
+
   try {
     // 'info' is the default level if not set
     logger.info('Calling "POST templates"');
@@ -85,31 +91,68 @@ async function main (params) {
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
-    if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
-      return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
-    }
-
     // check for missing request input parameters and headers
     const requiredHeaders = ['Authorization'];
     let errorMessages = checkMissingRequestInputs(params, [], requiredHeaders);
     if (errorMessages) {
+      await incBatchCounter('request_count', requester, ENDPOINT);
+      await incBatchCounterMultiLabel(
+        'error_count',
+        requester,
+        {
+          api: ENDPOINT,
+          errorCategory: '401'
+        }
+      );
       return errorResponse(401, errorMessages, logger);
     }
+
+    // extract the user Bearer token from the Authorization header
+    const accessToken = getBearerToken(params);
+    requester = getTokenData(accessToken).user_id;
+
+    await incBatchCounter('request_count', requester, ENDPOINT);
+
+    if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
+      await incBatchCounterMultiLabel(
+        'error_count',
+        requester,
+        {
+          api: ENDPOINT,
+          errorCategory: '405'
+        }
+      );
+      return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
+    }
+
     const requiredParams = [
       POST_PARAM_NAME
     ];
     errorMessages = checkMissingRequestInputs(params, requiredParams);
     if (errorMessages) {
+      await incBatchCounterMultiLabel(
+        'error_count',
+        requester,
+        {
+          api: ENDPOINT,
+          errorCategory: '400'
+        }
+      );
       return errorResponse(400, errorMessages, logger);
     }
-
-    // extract the user Bearer token from the Authorization header
-    const accessToken = getBearerToken(params);
 
     try {
       // validate the token, an exception will be thrown for a non-valid token
       await validateAccessToken(accessToken, imsUrl, imsClientId);
     } catch (error) {
+      await incBatchCounterMultiLabel(
+        'error_count',
+        requester,
+        {
+          api: ENDPOINT,
+          errorCategory: '401'
+        }
+      );
       return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
     }
 
@@ -128,6 +171,14 @@ async function main (params) {
       body
     });
     if (reqError) {
+      await incBatchCounterMultiLabel(
+        'error_count',
+        requester,
+        {
+          api: ENDPOINT,
+          errorCategory: '400'
+        }
+      );
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, reqError.toString().split('\n').map(line => line.trim()).join(' => '))], logger);
     }
 
@@ -215,8 +266,16 @@ async function main (params) {
     // log any server errors
     logger.error(error);
     // return with 500
+    await incBatchCounterMultiLabel(
+      'error_count',
+      requester,
+      {
+        api: ENDPOINT,
+        errorCategory: '500'
+      }
+    );
     return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.')], logger);
   }
 }
 
-exports.main = withMetrics(main, METRICS_KEY, ENDPOINT);
+exports.main = main;
