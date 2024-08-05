@@ -15,6 +15,7 @@ const utils = require('../actions/utils');
 const { fetchUrl, updateTemplate, findTemplateById } = require('../actions/templateRegistry');
 const action = require('../actions/templates/put/index');
 const consoleSDK = require('@adobe/aio-lib-console');
+const { setMetricsUrl } = require('../actions/metrics');
 
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
 Core.Logger.mockReturnValue(mockLoggerInstance);
@@ -30,6 +31,8 @@ const mockConsoleSDKInstance = {
   getProjectInstallConfig: jest.fn()
 };
 jest.mock('@adobe/aio-metrics-client');
+jest.mock('@adobe/aio-lib-ims');
+jest.mock('../actions/metrics');
 consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance);
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
@@ -649,5 +652,13 @@ describe('PUT templates', () => {
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" executed successfully');
+  });
+
+  test('Should set metrics URL', async () => {
+    const METRICS_URL = 'https://test.com';
+    await action.main({
+      METRICS_URL
+    });
+    expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
   });
 });

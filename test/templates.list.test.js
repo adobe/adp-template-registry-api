@@ -15,6 +15,7 @@ const utils = require('../actions/utils');
 const nock = require('nock');
 const { getTemplates, getReviewIssueByTemplateName } = require('../actions/templateRegistry');
 const { validateAccessToken, isValidServiceToken } = require('../actions/ims');
+const { setMetricsUrl } = require('../actions/metrics');
 
 process.env = {
   TEMPLATE_REGISTRY_ORG: 'adobe',
@@ -33,6 +34,8 @@ jest.mock('@adobe/aio-sdk', () => ({
   }
 }));
 jest.mock('@adobe/aio-metrics-client');
+jest.mock('@adobe/aio-lib-ims');
+jest.mock('../actions/metrics');
 jest.mock('../actions/templateRegistry', () => {
   const originalModule = jest.requireActual('../actions/templateRegistry');
   return {
@@ -639,5 +642,14 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.with-dev-console-templates.json')));
+  });
+
+  test('Should set metrics URL', async () => {
+    const METRICS_URL = 'https://test.com';
+    getTemplates.mockReturnValue(templates);
+    await action.main({
+      METRICS_URL
+    });
+    expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
   });
 });

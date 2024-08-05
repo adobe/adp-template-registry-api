@@ -82,23 +82,6 @@ async function main (params) {
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
-    // extract the user Bearer token from the Authorization header
-    const accessToken = getBearerToken(params);
-    requester = getTokenData(accessToken).user_id;
-    await incBatchCounter('request_count', requester, ENDPOINT);
-
-    if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
-      await incBatchCounterMultiLabel(
-        'error_count',
-        requester,
-        {
-          api: ENDPOINT,
-          errorCategory: '405'
-        }
-      );
-      return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
-    }
-
     // check for missing request input parameters and headers
     const requiredParams = [/* add required params */];
     const requiredHeaders = ['Authorization'];
@@ -113,6 +96,23 @@ async function main (params) {
         }
       );
       return errorResponse(401, errorMessages, logger);
+    }
+
+    // extract the user Bearer token from the Authorization header
+    const accessToken = getBearerToken(params);
+    requester = getTokenData(accessToken)?.user_id;
+    await incBatchCounter('request_count', requester, ENDPOINT);
+
+    if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
+      await incBatchCounterMultiLabel(
+        'error_count',
+        requester,
+        {
+          api: ENDPOINT,
+          errorCategory: '405'
+        }
+      );
+      return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
     }
 
     try {

@@ -16,6 +16,7 @@ const action = require('../actions/templates/install/index');
 const consoleLib = require('@adobe/aio-lib-console');
 const utils = require('../actions/utils');
 const consoleSDK = require('@adobe/aio-lib-console');
+const { setMetricsUrl } = require('../actions/metrics');
 
 // Mocking dependencies
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
@@ -41,6 +42,8 @@ const mockConsoleSDKInstance = {
 };
 consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance);
 jest.mock('@adobe/aio-metrics-client');
+jest.mock('@adobe/aio-lib-ims');
+jest.mock('../actions/metrics');
 
 const IMS_ACCESS_TOKEN = 'mockToken';
 const mockParams = {
@@ -935,5 +938,11 @@ describe('POST Install template: Core business logic specific tests', () => {
     expect(mockConsoleSDKInstance.createAdobeIdIntegration).not.toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).toHaveBeenCalled();
     expect(mockConsoleSDKInstance.createOauthS2SCredentialIntegration).toHaveBeenCalledWith('mockOrgId', { description: 'Created from template @adobe/developer-console-template', name: 'mockProjectName', services: [{ atlasPlanCode: '', licenseConfigs: [{ id: '2', productId: 'B', op: 'mockOp' }], roles: [], sdkCode: 'PhotoshopSDK' }], templateId: 'mockTemplateId' });
+  });
+
+  test('should set metrics URL', async () => {
+    const METRICS_URL = 'https://test.com';
+    await action.main({ METRICS_URL });
+    expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
   });
 });

@@ -139,9 +139,9 @@ async function main (params) {
     logger.debug(stringParameters(params));
 
     // extract the user Bearer token from the Authorization header
-    if (params.__ow_headers.authorization) {
+    if (params?.__ow_headers?.authorization) {
       const accessToken = getBearerToken(params);
-      requester = getTokenData(accessToken).user_id;
+      requester = getTokenData(accessToken)?.user_id;
     }
 
     await incBatchCounter('request_count', requester, ENDPOINT);

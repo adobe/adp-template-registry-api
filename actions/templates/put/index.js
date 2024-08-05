@@ -88,8 +88,7 @@ async function main (params) {
 
     // extract the user Bearer token from the Authorization header
     const accessToken = getBearerToken(params);
-    requester = getTokenData(accessToken).user_id;
-
+    requester = getTokenData(accessToken)?.user_id;
     await incBatchCounter('request_count', requester, ENDPOINT);
 
     if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {

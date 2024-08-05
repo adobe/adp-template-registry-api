@@ -18,18 +18,13 @@ describe('metrics', () => {
     jest.clearAllMocks();
   });
 
-  test('setMetricsUrl no metrics-url in environment', async () => {
-    metrics.setMetricsUrl({ artist: 'Renoir', painting: 'Bal du moulin de la Galette' }, 'fake-metric');
-    expect(metricsLib.setMetricsURL).toHaveBeenCalledTimes(0);
-  });
-
-  test('setMetricsUrl metrics-url in environment', async () => {
-    metrics.setMetricsUrl({ 'metrics-url': 'https://devxmetricsservice-stage.adobe.io/', artist: 'Renoir', painting: 'Bal du moulin de la Galette' }, 'fake-metric');
+  test('setMetricsUrl with metrics-url in environment', async () => {
+    metrics.setMetricsUrl('https://test.com', 'fake-metric');
     expect(metricsLib.setMetricsURL).toHaveBeenCalledTimes(1);
   });
 
-  test('setMetricsUrl metrics-url is not a valid url', async () => {
-    metrics.setMetricsUrl({ 'metrics-url': 'sillyhappybaby1', artist: 'Renoir', painting: 'Bal du moulin de la Galette' }, 'fake-metric');
+  test('setMetricsUrl no metrics-url in environment', async () => {
+    metrics.setMetricsUrl('test', 'fake-metric');
     expect(metricsLib.setMetricsURL).toHaveBeenCalledTimes(0);
   });
 });
