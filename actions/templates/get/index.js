@@ -15,9 +15,9 @@ const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VER
   require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const { evaluateEntitlements } = require('../../templateEntitlement');
-const { incBatchCounter, incBatchCounterMultiLabel } = require('@adobe/aio-metrics-client');
+const { incBatchCounter } = require('@adobe/aio-metrics-client');
 const { getTokenData } = require('@adobe/aio-lib-ims');
-const { setMetricsUrl } = require('../../metrics');
+const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
 
 // GET operation is available to everyone, no IMS access token is required
 const HTTP_METHOD = 'get';
@@ -139,8 +139,8 @@ async function main (params) {
     logger.debug(stringParameters(params));
 
     // extract the user Bearer token from the Authorization header
-    if (params?.__ow_headers?.authorization) {
-      const accessToken = getBearerToken(params);
+    const accessToken = getBearerToken(params);
+    if (accessToken) {
       requester = getTokenData(accessToken)?.user_id;
     }
 
@@ -148,14 +148,7 @@ async function main (params) {
 
     // checking for valid method
     if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
-      await incBatchCounterMultiLabel(
-        'error_count',
-        requester,
-        {
-          api: ENDPOINT,
-          errorCategory: '405'
-        }
-      );
+      incErrorCounterMetrics(requester, ENDPOINT, '405');
       return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
     }
     // checking for validation based on params call.
@@ -175,11 +168,13 @@ async function main (params) {
     if (paramField === 'templateId') {
       response = await fetchTemplateById(params, dbParams, logger);
       if (response.statusCode === 404) {
+        await incErrorCounterMetrics(requester, ENDPOINT, '404');
         return response;
       }
     } else {
       response = await fetchTemplateByName(params, dbParams, logger);
       if (response.statusCode === 404) {
+        await incErrorCounterMetrics(requester, ENDPOINT, '404');
         return response;
       }
     }
@@ -204,14 +199,7 @@ async function main (params) {
     // log any server errors
     logger.error(error);
     // return with 500
-    await incBatchCounterMultiLabel(
-      'error_count',
-      requester,
-      {
-        api: ENDPOINT,
-        errorCategory: '500'
-      }
-    );
+    await incErrorCounterMetrics(requester, ENDPOINT, '500');
     return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, error.message)], logger);
   }
 }

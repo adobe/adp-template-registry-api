@@ -16,9 +16,9 @@ const { validateAccessToken, generateAccessToken } = require('../../ims');
 const { findTemplateByName, addTemplate } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const consoleLib = require('@adobe/aio-lib-console');
-const { incBatchCounter, incBatchCounterMultiLabel } = require('@adobe/aio-metrics-client');
+const { incBatchCounter } = require('@adobe/aio-metrics-client');
 const { getTokenData } = require('@adobe/aio-lib-ims');
-const { setMetricsUrl } = require('../../metrics');
+const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
 
 const HTTP_METHOD = 'post';
 const ENDPOINT = 'POST /templates';
@@ -96,14 +96,7 @@ async function main (params) {
     let errorMessages = checkMissingRequestInputs(params, [], requiredHeaders);
     if (errorMessages) {
       await incBatchCounter('request_count', requester, ENDPOINT);
-      await incBatchCounterMultiLabel(
-        'error_count',
-        requester,
-        {
-          api: ENDPOINT,
-          errorCategory: '401'
-        }
-      );
+      await incErrorCounterMetrics(requester, ENDPOINT, '401');
       return errorResponse(401, errorMessages, logger);
     }
 
@@ -113,14 +106,7 @@ async function main (params) {
     await incBatchCounter('request_count', requester, ENDPOINT);
 
     if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
-      await incBatchCounterMultiLabel(
-        'error_count',
-        requester,
-        {
-          api: ENDPOINT,
-          errorCategory: '405'
-        }
-      );
+      await incErrorCounterMetrics(requester, ENDPOINT, '405');
       return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
     }
 
@@ -129,14 +115,7 @@ async function main (params) {
     ];
     errorMessages = checkMissingRequestInputs(params, requiredParams);
     if (errorMessages) {
-      await incBatchCounterMultiLabel(
-        'error_count',
-        requester,
-        {
-          api: ENDPOINT,
-          errorCategory: '400'
-        }
-      );
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
       return errorResponse(400, errorMessages, logger);
     }
 
@@ -144,14 +123,7 @@ async function main (params) {
       // validate the token, an exception will be thrown for a non-valid token
       await validateAccessToken(accessToken, imsUrl, imsClientId);
     } catch (error) {
-      await incBatchCounterMultiLabel(
-        'error_count',
-        requester,
-        {
-          api: ENDPOINT,
-          errorCategory: '401'
-        }
-      );
+      await incErrorCounterMetrics(requester, ENDPOINT, '401');
       return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
     }
 
@@ -170,14 +142,7 @@ async function main (params) {
       body
     });
     if (reqError) {
-      await incBatchCounterMultiLabel(
-        'error_count',
-        requester,
-        {
-          api: ENDPOINT,
-          errorCategory: '400'
-        }
-      );
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, reqError.toString().split('\n').map(line => line.trim()).join(' => '))], logger);
     }
 
@@ -186,6 +151,7 @@ async function main (params) {
 
     const result = await findTemplateByName(dbParams, templateName);
     if (result !== null) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '409');
       return {
         statusCode: 409
       };
@@ -201,7 +167,9 @@ async function main (params) {
       const projectId = consoleProjectUrl.split('/').at(-2);
       const accessToken = await generateAccessToken(params.IMS_AUTH_CODE, params.IMS_CLIENT_ID, params.IMS_CLIENT_SECRET, params.IMS_SCOPES, logger);
       const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, getEnv(logger));
+      console.log('projectId', projectId)
       const { body: installConfig } = await consoleClient.getProjectInstallConfig(projectId);
+      console.log('installConfig', installConfig)
 
       // We have to get the install config in this format to maintain backwards
       // compatibility with current template registry
@@ -252,6 +220,7 @@ async function main (params) {
 
     // validate the response data to be sure it complies with OpenApi Schema
     const [res, resError] = req.response(200, response);
+    console.log(JSON.stringify(response))
     if (resError) {
       throw new Error(resError.toString());
     }
@@ -265,14 +234,7 @@ async function main (params) {
     // log any server errors
     logger.error(error);
     // return with 500
-    await incBatchCounterMultiLabel(
-      'error_count',
-      requester,
-      {
-        api: ENDPOINT,
-        errorCategory: '500'
-      }
-    );
+    await incErrorCounterMetrics(requester, ENDPOINT, '500');
     return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.')], logger);
   }
 }

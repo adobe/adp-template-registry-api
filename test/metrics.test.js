@@ -27,4 +27,10 @@ describe('metrics', () => {
     metrics.setMetricsUrl('test', 'fake-metric');
     expect(metricsLib.setMetricsURL).toHaveBeenCalledTimes(0);
   });
+
+  test('incErrorCounterMetrics', async () => {
+    await metrics.incErrorCounterMetrics('test', 'test', 'test');
+    expect(metricsLib.incBatchCounterMultiLabel).toHaveBeenCalledTimes(1);
+    expect(metricsLib.incBatchCounterMultiLabel).toHaveBeenCalledWith('error_count', 'test', { api: 'test', errorCategory: 'test' });
+  });
 });

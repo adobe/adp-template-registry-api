@@ -15,9 +15,9 @@ const { getTemplates, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICAT
 const { validateAccessToken, isValidServiceToken } = require('../../ims');
 const Enforcer = require('openapi-enforcer');
 const orderBy = require('lodash.orderby');
-const { incBatchCounter, incBatchCounterMultiLabel } = require('@adobe/aio-metrics-client');
+const { incBatchCounter } = require('@adobe/aio-metrics-client');
 const { getTokenData } = require('@adobe/aio-lib-ims');
-const { setMetricsUrl } = require('../../metrics');
+const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
 
 const HTTP_METHOD = 'get';
 const ENDPOINT = 'GET /templates';
@@ -66,42 +66,24 @@ async function main (params) {
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
-    // extract the user Bearer token from the Authorization header
-    if (params?.__ow_headers?.authorization) {
-      const accessToken = getBearerToken(params);
+    const accessToken = getBearerToken(params);
+    if (accessToken) {
       requester = getTokenData(accessToken)?.user_id;
     }
 
     await incBatchCounter('request_count', requester, ENDPOINT);
 
     if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
-      await incBatchCounterMultiLabel(
-        'error_count',
-        requester,
-        {
-          api: ENDPOINT,
-          errorCategory: '405'
-        }
-      );
+      await incErrorCounterMetrics(requester, ENDPOINT, '405');
       return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
     }
-
-    // extract the user Bearer token from the Authorization header
-    const accessToken = getBearerToken(params);
 
     let validServiceToken = false;
     if (accessToken) {
       try {
         await validateAccessToken(accessToken, imsUrl, imsClientId);
       } catch (error) {
-        await incBatchCounterMultiLabel(
-          'error_count',
-          requester,
-          {
-            api: ENDPOINT,
-            errorCategory: '401'
-          }
-        );
+        await incErrorCounterMetrics(requester, ENDPOINT, '401');
         return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
       }
       validServiceToken = isValidServiceToken(accessToken, requiredScopes);
@@ -233,14 +215,7 @@ async function main (params) {
       path: `/templates${queryString}`
     });
     if (reqError) {
-      await incBatchCounterMultiLabel(
-        'error_count',
-        requester,
-        {
-          api: ENDPOINT,
-          errorCategory: '400'
-        }
-      );
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, reqError.toString().split('\n').map(line => line.trim()).join(' => '))], logger);
     }
 
@@ -293,14 +268,7 @@ async function main (params) {
     logger.error(error);
 
     // return with 500
-    await incBatchCounterMultiLabel(
-      'error_count',
-      requester,
-      {
-        api: ENDPOINT,
-        errorCategory: '500'
-      }
-    );
+    await incErrorCounterMetrics(requester, ENDPOINT, '500');
     return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.')], logger);
   }
 }

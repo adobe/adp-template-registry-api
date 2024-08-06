@@ -10,8 +10,18 @@ governing permissions and limitations under the License.
 */
 
 const { posix } = require('node:path');
-const { setMetricsURL } = require('@adobe/aio-metrics-client');
+const { setMetricsURL, incBatchCounterMultiLabel } = require('@adobe/aio-metrics-client');
 const logger = require('@adobe/aio-lib-core-logging')('adp-template-registry-api');
+
+/**
+ * Increment error counter metrics
+ * @param {string} requester Name of the requester, usually IMS clientId or userId, ex. 'crusher-stage'
+ * @param {string} api Endpoint to track errors for, ex. 'GET /templates/{templateId}'
+ * @param {string} errorCategory Error category, ex. '401'
+ */
+const incErrorCounterMetrics = async (requester, api, errorCategory) => {
+  await incBatchCounterMultiLabel('error_count', requester, { api, errorCategory });
+};
 
 /**
  * Sets the metrics URL for metrics recording
@@ -31,5 +41,6 @@ const setMetricsUrl = (metricsUrl, metricsKey) => {
 };
 
 module.exports = {
-  setMetricsUrl
+  setMetricsUrl,
+  incErrorCounterMetrics
 };
