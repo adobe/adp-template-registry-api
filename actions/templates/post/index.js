@@ -167,9 +167,7 @@ async function main (params) {
       const projectId = consoleProjectUrl.split('/').at(-2);
       const accessToken = await generateAccessToken(params.IMS_AUTH_CODE, params.IMS_CLIENT_ID, params.IMS_CLIENT_SECRET, params.IMS_SCOPES, logger);
       const consoleClient = await consoleLib.init(accessToken, params.IMS_CLIENT_ID, getEnv(logger));
-      console.log('projectId', projectId)
       const { body: installConfig } = await consoleClient.getProjectInstallConfig(projectId);
-      console.log('installConfig', installConfig)
 
       // We have to get the install config in this format to maintain backwards
       // compatibility with current template registry
@@ -220,7 +218,6 @@ async function main (params) {
 
     // validate the response data to be sure it complies with OpenApi Schema
     const [res, resError] = req.response(200, response);
-    console.log(JSON.stringify(response))
     if (resError) {
       throw new Error(resError.toString());
     }

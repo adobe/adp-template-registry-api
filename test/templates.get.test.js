@@ -15,6 +15,7 @@ const utils = require('../actions/utils');
 const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, findTemplateById } = require('../actions/templateRegistry');
 const { evaluateEntitlements } = require('../actions/templateEntitlement');
 const { setMetricsUrl } = require('../actions/metrics');
+const { getBearerToken } = require('../actions/utils');
 
 jest.mock('../actions/templateEntitlement');
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
@@ -31,7 +32,7 @@ jest.mock('../actions/utils', () => {
   const actualUtils = jest.requireActual('../actions/utils');
   return {
     ...actualUtils,
-    getBearerToken: jest.fn().mockImplementation(() => 'fake')
+    getBearerToken: jest.fn().mockImplementation(() => 'test')
   };
 });
 jest.mock('../actions/metrics');
@@ -559,6 +560,17 @@ describe('GET templates', () => {
   });
 
   test('Request with authorization header', async () => {
+    const AUTHORIZATION = 'test';
+    await action.main({
+      __ow_headers: {
+        authorization: AUTHORIZATION
+      }
+    });
+    expect(utils.getBearerToken).toHaveBeenCalledWith({ __ow_headers: { authorization: AUTHORIZATION } });
+  });
+
+  test('Request with authorization header, no bearer token', async () => {
+    getBearerToken.mockReturnValueOnce(undefined);
     const AUTHORIZATION = 'test';
     await action.main({
       __ow_headers: {
