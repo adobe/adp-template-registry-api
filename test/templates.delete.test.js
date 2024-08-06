@@ -14,6 +14,7 @@ const { validateAccessToken, isAdmin, isValidServiceToken } = require('../action
 const utils = require('../actions/utils');
 const action = require('../actions/templates/delete/index');
 const { findTemplateByName, removeTemplateById, removeTemplateByName } = require('../actions/templateRegistry');
+const { setMetricsUrl } = require('../actions/metrics');
 
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
 Core.Logger.mockReturnValue(mockLoggerInstance);
@@ -22,8 +23,11 @@ jest.mock('@adobe/aio-sdk', () => ({
     Logger: jest.fn()
   }
 }));
+jest.mock('@adobe/aio-metrics-client');
+jest.mock('@adobe/aio-lib-ims');
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
+jest.mock('../actions/metrics');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -75,7 +79,10 @@ describe('DELETE templates', () => {
       IMS_URL: process.env.IMS_URL,
       IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
       ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
-      __ow_method: 'get'
+      __ow_method: 'get',
+      __ow_headers: {
+        authorization: `Bearer ${IMS_ACCESS_TOKEN}`
+      }
     });
     expect(response).toEqual({
       error: {
@@ -372,5 +379,14 @@ describe('DELETE templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(removeTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
+  });
+
+  test('Set metrics URL', async () => {
+    const METRICS_URL = 'https://test.com';
+    await action.main({
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      METRICS_URL
+    });
+    expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
   });
 });

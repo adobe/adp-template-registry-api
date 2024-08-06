@@ -10,14 +10,19 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, stringParameters, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED } = require('../../utils');
+const { errorResponse, errorMessage, stringParameters, getBearerToken, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED } = require('../../utils');
 const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED, findTemplateById } =
   require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const { evaluateEntitlements } = require('../../templateEntitlement');
+const { incBatchCounter } = require('@adobe/aio-metrics-client');
+const { getTokenData } = require('@adobe/aio-lib-ims');
+const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
 
 // GET operation is available to everyone, no IMS access token is required
 const HTTP_METHOD = 'get';
+const ENDPOINT = 'GET /templates/{templateId}';
+const METRICS_KEY = 'recordtemplateregistrymetrics';
 
 /**
  *
@@ -121,13 +126,29 @@ async function main (params) {
     MONGODB_NAME: params.MONGODB_NAME
   };
 
+  let requester = 'unauth';
+  if (params?.METRICS_URL) {
+    setMetricsUrl(params.METRICS_URL, METRICS_KEY);
+  }
+
   try {
     // 'info' is the default level if not set
     logger.info('Calling "GET templates"');
+
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
+
+    // extract the user Bearer token from the Authorization header
+    const accessToken = getBearerToken(params);
+    if (accessToken) {
+      requester = getTokenData(accessToken)?.user_id;
+    }
+
+    await incBatchCounter('request_count', requester, ENDPOINT);
+
     // checking for valid method
     if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
+      incErrorCounterMetrics(requester, ENDPOINT, '405');
       return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
     }
     // checking for validation based on params call.
@@ -147,11 +168,13 @@ async function main (params) {
     if (paramField === 'templateId') {
       response = await fetchTemplateById(params, dbParams, logger);
       if (response.statusCode === 404) {
+        await incErrorCounterMetrics(requester, ENDPOINT, '404');
         return response;
       }
     } else {
       response = await fetchTemplateByName(params, dbParams, logger);
       if (response.statusCode === 404) {
+        await incErrorCounterMetrics(requester, ENDPOINT, '404');
         return response;
       }
     }
@@ -176,6 +199,7 @@ async function main (params) {
     // log any server errors
     logger.error(error);
     // return with 500
+    await incErrorCounterMetrics(requester, ENDPOINT, '500');
     return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, error.message)], logger);
   }
 }

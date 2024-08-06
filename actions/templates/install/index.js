@@ -15,8 +15,13 @@ const { validateAccessToken } = require('../../ims');
 const { findTemplateById } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const consoleLib = require('@adobe/aio-lib-console');
+const { incBatchCounter } = require('@adobe/aio-metrics-client');
+const { getTokenData } = require('@adobe/aio-lib-ims');
+const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
 
 const HTTP_METHOD = 'post';
+const ENDPOINT = 'POST /install/{templateId}';
+const METRICS_KEY = 'recordtemplateregistrymetrics';
 const POST_PARAM_NAME = 'templateId';
 const CREDENTIAL_FLOW_TYPE_ADOBEID = 'adobeid';
 const CREDENTIAL_FLOW_TYPE_ENTP = 'entp';
@@ -55,6 +60,11 @@ async function main (params) {
     MONGODB_NAME: params.MONGODB_NAME
   };
 
+  let requester = 'unauth';
+  if (params?.METRICS_URL) {
+    setMetricsUrl(params.METRICS_URL, METRICS_KEY);
+  }
+
   try {
     // 'info' is the default level if not set
     logger.info('Calling "POST install template"');
@@ -62,32 +72,40 @@ async function main (params) {
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
-    if (params.__ow_method === undefined || params.__ow_method.toString().toLowerCase() !== HTTP_METHOD) {
-      logger.error(`Unsupported method: ${params.__ow_method}`);
-      return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
-    }
-
     // check for missing request input parameters and headers
     const requiredHeaders = ['Authorization'];
     let errorMessages = checkMissingRequestInputs(params, [], requiredHeaders);
     if (errorMessages) {
+      await incBatchCounter('request_count', requester, ENDPOINT);
+      await incErrorCounterMetrics(requester, ENDPOINT, '401');
       return errorResponse(401, errorMessages, logger);
     }
+
+    // extract the user Bearer token from the Authorization header
+    const accessToken = getBearerToken(params);
+    requester = getTokenData(accessToken)?.user_id;
+    await incBatchCounter('request_count', requester, ENDPOINT);
+
+    if (params.__ow_method === undefined || params.__ow_method.toString().toLowerCase() !== HTTP_METHOD) {
+      logger.error(`Unsupported method: ${params.__ow_method}`);
+      await incErrorCounterMetrics(requester, ENDPOINT, '405');
+      return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
+    }
+
     const requiredParams = [
       POST_PARAM_NAME
     ];
     errorMessages = checkMissingRequestInputs(params, requiredParams);
     if (errorMessages) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
       return errorResponse(400, errorMessages, logger);
     }
-
-    // extract the user Bearer token from the Authorization header
-    const accessToken = getBearerToken(params);
 
     try {
       // validate the token, an exception will be thrown for a non-valid token
       await validateAccessToken(accessToken, imsUrl, imsClientId);
     } catch (error) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '401');
       return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
     }
 
@@ -108,6 +126,7 @@ async function main (params) {
       body
     });
     if (reqError) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, reqError.toString().split('\n').map(line => line.trim()).join(' => '))], logger);
     }
     console.log('Request:', req);
@@ -115,6 +134,7 @@ async function main (params) {
     const template = await findTemplateById(dbParams, params.templateId);
     if (!template) {
       logger.error(`Template with id ${params.templateId} not found.`);
+      await incErrorCounterMetrics(requester, ENDPOINT, '404');
       return errorResponse(404, [errorMessage(ERR_RC_INVALID_TEMPLATE_ID, `Template with id ${params.templateId} not found.`)], logger);
     }
     logger.info(`Template found: ${JSON.stringify(template)}`);
@@ -238,6 +258,7 @@ async function main (params) {
       logger.debug(`OAuth S2S Integration created: ${JSON.stringify(createIntegrationResponse)}`);
     } else {
       logger.error(`Credential flow type "${credentialFlowType}" not supported for template install.`);
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, `Credential flow type "${credentialFlowType}" not supported for template install`)], logger);
     }
 
@@ -254,6 +275,7 @@ async function main (params) {
     };
   } catch (error) {
     logger.error(error);
+    await incErrorCounterMetrics(requester, ENDPOINT, '500');
     return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, error.message)], logger);
   }
 }

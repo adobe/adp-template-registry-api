@@ -14,8 +14,13 @@ const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMiss
   require('../../utils');
 const { validateAccessToken, isAdmin, isValidServiceToken } = require('../../ims');
 const { removeTemplateById, removeTemplateByName } = require('../../templateRegistry');
+const { incBatchCounter } = require('@adobe/aio-metrics-client');
+const { getTokenData } = require('@adobe/aio-lib-ims');
+const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
 
 const HTTP_METHOD = 'delete';
+const ENDPOINT = 'DELETE /templates';
+const METRICS_KEY = 'recordtemplateregistrymetrics';
 const requiredScopes = ['template_registry.write'];
 
 const response200 = { statusCode: 200 };
@@ -65,6 +70,11 @@ async function main (params) {
     MONGODB_NAME: params.MONGODB_NAME
   };
 
+  let requester = 'unauth';
+  if (params?.METRICS_URL) {
+    setMetricsUrl(params.METRICS_URL, METRICS_KEY);
+  }
+
   try {
     // 'info' is the default level if not set
     logger.info('Calling "DELETE templates"');
@@ -72,25 +82,30 @@ async function main (params) {
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
-    if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
-      return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
-    }
-
     // check for missing request input parameters and headers
     const requiredParams = [/* add required params */];
     const requiredHeaders = ['Authorization'];
     const errorMessages = checkMissingRequestInputs(params, requiredParams, requiredHeaders);
     if (errorMessages) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '401');
       return errorResponse(401, errorMessages, logger);
     }
 
     // extract the user Bearer token from the Authorization header
     const accessToken = getBearerToken(params);
+    requester = getTokenData(accessToken)?.user_id;
+    await incBatchCounter('request_count', requester, ENDPOINT);
+
+    if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '405');
+      return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
+    }
 
     try {
       // validate the token, an exception will be thrown for a non-valid token
       await validateAccessToken(accessToken, imsUrl, imsClientId);
     } catch (error) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '401');
       return errorResponse(401, [errorMessage(ERR_RC_INVALID_IMS_ACCESS_TOKEN, error.message)], logger);
     }
 
@@ -100,6 +115,7 @@ async function main (params) {
       const isCallerAdmin = await isAdmin(accessToken, imsUrl, adminImsOrganizations);
       if (isCallerAdmin !== true) {
         const err = 'This operation is available to admins only. To request template removal from Template Registry, please, create a "Template Removal Request" issue on https://github.com/adobe/aio-template-submission';
+        await incErrorCounterMetrics(requester, ENDPOINT, '403');
         return errorResponse(403, [errorMessage(ERR_RC_PERMISSION_DENIED, err)], logger);
       }
     }
@@ -111,12 +127,16 @@ async function main (params) {
     } else {
       response = await deleteTemplateByIdFunc(params, dbParams);
     }
+    if (response.statusCode === 404) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '404');
+    }
     logger.info('"DELETE templates" executed successfully');
     return response;
   } catch (error) {
     // log any server errors
     logger.error(error);
     // return with 500
+    await incErrorCounterMetrics(requester, ENDPOINT, '500');
     return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, 'An error occurred, please try again later.')], logger);
   }
 }
