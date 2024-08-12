@@ -1,6 +1,6 @@
 {
   "name": "template-registry-api",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "dependencies": {
     "@adobe/aio-lib-console": "^5.1.0",
     "@adobe/aio-lib-ims": "^7.0.1",
