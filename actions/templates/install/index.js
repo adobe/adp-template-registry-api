@@ -138,6 +138,7 @@ async function main (params) {
       return errorResponse(404, [errorMessage(ERR_RC_INVALID_TEMPLATE_ID, `Template with id ${params.templateId} not found.`)], logger);
     }
     logger.info(`Template found: ${JSON.stringify(template)}`);
+    await incBatchCounter('install_count', requester, template.name);
 
     // extract credentials and APIs from the template
     const { credentials, apis } = template;
