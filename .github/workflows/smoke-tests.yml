@@ -6,7 +6,7 @@ defaults:
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # every 10 minutes
+    - cron: '*/60 * * * *' # every 10 minutes
 
 jobs:
   smoke:
