@@ -7,14 +7,14 @@ defaults:
 on:
   workflow_dispatch:
     inputs:
-    environment:
-      description: 'Deployment environment'
-      required: true
-      type: choice
-      options: 
-        - Stage
-        - Production
-      default: 'Stage'
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options: 
+          - Stage
+          - Production
+        default: 'Stage'
   schedule:
     - cron: '*/5 * * * *' # Run prod every 5 minutes
     - cron: '*/60 * * * *' # Run stage every hour
