@@ -7,13 +7,13 @@ defaults:
 on:
   workflow_dispatch:
   schedule:
-    - cron: '45 * * * *' # Run prod on 45th minute
-    - cron: '15 * * * *' # Run stage on 15th minute
+    - cron: '*/5 * * * *' # Run prod every 5 minutes
+    - cron: '*/60 * * * *' # Run stage every hour
 
 jobs:
   smoke:
-    environment: ${{ github.event.schedule == '45 * * * *' && 'Production' || 'Stage' }}
-    name: Smoke test ${{ github.event.schedule == '45 * * * *' && 'Production' || 'Stage' }}
+    environment: ${{ github.event.schedule == '*/5 * * * *' && 'Production' || 'Stage' }}
+    name: Smoke test ${{ github.event.schedule == '*/5 * * * *' && 'Production' || 'Stage' }}
     # we would like to avoid running this workflow in forked repos
     if: github.repository == 'adobe/adp-template-registry-api'
     runs-on: ${{ matrix.os }}
@@ -50,7 +50,7 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_TITLE: '${{ github.event.schedule == '15 * * * *' && 'Stage ' }}Template Registry Smoke Tests Failed'
+          SLACK_TITLE: ${{ github.event.schedule == '*/60 * * * *' && 'Stage ' }}Template Registry Smoke Tests Failed
           SLACK_MESSAGE: 'Node Version: ${{ matrix.node-version }}\n Runbook: https://git.corp.adobe.com/CNA/runbooks/tree/main/runbooks/template-registry-smoke-tests-failure.md'
           SLACK_COLOR: ${{ job.status == 'success' && 'good' || job.status == 'cancelled' && '#808080' || 'danger' }}
           ENABLE_ESCAPES: true
