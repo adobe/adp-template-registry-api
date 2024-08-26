@@ -5,12 +5,15 @@ defaults:
     shell: bash
 
 on:
+  workflow_dispatch:
   schedule:
-    - cron: '*/60 * * * *' # every 60 minutes
+    - cron: '45 * * * *' # Run prod on 45th minute
+    - cron: '15 * * * *' # Run stage on 15th minute
 
 jobs:
   smoke:
-    environment: Production
+    environment: ${{ github.event.schedule == '45 * * * *' && 'Production' || 'Stage' }}
+    name: Smoke test ${{ github.event.schedule == '45 * * * *' && 'Production' || 'Stage' }}
     # we would like to avoid running this workflow in forked repos
     if: github.repository == 'adobe/adp-template-registry-api'
     runs-on: ${{ matrix.os }}
@@ -29,6 +32,11 @@ jobs:
       - name: Install dependencies
         run: npm i --package-lock --package-lock-only && npm ci
       - name: Run smoke tests
+        uses: nick-fields/retry@v3
+        with: 
+          max_attempts: 2
+          timeout_minutes: 5
+          command: npm run test:smoke
         env:
           AIO_RUNTIME_APIHOST: ${{ secrets.AIO_RUNTIME_APIHOST }}
           IMS_CLIENT_ID: ${{ secrets.IMS_CLIENT_ID }}
@@ -36,14 +44,13 @@ jobs:
           IMS_AUTH_CODE: ${{ secrets.IMS_AUTH_CODE }}
           IMS_SCOPES: ${{ secrets.IMS_SCOPES }}
           TEMPLATE_REGISTRY_API_URL: ${{ secrets.TEMPLATE_REGISTRY_API_URL }}
-        run: npm run test:smoke
       - id: slacknotification
         name: Slack Notification
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_TITLE: 'Template Registry Smoke Tests Failed'
+          SLACK_TITLE: '${{ github.event.schedule == '15 * * * *' && 'Stage ' }}Template Registry Smoke Tests Failed'
           SLACK_MESSAGE: 'Node Version: ${{ matrix.node-version }}\n Runbook: https://git.corp.adobe.com/CNA/runbooks/tree/main/runbooks/template-registry-smoke-tests-failure.md'
           SLACK_COLOR: ${{ job.status == 'success' && 'good' || job.status == 'cancelled' && '#808080' || 'danger' }}
           ENABLE_ESCAPES: true
