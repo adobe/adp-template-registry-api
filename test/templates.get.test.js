@@ -14,6 +14,9 @@ const action = require('../actions/templates/get/index');
 const utils = require('../actions/utils');
 const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, findTemplateById } = require('../actions/templateRegistry');
 const { evaluateEntitlements } = require('../actions/templateEntitlement');
+const { setMetricsUrl } = require('../actions/metrics');
+const { getBearerToken } = require('../actions/utils');
+
 jest.mock('../actions/templateEntitlement');
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
 Core.Logger.mockReturnValue(mockLoggerInstance);
@@ -22,7 +25,17 @@ jest.mock('@adobe/aio-sdk', () => ({
     Logger: jest.fn()
   }
 }));
+jest.mock('@adobe/aio-metrics-client');
+jest.mock('@adobe/aio-lib-ims');
 jest.mock('../actions/templateRegistry');
+jest.mock('../actions/utils', () => {
+  const actualUtils = jest.requireActual('../actions/utils');
+  return {
+    ...actualUtils,
+    getBearerToken: jest.fn().mockImplementation(() => 'test')
+  };
+});
+jest.mock('../actions/metrics');
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -544,5 +557,34 @@ describe('GET templates', () => {
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateById).not.toHaveBeenCalledWith({}, templateId);
     expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
+  });
+
+  test('Request with authorization header', async () => {
+    const AUTHORIZATION = 'test';
+    await action.main({
+      __ow_headers: {
+        authorization: AUTHORIZATION
+      }
+    });
+    expect(utils.getBearerToken).toHaveBeenCalledWith({ __ow_headers: { authorization: AUTHORIZATION } });
+  });
+
+  test('Request with authorization header, no bearer token', async () => {
+    getBearerToken.mockReturnValueOnce(undefined);
+    const AUTHORIZATION = 'test';
+    await action.main({
+      __ow_headers: {
+        authorization: AUTHORIZATION
+      }
+    });
+    expect(utils.getBearerToken).toHaveBeenCalledWith({ __ow_headers: { authorization: AUTHORIZATION } });
+  });
+
+  test('Should set metrics URL', async () => {
+    const METRICS_URL = 'https://test.com';
+    await action.main({
+      METRICS_URL
+    });
+    expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
   });
 });

@@ -26,6 +26,7 @@ application:
               TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
               TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+              METRICS_URL: $METRICS_URL
             annotations:
               require-adobe-auth: false
               require-gw-validation: true
@@ -47,6 +48,7 @@ application:
               TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
               TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+              METRICS_URL: $METRICS_URL
             annotations:
               require-adobe-auth: false
               require-gw-validation: true
@@ -63,6 +65,7 @@ application:
               TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
               TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+              METRICS_URL: $METRICS_URL
             annotations:
               require-adobe-auth: false
               final: true
@@ -81,6 +84,7 @@ application:
               TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
               TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+              METRICS_URL: $METRICS_URL
             annotations:
               require-adobe-auth: false
               require-gw-validation: true
@@ -98,6 +102,7 @@ application:
               TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
               TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+              METRICS_URL: $METRICS_URL
             annotations:
               require-adobe-auth: false
               final: true
@@ -115,6 +120,7 @@ application:
               TEMPLATE_REGISTRY_ORG: $TEMPLATE_REGISTRY_ORG
               TEMPLATE_REGISTRY_REPOSITORY: $TEMPLATE_REGISTRY_REPOSITORY
               TEMPLATE_REGISTRY_API_URL: $TEMPLATE_REGISTRY_API_URL
+              METRICS_URL: $METRICS_URL
             annotations:
               require-adobe-auth: false
               final: true

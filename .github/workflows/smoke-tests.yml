@@ -5,12 +5,24 @@ defaults:
     shell: bash
 
 on:
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options: 
+          - Stage
+          - Production
+        default: 'Stage'
   schedule:
-    - cron: '*/10 * * * *' # every 10 minutes
+    - cron: '*/5 * * * *' # Run prod every 5 minutes
+    - cron: '*/60 * * * *' # Run stage every hour
 
 jobs:
   smoke:
-    environment: Production
+    environment: ${{ inputs.environment || github.event.schedule == '*/5 * * * *' && 'Production' || 'Stage' }}
+    name: Smoke test ${{ inputs.environment || github.event.schedule == '*/5 * * * *' && 'Production' || 'Stage' }}
     # we would like to avoid running this workflow in forked repos
     if: github.repository == 'adobe/adp-template-registry-api'
     runs-on: ${{ matrix.os }}
@@ -29,6 +41,11 @@ jobs:
       - name: Install dependencies
         run: npm i --package-lock --package-lock-only && npm ci
       - name: Run smoke tests
+        uses: nick-fields/retry@v3
+        with: 
+          max_attempts: 2
+          timeout_minutes: 5
+          command: npm run test:smoke
         env:
           AIO_RUNTIME_APIHOST: ${{ secrets.AIO_RUNTIME_APIHOST }}
           IMS_CLIENT_ID: ${{ secrets.IMS_CLIENT_ID }}
@@ -36,14 +53,13 @@ jobs:
           IMS_AUTH_CODE: ${{ secrets.IMS_AUTH_CODE }}
           IMS_SCOPES: ${{ secrets.IMS_SCOPES }}
           TEMPLATE_REGISTRY_API_URL: ${{ secrets.TEMPLATE_REGISTRY_API_URL }}
-        run: npm run test:smoke
       - id: slacknotification
         name: Slack Notification
         if: ${{ failure() }}
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_TITLE: 'Template Registry Smoke Tests Failed'
+          SLACK_TITLE: ${{ inputs.environment || github.event.schedule == '*/60 * * * *' && 'Stage ' }}Template Registry Smoke Tests Failed
           SLACK_MESSAGE: 'Node Version: ${{ matrix.node-version }}\n Runbook: https://git.corp.adobe.com/CNA/runbooks/tree/main/runbooks/template-registry-smoke-tests-failure.md'
           SLACK_COLOR: ${{ job.status == 'success' && 'good' || job.status == 'cancelled' && '#808080' || 'danger' }}
           ENABLE_ESCAPES: true

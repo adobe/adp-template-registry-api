@@ -70,4 +70,5 @@ jobs:
           TEMPLATE_REGISTRY_API_URL: ${{ secrets.TEMPLATE_REGISTRY_API_URL }}
           MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
+          METRICS_URL: ${{ secrets.METRICS_URL }}
         run: aio app deploy

@@ -16,6 +16,7 @@ const utils = require('../actions/utils');
 const { fetchUrl, findTemplateByName, addTemplate } = require('../actions/templateRegistry');
 const action = require('../actions/templates/post/index');
 const consoleSDK = require('@adobe/aio-lib-console');
+const { setMetricsUrl } = require('../actions/metrics');
 
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
 Core.Logger.mockReturnValue(mockLoggerInstance);
@@ -28,6 +29,9 @@ jest.mock('@adobe/aio-lib-console');
 const mockConsoleSDKInstance = {
   getProjectInstallConfig: jest.fn()
 };
+jest.mock('@adobe/aio-metrics-client');
+jest.mock('@adobe/aio-lib-ims');
+jest.mock('../actions/metrics');
 consoleSDK.init.mockResolvedValue(mockConsoleSDKInstance);
 jest.mock('../actions/ims');
 jest.mock('../actions/templateRegistry');
@@ -1109,5 +1113,13 @@ describe('POST templates', () => {
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
     expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
+  });
+
+  test('Should set metrics URL', async () => {
+    const METRICS_URL = 'https://test.com';
+    await action.main({
+      METRICS_URL
+    });
+    expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
   });
 });

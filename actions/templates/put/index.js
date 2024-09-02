@@ -10,14 +10,19 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INCORRECT_REQUEST, ERR_RC_MISSING_REQUIRED_PARAMETER, getEnv } =
+const { errorResponse, errorMessage, stringParameters, checkMissingRequestInputs, getBearerToken, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INCORRECT_REQUEST, ERR_RC_MISSING_REQUIRED_PARAMETER, getEnv } =
   require('../../utils');
 const { generateAccessToken } = require('../../ims');
 const { findTemplateById, updateTemplate } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const consoleLib = require('@adobe/aio-lib-console');
+const { incBatchCounter } = require('@adobe/aio-metrics-client');
+const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
+const { getTokenData } = require('@adobe/aio-lib-ims');
 
 const HTTP_METHOD = 'put';
+const ENDPOINT = 'PUT /templates/{templateId}';
+const METRICS_KEY = 'recordtemplateregistrymetrics';
 const PUT_PARAM_NAME = 'templateId';
 
 const serializeRequestBody = (params) => {
@@ -53,6 +58,11 @@ async function main (params) {
     MONGODB_NAME: params.MONGODB_NAME
   };
 
+  let requester = 'unauth';
+  if (params?.METRICS_URL) {
+    setMetricsUrl(params.METRICS_URL, METRICS_KEY);
+  }
+
   try {
     // 'info' is the default level if not set
     logger.info('Calling "PUT templates"');
@@ -60,19 +70,28 @@ async function main (params) {
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
-    if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
-      return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
-    }
-
     // check for missing request input parameters and headers
     const requiredHeaders = ['Authorization'];
     const errorMessages = checkMissingRequestInputs(params, [], requiredHeaders);
     if (errorMessages) {
+      await incBatchCounter('request_count', requester, ENDPOINT);
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
       return errorResponse(401, errorMessages, logger);
+    }
+
+    // extract the user Bearer token from the Authorization header
+    const accessToken = getBearerToken(params);
+    requester = getTokenData(accessToken)?.user_id;
+    await incBatchCounter('request_count', requester, ENDPOINT);
+
+    if (params.__ow_method === undefined || params.__ow_method.toLowerCase() !== HTTP_METHOD) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '405');
+      return errorResponse(405, [errorMessage(ERR_RC_HTTP_METHOD_NOT_ALLOWED, `HTTP "${params.__ow_method}" method is unsupported.`)], logger);
     }
 
     const isTemplateIdValid = PUT_PARAM_NAME in params && typeof params[PUT_PARAM_NAME] === 'string' && params[PUT_PARAM_NAME].length > 0;
     if (!isTemplateIdValid) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
       return errorResponse(400, [errorMessage(ERR_RC_MISSING_REQUIRED_PARAMETER, `The "${PUT_PARAM_NAME}" parameter is not set.`)], logger);
     }
 
@@ -94,6 +113,7 @@ async function main (params) {
       body
     });
     if (reqError) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, reqError.toString().split('\n').map(line => line.trim()).join(' => '))], logger);
     }
 
@@ -106,6 +126,7 @@ async function main (params) {
       // scenario 1 :  if apis or credentials, just overwrite the template
       const dbResponse = await updateTemplate(dbParams, templateId, body);
       if (dbResponse.matchedCount < 1) {
+        await incErrorCounterMetrics(requester, ENDPOINT, '404');
         return {
           statusCode: 404
         };
@@ -145,6 +166,7 @@ async function main (params) {
     const dbResponse = await updateTemplate(dbParams, templateId, body);
     if (dbResponse.matchedCount < 1) {
       logger.info('"PUT templates" not executed successfully');
+      await incErrorCounterMetrics(requester, ENDPOINT, '404');
       return {
         statusCode: 404
       };
@@ -178,6 +200,7 @@ async function main (params) {
     // log any server errors
     logger.error(error);
     // return with 500
+    await incErrorCounterMetrics(requester, ENDPOINT, '500');
     return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, error.message)], logger);
   }
 }

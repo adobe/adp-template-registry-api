@@ -1,9 +1,10 @@
 {
   "name": "template-registry-api",
-  "version": "0.8.1",
+  "version": "0.10.0",
   "dependencies": {
     "@adobe/aio-lib-console": "^5.1.0",
     "@adobe/aio-lib-ims": "^7.0.1",
+    "@adobe/aio-metrics-client": "^0.4.0",
     "@adobe/aio-sdk": "^5.0.1",
     "@octokit/rest": "^20.0.2",
     "axios": "^0.27.2",
