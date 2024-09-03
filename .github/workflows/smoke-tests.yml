@@ -43,8 +43,9 @@ jobs:
       - name: Run smoke tests
         uses: nick-fields/retry@v3
         with: 
-          max_attempts: 2
+          max_attempts: 3
           timeout_minutes: 5
+          retry_wait_seconds: 60
           command: npm run test:smoke
         env:
           AIO_RUNTIME_APIHOST: ${{ secrets.AIO_RUNTIME_APIHOST }}
