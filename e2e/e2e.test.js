@@ -21,7 +21,7 @@ const api = axios.create({
  * @description Create a new template
  * @returns {object} returns the created template
  */
-async function createTemplate(templateData) {
+async function createTemplate (templateData) {
   const response = await api.post('/templates', templateData);
   return response.data;
 }
@@ -32,14 +32,13 @@ async function createTemplate(templateData) {
  */
 const uuidv4 = () => {
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-    const r = (Math.random() * 16) | 0,
-      v = c === 'x' ? r : (r & 0x3) | 0x8;
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
     return v.toString(16);
   });
 };
 
 describe('Template Registry API E2E Tests', () => {
-
   const templateIdsToBeDeletedInTheEnd = [];
 
   test('Create a new template', async () => {
@@ -199,7 +198,6 @@ describe('Template Registry API E2E Tests', () => {
 });
 
 describe('Template Registry API API Console Template Tests', () => {
-
   const templateIdsToBeDeletedInTheEnd = [];
 
   const consoleTemplateData = {
