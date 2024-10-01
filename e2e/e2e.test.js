@@ -1,3 +1,5 @@
+const responseTime = 3000;
+
 const config = {
   baseUrl: process.env.TEMPLATE_REGISTRY_API_URL || 'http://localhost:3000',
   authToken: process.env.AUTH_TOKEN || 'your-auth-token-here'
@@ -19,12 +21,27 @@ const api = axios.create({
  * @description Create a new template
  * @returns {object} returns the created template
  */
-async function createTemplate (templateData) {
+async function createTemplate(templateData) {
   const response = await api.post('/templates', templateData);
   return response.data;
 }
 
+/**
+ * Utility to generate a UUID (version 4)
+ * @returns {string} returns a UUID
+ */
+const uuidv4 = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+    const r = (Math.random() * 16) | 0,
+      v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
 describe('Template Registry API E2E Tests', () => {
+
+  const templateIdsToBeDeletedInTheEnd = [];
+
   test('Create a new template', async () => {
     const templateData = {
       name: '@adobe/test-template',
@@ -34,6 +51,7 @@ describe('Template Registry API E2E Tests', () => {
     };
 
     const createdTemplate = await createTemplate(templateData);
+    templateIdsToBeDeletedInTheEnd.push(createdTemplate.id);
     expect(createdTemplate.id).toBeDefined();
     expect(createdTemplate.name).toBe(templateData.name);
 
@@ -43,8 +61,11 @@ describe('Template Registry API E2E Tests', () => {
   });
 
   test('List templates with filters', async () => {
-    await createTemplate({ name: '@adobe/template1', categories: ['cat1'] });
-    await createTemplate({ name: '@adobe/template2', categories: ['cat2'] });
+    const createdTemplate1 = await createTemplate({ name: '@adobe/template1', categories: ['cat1'] });
+    const createdTemplate2 = await createTemplate({ name: '@adobe/template2', categories: ['cat2'] });
+
+    templateIdsToBeDeletedInTheEnd.push(createdTemplate1.id);
+    templateIdsToBeDeletedInTheEnd.push(createdTemplate2.id);
 
     const listResponse = await api.get('/templates');
     expect(listResponse.status).toBe(200);
@@ -62,6 +83,7 @@ describe('Template Registry API E2E Tests', () => {
 
   test('Update an existing template', async () => {
     const template = await createTemplate({ name: '@adobe/update-test' });
+    templateIdsToBeDeletedInTheEnd.push(template.id);
 
     const updateData = {
       updatedBy: 'Tester',
@@ -76,17 +98,9 @@ describe('Template Registry API E2E Tests', () => {
     expect(getResponse.data.description).toBe(updateData.description);
   });
 
-  test('Delete a template', async () => {
-    const template = await createTemplate({ name: '@adobe/delete-test' });
-
-    const deleteResponse = await api.delete(`/templates/${template.id}`);
-    expect(deleteResponse.status).toBe(200);
-
-    await expect(api.get(`/templates/${template.id}`)).rejects.toThrow('Request failed with status code 404');
-  });
-
   test('Install a template', async () => {
     const template = await createTemplate({ name: '@adobe/install-test' });
+    templateIdsToBeDeletedInTheEnd.push(template.id);
 
     const installData = {
       orgId: 'test-org-id',
@@ -99,6 +113,14 @@ describe('Template Registry API E2E Tests', () => {
     expect(installResponse.data.id).toBeDefined();
     expect(installResponse.data.apiKey).toBeDefined();
     expect(installResponse.data.orgId).toBe(installData.orgId);
+  });
+
+  test('Delete all templates and verify deletion', async () => {
+    for (const templateId of templateIdsToBeDeletedInTheEnd) {
+      const deleteResponse = await api.delete(`/templates/${templateId}`);
+      expect(deleteResponse.status).toBe(200);
+      await expect(api.get(`/templates/${templateId}`)).rejects.toThrow('Request failed with status code 404');
+    }
   });
 
   test('Verify error responses', async () => {
@@ -171,7 +193,94 @@ describe('Template Registry API E2E Tests', () => {
 
     console.log(`Average response time: ${avgResponseTime}ms`);
 
-    expect(avgResponseTime).toBeLessThan(3000); // Assuming 3000 ms is acceptable
+    expect(avgResponseTime).toBeLessThan(responseTime); // Assuming 3000 ms is acceptable
     expect(responses.every(r => r.status === 200)).toBe(true);
+  });
+});
+
+describe('Template Registry API API Console Template Tests', () => {
+
+  const templateIdsToBeDeletedInTheEnd = [];
+
+  const consoleTemplateData = {
+    adobeRecommended: true,
+    apis: [
+      {
+        code: 'ccai-sdk',
+        credentialType: 'OAUTH_SERVER_TO_SERVER',
+        flowType: 'ENTP'
+      },
+      {
+        code: 'PhotoshopCCESDK',
+        credentialType: 'OAUTH_SERVER_TO_SERVER',
+        flowType: 'ENTP'
+      },
+      {
+        code: 'LightroomCCESDK',
+        credentialType: 'OAUTH_SERVER_TO_SERVER',
+        flowType: 'ENTP'
+      },
+      {
+        code: 'Firefly SDK - Enterprise - GA',
+        credentialType: 'OAUTH_SERVER_TO_SERVER',
+        flowType: 'ENTP'
+      }
+    ],
+    author: 'Adobe, Inc.',
+    codeSamples: [
+      {
+        language: 'javascript',
+        link: 'https://developer-stage.adobe.com/package.zip'
+      }
+    ],
+    createdBy: 'PostBuster User',
+    credentials: [
+      {
+        flowType: 'ENTP',
+        type: 'OAUTH_SERVER_TO_SERVER'
+      }
+    ],
+    description: 'Full test template made by PostBuster',
+    links: {
+      consoleProject: 'https://developer-stage.adobe.com/console/projects/918/4566206088344750634/overview'
+    },
+    name: `test-template-fields-postbuster-${uuidv4()}`, // Generate UUID
+    status: 'Approved'
+  };
+
+  it('should return create a new console template', async () => {
+    const template = await createTemplate(consoleTemplateData);
+    templateIdsToBeDeletedInTheEnd.push(template.id);
+
+    expect(template).toMatchObject({
+      status: 'Approved',
+      name: expect.stringContaining('test-template-fields-postbuster-'),
+      description: 'Full test template made by PostBuster'
+    });
+  });
+
+  test('Update an existing console template', async () => {
+    const template = await createTemplate(consoleTemplateData);
+    templateIdsToBeDeletedInTheEnd.push(template.id);
+
+    const updateData = {
+      updatedBy: 'Tester',
+      description: 'Updated description'
+    };
+
+    const updateResponse = await api.put(`/templates/${template.id}`, updateData);
+    expect(updateResponse.status).toBe(200);
+    expect(updateResponse.data.description).toBe(updateData.description);
+
+    const getResponse = await api.get(`/templates/${template.id}`);
+    expect(getResponse.data.description).toBe(updateData.description);
+  });
+
+  test('Delete all console templates and verify deletion', async () => {
+    for (const templateId of templateIdsToBeDeletedInTheEnd) {
+      const deleteResponse = await api.delete(`/templates/${templateId}`);
+      expect(deleteResponse.status).toBe(200);
+      await expect(api.get(`/templates/${templateId}`)).rejects.toThrow('Request failed with status code 404');
+    }
   });
 });
