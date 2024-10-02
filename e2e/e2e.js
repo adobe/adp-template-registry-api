@@ -1,5 +1,5 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
-jest.setTimeout(60000)
+jest.setTimeout(60000);
 
 const fetch = require('node-fetch');
 const { validateAccessToken, generateAccessToken } = require('../actions/ims');
@@ -20,14 +20,14 @@ const {
  * @description Creates a new template
  * @returns {object} returns the created template
  */
-async function createTemplate(accessToken, templateData) {
+async function createTemplate (accessToken, templateData) {
   const response = await fetch(`${TEMPLATE_REGISTRY_API_URL}/templates`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`
     },
-    body: JSON.stringify(templateData),
+    body: JSON.stringify(templateData)
   });
 
   if (!response.ok) {
@@ -45,15 +45,14 @@ async function createTemplate(accessToken, templateData) {
  * @description Updates a new template
  * @returns {object} returns the updated template
  */
-async function updateTemplate(accessToken, templateId, updateTemplateData) {
-
+async function updateTemplate (accessToken, templateId, updateTemplateData) {
   const response = await fetch(`${TEMPLATE_REGISTRY_API_URL}/templates/${templateId}`, {
     method: 'PUT',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
+      Authorization: `Bearer ${accessToken}`
     },
-    body: JSON.stringify(updateTemplateData),
+    body: JSON.stringify(updateTemplateData)
   });
 
   if (!response.ok) {
@@ -70,14 +69,14 @@ async function updateTemplate(accessToken, templateId, updateTemplateData) {
  * @description Fetches template by id
  * @returns {object} returns the template
  */
-async function getTemplate(accessToken, templateId) {
+async function getTemplate (accessToken, templateId) {
   const url = `${TEMPLATE_REGISTRY_API_URL}/templates/${templateId}`;
   const response = await fetch(url, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
+      Authorization: `Bearer ${accessToken}`
+    }
   });
 
   if (!response.ok) {
@@ -92,22 +91,21 @@ async function getTemplate(accessToken, templateId) {
  * @param {string} accessToken token to access API
  * @param {object} queryParams , filters to be applied
  * @description Fetches templates with filters
- * @returns {array} returns the templates
+ * @returns {Array} returns the templates
  */
-async function getTemplates(accessToken, queryParams) {
+async function getTemplates (accessToken, queryParams) {
   const url = `${TEMPLATE_REGISTRY_API_URL}/templates`;
 
   const urlObj = new URL(url);
   const params = new URLSearchParams(queryParams);
   urlObj.search = params.toString();
 
-
   const response = await fetch(urlObj.toString(), {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
+      Authorization: `Bearer ${accessToken}`
+    }
   });
 
   const data = await response.json();
@@ -120,41 +118,16 @@ async function getTemplates(accessToken, queryParams) {
  * @description deletes template by id
  * @returns {object} returns the response
  */
-async function deleteTemplate(accessToken, templateId) {
+async function deleteTemplate (accessToken, templateId) {
   const response = await fetch(`${TEMPLATE_REGISTRY_API_URL}/templates/${templateId}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
+      Authorization: `Bearer ${accessToken}`
+    }
   });
 
   return response;
-}
-
-/**
- * @param {string} accessToken - token to access API
- * @param {string} templateId - template id to be installed
- * @param {object} templateData contains name and links
- * @description Install a template
- * @returns {object} returns the installed template
- */
-async function installTemplate(accessToken, templateId, templateData) {
-  const response = await fetch(`${TEMPLATE_REGISTRY_API_URL}/install/${templateId}`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`,
-    },
-    body: JSON.stringify(templateData),
-  });
-
-  if (!response.ok) {
-    throw new Error(`HTTP error! status: ${response.status}`);
-  }
-
-  const data = await response.json();
-  return { data, status: response.status };
 }
 
 /**
@@ -213,7 +186,7 @@ describe('E2E Tests', () => {
     it('Should list templates by id', async () => {
       const { data: getTemplateData, status: getTemplateResponse } = await getTemplate(accessToken, createdTemplateId);
       expect(getTemplateResponse).toBe(200);
-      expect(getTemplateData.status).toBe("InVerification");
+      expect(getTemplateData.status).toBe('InVerification');
     });
 
     it('Should fetch templates by name', async () => {
@@ -259,11 +232,9 @@ describe('E2E Tests', () => {
       const getResponse = await getTemplate(accessToken, 'c09309fea566cb37f8afa89a');
       expect(getResponse.status).toBe(404);
     });
-
   });
 
   describe('Template Registry API - Console Template Tests', () => {
-
     let consoleTemplateId = null;
 
     const consoleTemplateData = {
@@ -344,7 +315,7 @@ describe('E2E Tests', () => {
       const { data: getTemplateData, status: getTemplateResponse } = await getTemplate(accessToken, consoleTemplateId);
       expect(getTemplateResponse).toBe(200);
       expect(getTemplateData.id).toBe(consoleTemplateId);
-      expect(getTemplateData.status).toBe("Approved");
+      expect(getTemplateData.status).toBe('Approved');
     });
 
     it('should update an existing console template', async () => {
@@ -373,12 +344,10 @@ describe('E2E Tests', () => {
   });
 
   describe('Template Registry API - Performance Testing', () => {
-
     const numRequests = 25;
     const responseTime = 3000;
 
     it('Should verify GET Templated By Id API performance under load', async () => {
-
       const templateData = {
         name: `@adobe/test-template-${uuidv4()}`,
         links: {
