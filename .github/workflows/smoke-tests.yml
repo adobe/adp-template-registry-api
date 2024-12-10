@@ -17,7 +17,7 @@ on:
         default: 'Stage'
   schedule:
     - cron: '*/5 * * * *' # Run prod every 5 minutes
-    - cron: '*/60 * * * *' # Run stage every hour
+    # - cron: '*/60 * * * *' # Run stage every hour
 
 jobs:
   smoke:
