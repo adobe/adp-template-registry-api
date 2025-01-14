@@ -67,7 +67,7 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_TITLE: ${{ inputs.environment || github.event.schedule == '*/60 * * * *' && 'Stage ' }}Template Registry Smoke Tests Failed
+          SLACK_TITLE: ${{ inputs.environment || github.event.schedule == '*/60 * * * *' && 'Stage ' || '' }}Template Registry Smoke Tests Failed
           SLACK_MESSAGE: 'Node Version: ${{ matrix.node-version }}\n Runbook: https://git.corp.adobe.com/CNA/runbooks/tree/main/runbooks/template-registry-smoke-tests-failure.md'
           SLACK_COLOR: ${{ job.status == 'success' && 'good' || job.status == 'cancelled' && '#808080' || 'danger' }}
           ENABLE_ESCAPES: true
