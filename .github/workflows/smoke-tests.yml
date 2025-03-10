@@ -38,13 +38,21 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Clear npm cache
+        run: npm cache clean --force
       - name: Install dependencies
-        run: npm i --package-lock --package-lock-only && npm ci
+        uses: nick-fields/retry@v3
+        with: 
+          max_attempts: 3
+          timeout_minutes: 5
+          retry_wait_seconds: 30
+          command: npm i --package-lock --package-lock-only && npm ci
       - name: Run smoke tests
         uses: nick-fields/retry@v3
         with: 
-          max_attempts: 2
+          max_attempts: 3
           timeout_minutes: 5
+          retry_wait_seconds: 60
           command: npm run test:smoke
         env:
           AIO_RUNTIME_APIHOST: ${{ secrets.AIO_RUNTIME_APIHOST }}
@@ -59,7 +67,7 @@ jobs:
         uses: rtCamp/action-slack-notify@v2
         env:
           SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
-          SLACK_TITLE: ${{ inputs.environment || github.event.schedule == '*/60 * * * *' && 'Stage ' }}Template Registry Smoke Tests Failed
+          SLACK_TITLE: ${{ inputs.environment || github.event.schedule == '*/60 * * * *' && 'Stage ' || '' }}Template Registry Smoke Tests Failed
           SLACK_MESSAGE: 'Node Version: ${{ matrix.node-version }}\n Runbook: https://git.corp.adobe.com/CNA/runbooks/tree/main/runbooks/template-registry-smoke-tests-failure.md'
           SLACK_COLOR: ${{ job.status == 'success' && 'good' || job.status == 'cancelled' && '#808080' || 'danger' }}
           ENABLE_ESCAPES: true
