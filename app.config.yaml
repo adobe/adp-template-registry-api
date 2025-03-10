@@ -12,7 +12,7 @@ application:
           templates-post:
             function: actions/templates/post/index.js
             web: "yes"
-            runtime: "nodejs:18"
+            runtime: "nodejs:22"
             include:
               - ["template-registry-api.json"]
             inputs:
@@ -34,7 +34,7 @@ application:
           templates-put:
             function: actions/templates/put/index.js
             web: "yes"
-            runtime: "nodejs:18"
+            runtime: "nodejs:22"
             include:
               - ["template-registry-api.json"]
             inputs:
@@ -56,7 +56,7 @@ application:
           templates-get:
             function: actions/templates/get/index.js
             web: "yes"
-            runtime: "nodejs:18"
+            runtime: "nodejs:22"
             include:
               - ["template-registry-api.json"]
             inputs:
@@ -72,7 +72,7 @@ application:
           templates-delete:
             function: actions/templates/delete/index.js
             web: "yes"
-            runtime: "nodejs:18"
+            runtime: "nodejs:22"
             include:
               - ["template-registry-api.json"]
             inputs:
@@ -92,7 +92,7 @@ application:
           templates-list:
             function: actions/templates/list/index.js
             web: "yes"
-            runtime: "nodejs:18"
+            runtime: "nodejs:22"
             include:
               - ["template-registry-api.json"]
             inputs:
@@ -109,7 +109,7 @@ application:
           templates-install:
             function: actions/templates/install/index.js
             web: "yes"
-            runtime: "nodejs:18"
+            runtime: "nodejs:22"
             include:
               - ["template-registry-api.json"]
             inputs:
