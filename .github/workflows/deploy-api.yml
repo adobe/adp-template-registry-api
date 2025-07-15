@@ -71,4 +71,4 @@ jobs:
           MONGODB_NAME: ${{ secrets.MONGODB_NAME }}
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           METRICS_URL: ${{ secrets.METRICS_URL }}
-        run: aio app deploy
+        run: AIO_runtime_apihost=https://stage.adobeioruntime.net aio app deploy
