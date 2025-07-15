@@ -3,7 +3,7 @@
   "basePath": "/v1",
   "info": {
     "title": "Template Registry API",
-    "version": "0.10.0",
+    "version": "1.0.0",
     "license": {
       "name": "Apache-2.0 License",
       "url": "https://github.com/adobe/adp-template-registry-api?tab=Apache-2.0-1-ov-file"
@@ -302,7 +302,7 @@
                 "apis": {
                   "type": "array",
                   "description": "A list of Adobe APIs required by the template",
-                  "minItems": 1,
+                  "minItems": 0,
                   "items": {
                     "type": "object",
                     "required": [
@@ -329,7 +329,7 @@
                 "credentials": {
                   "type": "array",
                   "description": "A list of credentials required by the template",
-                  "minItems": 1,
+                  "minItems": 0,
                   "items": {
                     "type": "object",
                     "required": [
@@ -1102,7 +1102,7 @@
         "apis": {
           "type": "array",
           "description": "A list of Adobe APIs required by the template",
-          "minItems": 1,
+          "minItems": 0,
           "items": {
             "type": "object",
             "required": [
@@ -1129,7 +1129,7 @@
         "credentials": {
           "type": "array",
           "description": "A list of credentials required by the template",
-          "minItems": 1,
+          "minItems": 0,
           "items": {
             "type": "object",
             "required": [
@@ -1531,7 +1531,7 @@
         "credentials": {
           "type": "array",
           "description": "A list of credentials required by the template",
-          "minItems": 1,
+          "minItems": 0,
           "items": {
             "type": "object",
             "required": [
@@ -1564,7 +1564,7 @@
         "apis": {
           "type": "array",
           "description": "A list of Adobe APIs required by the template",
-          "minItems": 1,
+          "minItems": 0,
           "items": {
             "type": "object",
             "required": [
