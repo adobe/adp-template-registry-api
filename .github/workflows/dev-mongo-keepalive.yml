@@ -1,0 +1,30 @@
+name: Dev - MongoDB Keepalive
+
+on:
+  schedule:
+    # Run weekly on Monday at 2 AM UTC (keeps MongoDB active)
+    - cron: '0 2 * * 1'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  dev-keepalive:
+    environment: Dev
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      
+      - name: Install mongodb package
+        run: npm install mongodb
+      
+      - name: Run Dev MongoDB Keepalive
+        run: node scripts/mongodb-keepalive.js
+        env:
+          MONGODB_URI: ${{ secrets.DEV_MONGODB_URI }}
+          MONGODB_NAME: ${{ secrets.DEV_MONGODB_NAME }}
+          KEEPALIVE_SOURCE: dev-github-actions-workflow
