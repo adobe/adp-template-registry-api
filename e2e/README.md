@@ -2,23 +2,33 @@
 
 ## Requirements
 
-To run the e2e test you'll need these env variables set:
-  0. Create `.env` in `e2e` directory and SET:
-  1. `TEMPLATE_REGISTRY_API_URL`
-  2. `AUTH_TOKEN`
-  3. `IMS_CLIENT_ID`=`
-  4. `IMS_CLIENT_SECRET`=`
-  5. `IMS_AUTH_CODE`=`
-  6. `IMS_SCOPES`=`
-  7. `IMS_URL`=`
-  8. `ACCESS_TOKEN`
+1. Copy `.env.example` to `.env` in the `e2e` directory
+2. Set the required variables in `.env` (see below)
+
+### Environment variables
+
+| Variable | Required | Description |
+|---|---|---|
+| `TEMPLATE_REGISTRY_API_URL` | Yes | Base URL of the Template Registry API |
+| `IMS_URL` | Yes | IMS host URL (e.g. `https://ims-na1.adobelogin.com`) |
+| `ACCESS_TOKEN` | No* | Pre-generated IMS access token. If set, the IMS auth variables below are not needed. |
+| `IMS_AUTH_CODE` | No* | IMS auth code — required when `ACCESS_TOKEN` is not set |
+| `IMS_CLIENT_ID` | No* | IMS client ID — required when `ACCESS_TOKEN` is not set |
+| `IMS_CLIENT_SECRET` | No* | IMS client secret — required when `ACCESS_TOKEN` is not set |
+| `IMS_SCOPES` | No* | Space-separated IMS scopes — required when `ACCESS_TOKEN` is not set |
+
+\* Either `ACCESS_TOKEN` **or** all four IMS auth variables must be provided. The test suite will print a clear error for each missing variable and abort before any tests run.
 
 ## Run
 
-`npm run e2e`
+```
+npm run e2e
+```
 
 ## Test overview
 
 The tests cover:
 
-1. Template Registry API CRUD Operations
+- Template Registry API CRUD Operations (create, read, update, delete)
+- Console template lifecycle
+- Concurrent template operations and basic performance benchmarking
