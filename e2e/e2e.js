@@ -13,6 +13,22 @@ const {
   ACCESS_TOKEN
 } = process.env;
 
+const alwaysRequired = { IMS_URL, TEMPLATE_REGISTRY_API_URL };
+const tokenRequired = { IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES };
+
+const missing = Object.entries(alwaysRequired)
+  .filter(([, v]) => !v)
+  .map(([k]) => k);
+
+if (!ACCESS_TOKEN) {
+  missing.push(...Object.entries(tokenRequired).filter(([, v]) => !v).map(([k]) => k));
+}
+
+if (missing.length > 0) {
+  missing.forEach(k => console.error(`Missing required environment variable: ${k}`));
+  throw new Error(`E2E setup failed: missing environment variables: ${missing.join(', ')}`);
+}
+
 /**
  * @param {string} accessToken - token to access API
  * @param {object} templateData contains name and links
