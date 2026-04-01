@@ -47,19 +47,18 @@ jobs:
         with:
           os: ${{ matrix.os }}
           version: 10.x.x
-      - name: Configure AIO Runtime
+      - name: Generate Template Registry APIs
         env:
           AIO_runtime_auth: ${{ secrets.AIO_RUNTIME_AUTH }}
           AIO_runtime_namespace: ${{ secrets.AIO_RUNTIME_NAMESPACE }}
           AIO_runtime_apihost: ${{ secrets.AIO_RUNTIME_APIHOST }}
-        run: |
-          aio config set runtime.apihost "$AIO_runtime_apihost"
-          aio config set runtime.namespace "$AIO_runtime_namespace"
-          aio config set runtime.auth "$AIO_runtime_auth"
-      - name: Generate Template Registry APIs
         run: aio runtime api create --config-file=template-registry-api.json
       - name: Deploy
         env:
+          AIO_runtime_auth: ${{ secrets.AIO_RUNTIME_AUTH }}
+          AIO_runtime_namespace: ${{ secrets.AIO_RUNTIME_NAMESPACE }}
+          AIO_runtime_apihost: ${{ secrets.AIO_RUNTIME_APIHOST }}
+          AIO_CLI_ENV: ${{ inputs.environment }}
           TEMPLATE_REGISTRY_ORG: ${{ secrets.TEMPLATE_REGISTRY_ORG }}
           TEMPLATE_REGISTRY_REPOSITORY: ${{ secrets.TEMPLATE_REGISTRY_REPOSITORY }}
           ACCESS_TOKEN_GITHUB: ${{ secrets.ACCESS_TOKEN_GITHUB }}
