@@ -1,7 +1,6 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 jest.setTimeout(60000);
 
-const fetch = require('node-fetch');
 const { validateAccessToken, generateAccessToken } = require('../actions/ims');
 
 const {

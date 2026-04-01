@@ -9,7 +9,6 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const fetch = require('node-fetch');
 require('dotenv').config();
 const { Ims } = require('@adobe/aio-lib-ims');
 const testConsoleTemplate = require('./fixtures/smoke/template.console.json');

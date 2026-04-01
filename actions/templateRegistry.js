@@ -9,7 +9,6 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const axios = require('axios').default;
 const { Octokit } = require('@octokit/rest');
 
 const collectionName = 'templates';
@@ -197,26 +196,20 @@ async function getTemplates (dbParams) {
  * @returns {Promise} response data
  */
 async function fetchUrl (url, headers = {}, params = {}) {
-  return new Promise((resolve, reject) => {
-    axios({
-      method: 'get',
-      url,
-      headers,
-      params
-    })
-      .then(response => {
-        if (response.status === 200) {
-          resolve(response.data);
-        } else {
-          const error = `Error fetching "${url}". Response code is ${response.status}`;
-          reject(new Error(error));
-        }
-      })
-      .catch(e => {
-        const error = `Error fetching "${url}". ${e.toString()}`;
-        reject(new Error(error));
-      });
-  });
+  const urlObj = new URL(url);
+  for (const [k, v] of Object.entries(params)) {
+    urlObj.searchParams.set(k, v);
+  }
+  let response;
+  try {
+    response = await fetch(urlObj.toString(), { headers });
+  } catch (e) {
+    throw new Error(`Error fetching "${url}". ${e.toString()}`);
+  }
+  if (response.status === 200) {
+    return response.json();
+  }
+  throw new Error(`Error fetching "${url}". Response code is ${response.status}`);
 }
 
 module.exports = {

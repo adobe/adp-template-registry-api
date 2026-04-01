@@ -7,7 +7,6 @@
     "@adobe/aio-metrics-client": "^0.4.0",
     "@adobe/aio-sdk": "^5.0.1",
     "@octokit/rest": "^20.0.2",
-    "axios": "^0.27.2",
     "lodash.orderby": "^4.6.0",
     "mongodb": "^6.5.0",
     "openapi-enforcer": "^1.23.0"
@@ -28,7 +27,6 @@
     "jest": "^29.7.0",
     "jest-junit": "^16.0.0",
     "nock": "^13.5.4",
-    "node-fetch": "^2.6.7",
     "np": "^10.0.5"
   },
   "scripts": {

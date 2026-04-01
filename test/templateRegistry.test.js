@@ -10,7 +10,6 @@ governing permissions and limitations under the License.
 */
 
 const { MongoClient, ObjectId } = require('mongodb');
-const nock = require('nock');
 const {
   fetchUrl,
   createReviewIssue,
@@ -47,10 +46,9 @@ describe('Verify communication with Template Registry', () => {
   test('Returns an open "Template Review Request" issue', async () => {
     const templateName = '@adobe/app-builder-template';
     const issueUrl = `https://github.com/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/issues/2`;
-    nock('https://api.github.com')
-      .get(`/repos/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/issues?state=open&labels=add-template&sort=updated-desc`)
-      .times(1)
-      .reply(200, [
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      status: 200,
+      json: async () => [
         {
           html_url: `https://github.com/${process.env.TEMPLATE_REGISTRY_ORG}/${process.env.TEMPLATE_REGISTRY_REPOSITORY}/issues/1`,
           body: '### Link to GitHub repo\nhttps://github.com/company1/app-builder-template\n### npm package name\n@company1/app-builder-template'
@@ -59,7 +57,8 @@ describe('Verify communication with Template Registry', () => {
           html_url: issueUrl,
           body: `### Link to GitHub repo\nhttps://github.com/adobe/app-builder-template\n### npm package name\n${templateName}`
         }
-      ]);
+      ]
+    });
 
     await expect(getReviewIssueByTemplateName(templateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY))
       .resolves.toBe(issueUrl);
@@ -311,15 +310,11 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     expect(templatesResult).toEqual(null);
   });
 
-  test('axios fetchUrl should return the response body', async () => {
-    nock('https://jsonplaceholder.typicode.com')
-      .get('/posts/1')
-      .reply(200, {
-        userId: 1,
-        id: 1,
-        title: 'title',
-        body: 'body'
-      });
+  test('fetchUrl should return the response body', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      status: 200,
+      json: async () => ({ userId: 1, id: 1, title: 'title', body: 'body' })
+    });
 
     const url = 'https://jsonplaceholder.typicode.com/posts/1';
     const response = await fetchUrl(url);
@@ -331,32 +326,32 @@ describe('Template Registry Mongodb CRUD Actions', () => {
     });
   });
 
-  test('axios fetchUrl returns non-200 status code', async () => {
-    nock('https://jsonplaceholder.typicode.com')
-      .get('/posts/1')
-      .reply(201, {
-        userId: 1,
-        id: 1,
-        title: 'title',
-        body: 'body'
-      });
+  test('fetchUrl returns non-200 status code', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue({ status: 201, json: async () => ({}) });
 
     const url = 'https://jsonplaceholder.typicode.com/posts/1';
     await expect(fetchUrl(url)).rejects.toThrow('Error fetching "https://jsonplaceholder.typicode.com/posts/1". Response code is 201');
   });
 
-  test('axios fetchUrl returns 400 status code', async () => {
-    nock('https://jsonplaceholder.typicode.com')
-      .get('/posts/1')
-      .reply(400, {
-        userId: 1,
-        id: 1,
-        title: 'title',
-        body: 'body'
-      });
+  test('fetchUrl returns 400 status code', async () => {
+    jest.spyOn(global, 'fetch').mockResolvedValue({ status: 400, json: async () => ({}) });
 
     const url = 'https://jsonplaceholder.typicode.com/posts/1';
-    await expect(fetchUrl(url)).rejects.toThrow('Error fetching "https://jsonplaceholder.typicode.com/posts/1". AxiosError: Request failed with status code 400');
+    await expect(fetchUrl(url)).rejects.toThrow('Error fetching "https://jsonplaceholder.typicode.com/posts/1". Response code is 400');
+  });
+
+  test('fetchUrl throws on network error', async () => {
+    jest.spyOn(global, 'fetch').mockRejectedValue(new Error('network failure'));
+
+    const url = 'https://jsonplaceholder.typicode.com/posts/1';
+    await expect(fetchUrl(url)).rejects.toThrow('Error fetching "https://jsonplaceholder.typicode.com/posts/1". Error: network failure');
+  });
+
+  test('fetchUrl should append query params to the URL', async () => {
+    const spy = jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200, json: async () => ([]) });
+
+    await fetchUrl('https://api.example.com/items', {}, { page: '1', limit: '10' });
+    expect(spy).toHaveBeenCalledWith('https://api.example.com/items?page=1&limit=10', expect.any(Object));
   });
 
   test('create issue for a template', async () => {

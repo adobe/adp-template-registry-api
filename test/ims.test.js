@@ -9,7 +9,6 @@ OF ANY KIND, either express or implied. See the License for the specific languag
 governing permissions and limitations under the License.
 */
 
-const nock = require('nock');
 const { Ims, getTokenData } = require('@adobe/aio-lib-ims');
 const { validateAccessToken, isAdmin, generateAccessToken, isValidServiceToken } = require('../actions/ims');
 
@@ -29,25 +28,14 @@ beforeEach(() => {
 
 describe('Verify communication with IMS', () => {
   test('Verify checking that provided IMS access token is valid', async () => {
-    nock(process.env.IMS_URL)
-      .get(`/ims/validate_token/v1?client_id=${process.env.IMS_CLIENT_ID}&type=access_token`)
-      .times(1)
-      .reply(200, {
-        valid: true
-      });
+    jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200, json: async () => ({ valid: true }) });
 
     await expect(validateAccessToken('<access-token>', process.env.IMS_URL, process.env.IMS_CLIENT_ID))
       .resolves.toBeUndefined();
   });
 
   test('Verify that exception is thrown for non-valid IMS access token', async () => {
-    nock(process.env.IMS_URL)
-      .get(`/ims/validate_token/v1?client_id=${process.env.IMS_CLIENT_ID}&type=access_token`)
-      .times(1)
-      .reply(200, {
-        valid: false,
-        reason: 'bad_signature'
-      });
+    jest.spyOn(global, 'fetch').mockResolvedValue({ status: 200, json: async () => ({ valid: false, reason: 'bad_signature' }) });
 
     await expect(validateAccessToken('<access-token>', process.env.IMS_URL, process.env.IMS_CLIENT_ID))
       .rejects.toThrow('Provided IMS access token is invalid. Reason: bad_signature');
@@ -57,21 +45,13 @@ describe('Verify communication with IMS', () => {
     const adminImsOrganizations = [
       'adminOrg@AdobeOrg'
     ];
-    nock(process.env.IMS_URL)
-      .get('/ims/organizations/v6')
-      .times(1)
-      .reply(200, [
-        {
-          orgName: 'Org1',
-          orgRef: { ident: 'adminOrg', authSrc: 'AdobeOrg' },
-          orgType: 'Enterprise'
-        },
-        {
-          orgName: 'Org2',
-          orgRef: { ident: 'non-adminOrg', authSrc: 'AdobeOrg' },
-          orgType: 'Enterprise'
-        }
-      ]);
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      status: 200,
+      json: async () => [
+        { orgName: 'Org1', orgRef: { ident: 'adminOrg', authSrc: 'AdobeOrg' }, orgType: 'Enterprise' },
+        { orgName: 'Org2', orgRef: { ident: 'non-adminOrg', authSrc: 'AdobeOrg' }, orgType: 'Enterprise' }
+      ]
+    });
 
     await expect(isAdmin('<access-token>', process.env.IMS_URL, adminImsOrganizations))
       .resolves.toBe(true);
@@ -81,41 +61,34 @@ describe('Verify communication with IMS', () => {
     const adminImsOrganizations = [
       'adminOrg@AdobeOrg'
     ];
-    nock(process.env.IMS_URL)
-      .get('/ims/organizations/v6')
-      .times(1)
-      .reply(200, [
-        {
-          orgName: 'Org1',
-          orgRef: { ident: 'non-adminOrg1', authSrc: 'AdobeOrg' },
-          orgType: 'Enterprise'
-        },
-        {
-          orgName: 'Org2',
-          orgRef: { ident: 'non-adminOrg2', authSrc: 'AdobeOrg' },
-          orgType: 'Enterprise'
-        }
-      ]);
+    jest.spyOn(global, 'fetch').mockResolvedValue({
+      status: 200,
+      json: async () => [
+        { orgName: 'Org1', orgRef: { ident: 'non-adminOrg1', authSrc: 'AdobeOrg' }, orgType: 'Enterprise' },
+        { orgName: 'Org2', orgRef: { ident: 'non-adminOrg2', authSrc: 'AdobeOrg' }, orgType: 'Enterprise' }
+      ]
+    });
 
     await expect(isAdmin('<access-token>', process.env.IMS_URL, adminImsOrganizations))
       .resolves.toBe(false);
   });
 
   test('Verify that exception is thrown for non-successful IMS communication', async () => {
-    nock(process.env.IMS_URL)
-      .get('/ims/organizations/v6')
-      .times(1)
-      .reply(400);
+    jest.spyOn(global, 'fetch').mockResolvedValue({ status: 400, json: async () => ({}) });
 
     await expect(isAdmin('<access-token>', process.env.IMS_URL, []))
-      .rejects.toThrow(`Error fetching "${process.env.IMS_URL}/ims/organizations/v6". AxiosError: Request failed with status code 400`);
+      .rejects.toThrow(`Error fetching "${process.env.IMS_URL}/ims/organizations/v6". Response code is 400`);
+  });
+
+  test('Verify that exception is thrown for network error during IMS communication', async () => {
+    jest.spyOn(global, 'fetch').mockRejectedValue(new Error('network failure'));
+
+    await expect(isAdmin('<access-token>', process.env.IMS_URL, []))
+      .rejects.toThrow(`Error fetching "${process.env.IMS_URL}/ims/organizations/v6". Error: network failure`);
   });
 
   test('Verify that exception is thrown for non-successful IMS communication, non-error code', async () => {
-    nock(process.env.IMS_URL)
-      .get('/ims/organizations/v6')
-      .times(1)
-      .reply(201);
+    jest.spyOn(global, 'fetch').mockResolvedValue({ status: 201, json: async () => ({}) });
 
     await expect(isAdmin('<access-token>', process.env.IMS_URL, []))
       .rejects.toThrow(`Error fetching "${process.env.IMS_URL}/ims/organizations/v6". Response code is 201`);
