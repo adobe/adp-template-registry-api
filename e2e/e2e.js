@@ -13,8 +13,8 @@ const {
   ACCESS_TOKEN
 } = process.env;
 
-const alwaysRequired = { IMS_URL, TEMPLATE_REGISTRY_API_URL };
-const tokenRequired = { IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES };
+const alwaysRequired = { IMS_URL, IMS_CLIENT_ID, TEMPLATE_REGISTRY_API_URL };
+const tokenRequired = { IMS_AUTH_CODE, IMS_CLIENT_SECRET, IMS_SCOPES };
 
 const missing = Object.entries(alwaysRequired)
   .filter(([, v]) => !v)
