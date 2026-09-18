@@ -10,13 +10,14 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_PERMISSION_DENIED } =
+const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_PERMISSION_DENIED, ERR_RC_INCORRECT_REQUEST } =
   require('../../utils');
 const { validateAccessToken, isAdmin, isValidServiceToken } = require('../../ims');
-const { removeTemplateById, removeTemplateByName } = require('../../templateRegistry');
+const { removeTemplateById, removeTemplateByName, isValidTemplateId } = require('../../templateRegistry');
 const { incBatchCounter } = require('@adobe/aio-metrics-client');
 const { getTokenData } = require('@adobe/aio-lib-ims');
 const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
+const { withRequestLogging, getStatusCode } = require('../../loggingUtils');
 
 const HTTP_METHOD = 'delete';
 const ENDPOINT = 'DELETE /templates';
@@ -58,9 +59,7 @@ const deleteTemplateByIdFunc = async (params, dbParams) => {
  * @returns {object} response
  */
 async function main (params) {
-  // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
-
   const imsUrl = params.IMS_URL;
   const imsClientId = params.IMS_CLIENT_ID;
   const adminImsOrganizations = params.ADMIN_IMS_ORGANIZATIONS.split(',');
@@ -76,9 +75,6 @@ async function main (params) {
   }
 
   try {
-    // 'info' is the default level if not set
-    logger.info('Calling "DELETE templates"');
-
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
@@ -125,12 +121,17 @@ async function main (params) {
     if (!shouldDeleteById) {
       response = await deleteTemplateByNameFunc(params, dbParams);
     } else {
-      response = await deleteTemplateByIdFunc(params, dbParams);
+      const templateId = params.templateId;
+      if (templateId !== undefined && templateId !== null && !isValidTemplateId(templateId)) {
+        response = errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, `The "templateId" parameter "${templateId}" is not a valid template id.`)], logger);
+      } else {
+        response = await deleteTemplateByIdFunc(params, dbParams);
+      }
     }
-    if (response.statusCode === 404) {
-      await incErrorCounterMetrics(requester, ENDPOINT, '404');
+    const statusCode = getStatusCode(response);
+    if (statusCode >= 400) {
+      await incErrorCounterMetrics(requester, ENDPOINT, String(statusCode));
     }
-    logger.info('"DELETE templates" executed successfully');
     return response;
   } catch (error) {
     // log any server errors
@@ -141,4 +142,4 @@ async function main (params) {
   }
 }
 
-exports.main = main;
+exports.main = withRequestLogging(ENDPOINT, main);

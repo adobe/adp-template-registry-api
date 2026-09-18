@@ -24,6 +24,16 @@ const { mongoConnection } = require('../db/mongo');
 const { convertMongoIdToString } = require('./utils');
 
 /**
+ * Returns whether the given templateId is a syntactically valid MongoDB ObjectId.
+ *
+ * @param {string} templateId candidate template id
+ * @returns {boolean} true if templateId can be used to construct a valid ObjectId
+ */
+function isValidTemplateId (templateId) {
+  return ObjectId.isValid(templateId);
+}
+
+/**
  * Returns a template record from Template Registry by a template id.
  *
  * @param {object} dbParams database connection parameters
@@ -217,6 +227,7 @@ module.exports = {
   getTemplates,
   findTemplateByName,
   findTemplateById,
+  isValidTemplateId,
   addTemplate,
   removeTemplateByName,
   createReviewIssue,

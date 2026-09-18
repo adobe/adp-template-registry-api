@@ -12,12 +12,13 @@ governing permissions and limitations under the License.
 const { Core } = require('@adobe/aio-sdk');
 const { errorResponse, errorMessage, getBearerToken, stringParameters, checkMissingRequestInputs, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INVALID_IMS_ACCESS_TOKEN, ERR_RC_INCORRECT_REQUEST, ERR_RC_INVALID_TEMPLATE_ID, getEnv } = require('../../utils');
 const { validateAccessToken } = require('../../ims');
-const { findTemplateById } = require('../../templateRegistry');
+const { findTemplateById, isValidTemplateId } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const consoleLib = require('@adobe/aio-lib-console');
 const { incBatchCounter } = require('@adobe/aio-metrics-client');
 const { getTokenData } = require('@adobe/aio-lib-ims');
 const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
+const { withRequestLogging } = require('../../loggingUtils');
 
 const HTTP_METHOD = 'post';
 const ENDPOINT = 'POST /install/{templateId}';
@@ -49,9 +50,7 @@ const serializeRequestBody = (params) => {
  * @returns {object} response
  */
 async function main (params) {
-  // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
-
   const imsUrl = params.IMS_URL;
   const imsClientId = params.IMS_CLIENT_ID;
 
@@ -66,9 +65,6 @@ async function main (params) {
   }
 
   try {
-    // 'info' is the default level if not set
-    logger.info('Calling "POST install template"');
-
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
@@ -130,6 +126,11 @@ async function main (params) {
       return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, reqError.toString().split('\n').map(line => line.trim()).join(' => '))], logger);
     }
     console.log('Request:', req);
+
+    if (!isValidTemplateId(params.templateId)) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
+      return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, `The "templateId" parameter "${params.templateId}" is not a valid template id.`)], logger);
+    }
 
     const template = await findTemplateById(dbParams, params.templateId);
     if (!template) {
@@ -269,7 +270,6 @@ async function main (params) {
       throw new Error(resError.toString());
     }
 
-    logger.info('"POST Install templates" executed successfully');
     return {
       statusCode: 201,
       body: res.body
@@ -280,4 +280,4 @@ async function main (params) {
     return errorResponse(500, [errorMessage(ERR_RC_SERVER_ERROR, error.message)], logger);
   }
 }
-exports.main = main;
+exports.main = withRequestLogging(ENDPOINT, main);

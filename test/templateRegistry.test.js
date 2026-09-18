@@ -20,7 +20,8 @@ const {
   removeTemplateByName,
   updateTemplate,
   findTemplateById,
-  removeTemplateById
+  removeTemplateById,
+  isValidTemplateId
 } = require('../actions/templateRegistry');
 
 const dbParams = {
@@ -40,6 +41,16 @@ jest.mock('@octokit/rest', () => {
       };
     })
   };
+});
+
+describe('isValidTemplateId', () => {
+  test('returns true for a valid 24-character hex ObjectId string', () => {
+    expect(isValidTemplateId('662f8c822fb28925eb4d7f3a')).toBe(true);
+  });
+
+  test('returns false for a malformed templateId', () => {
+    expect(isValidTemplateId('not-a-valid-object-id')).toBe(false);
+  });
 });
 
 describe('Verify communication with Template Registry', () => {

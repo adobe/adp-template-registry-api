@@ -19,16 +19,17 @@ let db = null;
  * @returns {Promise<void>}
  */
 async function connectToMongoDB (params) {
+  const start = Date.now();
   try {
     const dbName = params.MONGODB_NAME;
     const url = params.MONGODB_URI;
     const client = new MongoClient(url);
     await client.connect();
-    console.log('Connected to MongoDB.');
+    console.log(`Connected to MongoDB in ${Date.now() - start}ms.`);
     db = client.db(dbName);
   } catch (error) {
     console.error('Error connecting to MongoDB:', error);
-    throw new Error('Error connecting to MongoDB');
+    throw new Error('Error connecting to MongoDB', { cause: error });
   }
 }
 

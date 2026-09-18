@@ -11,7 +11,7 @@ governing permissions and limitations under the License.
 
 const { Core } = require('@adobe/aio-sdk');
 const { validateAccessToken } = require('../actions/ims');
-const { findTemplateById } = require('../actions/templateRegistry');
+const { findTemplateById, isValidTemplateId } = require('../actions/templateRegistry');
 const action = require('../actions/templates/install/index');
 const consoleLib = require('@adobe/aio-lib-console');
 const utils = require('../actions/utils');
@@ -32,7 +32,8 @@ jest.mock('../actions/ims', () => ({
 }));
 
 jest.mock('../actions/templateRegistry', () => ({
-  findTemplateById: jest.fn()
+  findTemplateById: jest.fn(),
+  isValidTemplateId: jest.fn().mockReturnValue(true)
 }));
 
 jest.mock('@adobe/aio-lib-console');
@@ -46,6 +47,8 @@ jest.mock('@adobe/aio-lib-ims');
 jest.mock('../actions/metrics');
 
 const IMS_ACCESS_TOKEN = 'mockToken';
+const REQUEST_ID = 'test-request-id';
+const ENDPOINT = 'POST /install/{templateId}';
 const mockParams = {
   IMS_URL: 'mock IMS_URL',
   IMS_CLIENT_ID: 'mock IMS_CLIENT_ID',
@@ -178,6 +181,25 @@ describe('POST Install template: Core business logic specific tests', () => {
     // reset params
     mockParams.projectName = 'mockProjectName';
     mockParams.orgId = 'mockOrgId';
+  });
+
+  test('Malformed templateId, should return 400', async () => {
+    isValidTemplateId.mockReturnValueOnce(false);
+    const response = await action.main(mockParams);
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: `The "templateId" parameter "${mockParams.templateId}" is not a valid template id.`
+            }
+          ]
+        }
+      }
+    });
+    expect(findTemplateById).not.toHaveBeenCalled();
   });
 
   test('should return 404 error if template is not found', async () => {
@@ -944,5 +966,11 @@ describe('POST Install template: Core business logic specific tests', () => {
     const METRICS_URL = 'https://test.com';
     await action.main({ METRICS_URL });
     expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
+  });
+
+  test('Logs Start-API and End-API tagged with x-request-id when the header is present', async () => {
+    await action.main({ __ow_headers: { 'x-request-id': REQUEST_ID } });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Start-API endpoint=%s x-request-id=%s', ENDPOINT, REQUEST_ID);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('End-API endpoint=%s statusCode=%s durationMs=%s x-request-id=%s', ENDPOINT, 401, expect.any(Number), REQUEST_ID);
   });
 });

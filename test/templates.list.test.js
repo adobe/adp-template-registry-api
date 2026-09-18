@@ -54,6 +54,8 @@ beforeEach(() => {
 const orgName = '@adobe';
 const templateName = 'app-builder-template';
 const HTTP_METHOD = 'get';
+const REQUEST_ID = 'test-request-id';
+const ENDPOINT = 'GET /templates';
 const templates = [{
   _links: {
     self: {
@@ -150,8 +152,6 @@ describe('LIST templates', () => {
     });
     expect(getTemplates).toHaveBeenCalledTimes(1);
     expect(getTemplates).toHaveBeenCalledWith({});
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Successful simple filtering by one field, should return 200', async () => {
@@ -169,8 +169,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.simple-filter.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Successful simple filtering by one field with value exclusion, should return 200', async () => {
@@ -188,8 +186,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.simple-filter.exclusion-filter.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Successful simple filtering by one field value exclusion only, should return 200', async () => {
@@ -207,8 +203,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.exclusion-filter.only.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Successful complex filtering by multiple fields, should return 200', async () => {
@@ -229,8 +223,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.complex-filter.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Successful complex filtering by multiple fields with value exclusion, should return 200', async () => {
@@ -251,8 +243,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.complex-filter.exclusion-filter.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('No templates matching filters, should return 200', async () => {
@@ -282,8 +272,6 @@ describe('LIST templates', () => {
         items: []
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Successful sorting by names in ascending order (Default), should return 200', async () => {
@@ -302,8 +290,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.orderBy.names.asc.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Successful sorting by names in descending order, should return 200', async () => {
@@ -322,8 +308,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.orderBy.names.desc.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Successful sorting by multiple properties, should return 200', async () => {
@@ -344,8 +328,6 @@ describe('LIST templates', () => {
       }
     );
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.orderBy.multiple.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Unsupported HTTP method, should return 405', async () => {
@@ -365,8 +347,6 @@ describe('LIST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Filtering by "*", should return templates that have a query param property set', async () => {
@@ -384,8 +364,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.filter-value-any.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Empty filters (?extensions=), should return templates that do not have a query param property set', async () => {
@@ -403,8 +381,6 @@ describe('LIST templates', () => {
       }
     );
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.filter-value-none-extensions.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Empty filters (?runtime=), should return templates that do not have a query param property set', async () => {
@@ -420,8 +396,6 @@ describe('LIST templates', () => {
       }
     );
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.filter-value-none-runtime.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Support of the "events" filtering that only supports empty and any filters for now', async () => {
@@ -438,8 +412,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.filter-value-any-events.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Support of the "events" filtering, not empty or any filters', async () => {
@@ -456,8 +428,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.filter-value-test-events.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"LIST templates" executed successfully');
   });
 
   test('Openapi schema validation fails on empty names param', async () => {
@@ -486,7 +456,6 @@ describe('LIST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
   });
 
   test('Openapi schema response validation fails on bad response', async () => {
@@ -514,7 +483,6 @@ describe('LIST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
   });
 
   test('Using the not operator with non-array field', async () => {
@@ -531,7 +499,6 @@ describe('LIST templates', () => {
     );
 
     expect(response).toEqual(require(path.join(__dirname, '/fixtures/list/response.not-approved.json')));
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "LIST templates"');
   });
 
   test('Get review issues but no issue exists', async () => {
@@ -651,5 +618,15 @@ describe('LIST templates', () => {
       METRICS_URL
     });
     expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
+  });
+
+  test('Logs Start-API and End-API tagged with x-request-id when the header is present', async () => {
+    getTemplates.mockReturnValue(templates);
+    await action.main({
+      __ow_method: HTTP_METHOD,
+      __ow_headers: { 'x-request-id': REQUEST_ID }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Start-API endpoint=%s x-request-id=%s', ENDPOINT, REQUEST_ID);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('End-API endpoint=%s statusCode=%s durationMs=%s x-request-id=%s', ENDPOINT, 200, expect.any(Number), REQUEST_ID);
   });
 });

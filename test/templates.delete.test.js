@@ -13,7 +13,7 @@ const { Core } = require('@adobe/aio-sdk');
 const { validateAccessToken, isAdmin, isValidServiceToken } = require('../actions/ims');
 const utils = require('../actions/utils');
 const action = require('../actions/templates/delete/index');
-const { findTemplateByName, removeTemplateById, removeTemplateByName } = require('../actions/templateRegistry');
+const { findTemplateByName, removeTemplateById, removeTemplateByName, isValidTemplateId } = require('../actions/templateRegistry');
 const { setMetricsUrl } = require('../actions/metrics');
 
 const mockLoggerInstance = { info: jest.fn(), debug: jest.fn(), error: jest.fn() };
@@ -33,6 +33,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   validateAccessToken.mockReset();
   isAdmin.mockReset();
+  isValidTemplateId.mockReturnValue(true);
 });
 
 process.env = {
@@ -40,6 +41,8 @@ process.env = {
 };
 
 const HTTP_METHOD = 'delete';
+const REQUEST_ID = 'test-request-id';
+const ENDPOINT = 'DELETE /templates';
 const IMS_ACCESS_TOKEN = 'fake';
 const fakeParams = {
   __ow_headers: {
@@ -97,8 +100,6 @@ describe('DELETE templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 
   test('Invalid token, should return 401', async () => {
@@ -212,9 +213,7 @@ describe('DELETE templates', () => {
     expect(response).toEqual({
       statusCode: 404
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(removeTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 
   test('Admin token, should return 200', async () => {
@@ -240,11 +239,9 @@ describe('DELETE templates', () => {
     expect(response).toEqual({
       statusCode: 200
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
     expect(isAdmin).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.ADMIN_IMS_ORGANIZATIONS.split(','));
     expect(removeTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 
   test('Service token, should return 200', async () => {
@@ -272,11 +269,9 @@ describe('DELETE templates', () => {
     expect(response).toEqual({
       statusCode: 200
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
     expect(isValidServiceToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, ['template_registry.write']);
     expect(removeTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 
   test('Should Delete By Template Id : Admin token, should return 200', async () => {
@@ -299,11 +294,9 @@ describe('DELETE templates', () => {
     expect(response).toEqual({
       statusCode: 200
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
     // expect(isAdmin).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.ADMIN_IMS_ORGANIZATIONS.split(','));
     expect(removeTemplateById).toHaveBeenCalledWith({}, templateId);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 
   // eslint-disable-next-line jest/no-focused-tests
@@ -327,11 +320,9 @@ describe('DELETE templates', () => {
     expect(response).toEqual({
       statusCode: 200
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_CLIENT_ID);
     expect(isValidServiceToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, ['template_registry.write']);
     expect(removeTemplateById).toHaveBeenCalledWith({}, templateId);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 
   test('Template Id Scenario : TemplateId cannot be null, should return 404', async () => {
@@ -353,8 +344,6 @@ describe('DELETE templates', () => {
     expect(response).toEqual({
       statusCode: 404
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
   });
 
   test('Template Id Scenario : Template does not exist, should return 404', async () => {
@@ -376,9 +365,36 @@ describe('DELETE templates', () => {
     expect(response).toEqual({
       statusCode: 404
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "DELETE templates"');
     expect(removeTemplateById).toHaveBeenCalledWith({}, templateId);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"DELETE templates" executed successfully');
+  });
+
+  test('Template Id Scenario : Malformed templateId, should return 400', async () => {
+    isAdmin.mockReturnValue(true);
+    isValidTemplateId.mockReturnValueOnce(false);
+
+    const templateId = 'not-a-valid-object-id';
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_CLIENT_ID,
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      __ow_method: HTTP_METHOD,
+      templateId,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: `The "templateId" parameter "${templateId}" is not a valid template id.`
+            }
+          ]
+        }
+      }
+    });
+    expect(removeTemplateById).not.toHaveBeenCalled();
   });
 
   test('Set metrics URL', async () => {
@@ -388,5 +404,14 @@ describe('DELETE templates', () => {
       METRICS_URL
     });
     expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
+  });
+
+  test('Logs Start-API and End-API tagged with x-request-id when the header is present', async () => {
+    await action.main({
+      ADMIN_IMS_ORGANIZATIONS: process.env.ADMIN_IMS_ORGANIZATIONS,
+      __ow_headers: { 'x-request-id': REQUEST_ID }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Start-API endpoint=%s x-request-id=%s', ENDPOINT, REQUEST_ID);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('End-API endpoint=%s statusCode=%s durationMs=%s x-request-id=%s', ENDPOINT, 401, expect.any(Number), REQUEST_ID);
   });
 });

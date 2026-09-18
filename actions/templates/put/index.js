@@ -13,12 +13,13 @@ const { Core } = require('@adobe/aio-sdk');
 const { errorResponse, errorMessage, stringParameters, checkMissingRequestInputs, getBearerToken, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INCORRECT_REQUEST, ERR_RC_MISSING_REQUIRED_PARAMETER, getEnv } =
   require('../../utils');
 const { generateAccessToken } = require('../../ims');
-const { findTemplateById, updateTemplate } = require('../../templateRegistry');
+const { findTemplateById, updateTemplate, isValidTemplateId } = require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const consoleLib = require('@adobe/aio-lib-console');
 const { incBatchCounter } = require('@adobe/aio-metrics-client');
 const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
 const { getTokenData } = require('@adobe/aio-lib-ims');
+const { withRequestLogging } = require('../../loggingUtils');
 
 const HTTP_METHOD = 'put';
 const ENDPOINT = 'PUT /templates/{templateId}';
@@ -50,9 +51,7 @@ const serializeRequestBody = (params) => {
  * @returns {object} response
  */
 async function main (params) {
-  // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
-
   const dbParams = {
     MONGODB_URI: params.MONGODB_URI,
     MONGODB_NAME: params.MONGODB_NAME
@@ -64,9 +63,6 @@ async function main (params) {
   }
 
   try {
-    // 'info' is the default level if not set
-    logger.info('Calling "PUT templates"');
-
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
@@ -93,6 +89,11 @@ async function main (params) {
     if (!isTemplateIdValid) {
       await incErrorCounterMetrics(requester, ENDPOINT, '400');
       return errorResponse(400, [errorMessage(ERR_RC_MISSING_REQUIRED_PARAMETER, `The "${PUT_PARAM_NAME}" parameter is not set.`)], logger);
+    }
+
+    if (!isValidTemplateId(params[PUT_PARAM_NAME])) {
+      await incErrorCounterMetrics(requester, ENDPOINT, '400');
+      return errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, `The "${PUT_PARAM_NAME}" parameter "${params[PUT_PARAM_NAME]}" is not a valid template id.`)], logger);
     }
 
     Enforcer.v3_0.Schema.defineDataTypeFormat('string', 'uuid', null);
@@ -165,7 +166,6 @@ async function main (params) {
     // an app builder template scenario
     const dbResponse = await updateTemplate(dbParams, templateId, body);
     if (dbResponse.matchedCount < 1) {
-      logger.info('"PUT templates" not executed successfully');
       await incErrorCounterMetrics(requester, ENDPOINT, '404');
       return {
         statusCode: 404
@@ -191,7 +191,6 @@ async function main (params) {
       throw new Error(resError.toString());
     }
 
-    logger.info('"PUT templates" executed successfully');
     return {
       statusCode: 200,
       body: res.body
@@ -205,4 +204,4 @@ async function main (params) {
   }
 }
 
-exports.main = main;
+exports.main = withRequestLogging(ENDPOINT, main);
