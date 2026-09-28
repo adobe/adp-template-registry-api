@@ -10,14 +10,15 @@ governing permissions and limitations under the License.
 */
 
 const { Core } = require('@adobe/aio-sdk');
-const { errorResponse, errorMessage, stringParameters, getBearerToken, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED } = require('../../utils');
-const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED, findTemplateById } =
+const { errorResponse, errorMessage, stringParameters, getBearerToken, ERR_RC_SERVER_ERROR, ERR_RC_HTTP_METHOD_NOT_ALLOWED, ERR_RC_INCORRECT_REQUEST } = require('../../utils');
+const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, TEMPLATE_STATUS_REJECTED, findTemplateById, isValidTemplateId } =
   require('../../templateRegistry');
 const Enforcer = require('openapi-enforcer');
 const { evaluateEntitlements } = require('../../templateEntitlement');
 const { incBatchCounter } = require('@adobe/aio-metrics-client');
 const { getTokenData } = require('@adobe/aio-lib-ims');
 const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
+const { withRequestLogging, getStatusCode } = require('../../loggingUtils');
 
 // GET operation is available to everyone, no IMS access token is required
 const HTTP_METHOD = 'get';
@@ -119,7 +120,6 @@ async function fetchTemplateByName (params, dbParams, logger) {
  * @returns {object} response
  */
 async function main (params) {
-  // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
   const dbParams = {
     MONGODB_URI: params.MONGODB_URI,
@@ -132,9 +132,6 @@ async function main (params) {
   }
 
   try {
-    // 'info' is the default level if not set
-    logger.info('Calling "GET templates"');
-
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
@@ -166,17 +163,20 @@ async function main (params) {
 
     let response = {};
     if (paramField === 'templateId') {
-      response = await fetchTemplateById(params, dbParams, logger);
-      if (response.statusCode === 404) {
-        await incErrorCounterMetrics(requester, ENDPOINT, '404');
-        return response;
+      const templateId = params.templateId;
+      if (templateId !== undefined && templateId !== null && !isValidTemplateId(templateId)) {
+        response = errorResponse(400, [errorMessage(ERR_RC_INCORRECT_REQUEST, `The "templateId" parameter "${templateId}" is not a valid template id.`)], logger);
+      } else {
+        response = await fetchTemplateById(params, dbParams, logger);
       }
     } else {
       response = await fetchTemplateByName(params, dbParams, logger);
-      if (response.statusCode === 404) {
-        await incErrorCounterMetrics(requester, ENDPOINT, '404');
-        return response;
-      }
+    }
+
+    const statusCode = getStatusCode(response);
+    if (statusCode >= 400) {
+      await incErrorCounterMetrics(requester, ENDPOINT, String(statusCode));
+      return response;
     }
 
     const evaluatedTemplates = await evaluateEntitlements([response], params, logger);
@@ -190,7 +190,6 @@ async function main (params) {
       throw new Error(error.toString());
     }
 
-    logger.info('"GET templates" executed successfully');
     return {
       statusCode: 200,
       body: res.body
@@ -204,4 +203,4 @@ async function main (params) {
   }
 }
 
-exports.main = main;
+exports.main = withRequestLogging(ENDPOINT, main);

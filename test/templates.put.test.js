@@ -12,7 +12,7 @@ governing permissions and limitations under the License.
 const { Core } = require('@adobe/aio-sdk');
 const { generateAccessToken } = require('../actions/ims');
 const utils = require('../actions/utils');
-const { fetchUrl, updateTemplate, findTemplateById } = require('../actions/templateRegistry');
+const { fetchUrl, updateTemplate, findTemplateById, isValidTemplateId } = require('../actions/templateRegistry');
 const action = require('../actions/templates/put/index');
 const consoleSDK = require('@adobe/aio-lib-console');
 const { setMetricsUrl } = require('../actions/metrics');
@@ -43,9 +43,12 @@ process.env = {
 
 beforeEach(() => {
   jest.clearAllMocks();
+  isValidTemplateId.mockReturnValue(true);
 });
 
 const HTTP_METHOD = 'put';
+const REQUEST_ID = 'test-request-id';
+const ENDPOINT = 'PUT /templates/{templateId}';
 const PUT_PARAM_ID = 'templateId';
 const PUT_PARAM_LINKS = 'links';
 const PUT_PARAM_LINKS_GITHUB = 'github';
@@ -132,8 +135,6 @@ describe('PUT templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"PUT templates" executed successfully');
   });
 
   test('Incorrect PUT payload, should return 400', async () => {
@@ -191,9 +192,7 @@ describe('PUT templates', () => {
     expect(response).toEqual({
       statusCode: 404
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
     expect(findTemplateById).not.toHaveBeenCalledWith({}, TEMPLATE_ID);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" not executed successfully');
   });
 
   test('Template does not exist, should return 404', async () => {
@@ -224,9 +223,7 @@ describe('PUT templates', () => {
     expect(response).toEqual({
       statusCode: 404
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
     expect(findTemplateById).not.toHaveBeenCalledWith({}, TEMPLATE_ID);
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"PUT templates" executed successfully');
   });
 
   test('Server Error should be catch and return 500', async () => {
@@ -307,6 +304,32 @@ describe('PUT templates', () => {
         }
       }
     });
+  });
+
+  test('Malformed templateId, should return 400', async () => {
+    const templateId = 'not-a-valid-object-id';
+    isValidTemplateId.mockReturnValueOnce(false);
+    const response = await action.main({
+      IMS_URL: process.env.IMS_URL,
+      IMS_CLIENT_ID: process.env.IMS_URL,
+      __ow_method: HTTP_METHOD,
+      templateId,
+      ...fakeParams
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: `The "templateId" parameter "${templateId}" is not a valid template id.`
+            }
+          ]
+        }
+      }
+    });
+    expect(updateTemplate).not.toHaveBeenCalled();
   });
 
   test('Incorrect response, should throw error', async () => {
@@ -575,10 +598,8 @@ describe('PUT templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" executed successfully');
   });
 
   test('Should Updating existing template, but no apis present in the credential', async () => {
@@ -648,10 +669,8 @@ describe('PUT templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "PUT templates"');
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"PUT templates" executed successfully');
   });
 
   test('Should set metrics URL', async () => {
@@ -660,5 +679,13 @@ describe('PUT templates', () => {
       METRICS_URL
     });
     expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
+  });
+
+  test('Logs Start-API and End-API tagged with x-request-id when the header is present', async () => {
+    await action.main({
+      __ow_headers: { 'x-request-id': REQUEST_ID }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Start-API endpoint=%s x-request-id=%s', ENDPOINT, REQUEST_ID);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('End-API endpoint=%s statusCode=%s durationMs=%s x-request-id=%s', ENDPOINT, 401, expect.any(Number), REQUEST_ID);
   });
 });

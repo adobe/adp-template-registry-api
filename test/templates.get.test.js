@@ -12,7 +12,7 @@ governing permissions and limitations under the License.
 const { Core } = require('@adobe/aio-sdk');
 const action = require('../actions/templates/get/index');
 const utils = require('../actions/utils');
-const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, findTemplateById } = require('../actions/templateRegistry');
+const { findTemplateByName, getReviewIssueByTemplateName, TEMPLATE_STATUS_IN_VERIFICATION, findTemplateById, isValidTemplateId } = require('../actions/templateRegistry');
 const { evaluateEntitlements } = require('../actions/templateEntitlement');
 const { setMetricsUrl } = require('../actions/metrics');
 const { getBearerToken } = require('../actions/utils');
@@ -42,6 +42,7 @@ beforeEach(() => {
   evaluateEntitlements.mockImplementation(jest.fn().mockImplementation((templates, params, logger) => {
     return templates;
   }));
+  isValidTemplateId.mockReturnValue(true);
 });
 
 process.env = {
@@ -49,6 +50,8 @@ process.env = {
 };
 
 const HTTP_METHOD = 'get';
+const REQUEST_ID = 'test-request-id';
+const ENDPOINT = 'GET /templates/{templateId}';
 
 describe('GET templates', () => {
   test('main should be defined', () => {
@@ -143,9 +146,7 @@ describe('GET templates', () => {
       }
     };
     expect(response).toEqual(expectedResponse);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
     expect(evaluateEntitlements).toHaveBeenCalledWith([expectedResponse.body], expect.any(Object), mockLoggerInstance);
   }
 
@@ -194,10 +195,8 @@ describe('GET templates', () => {
       }
     };
     expect(response).toEqual(expectedResponse);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(getReviewIssueByTemplateName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
     expect(evaluateEntitlements).toHaveBeenCalledWith([expectedResponse.body], expect.any(Object), mockLoggerInstance);
   });
 
@@ -234,10 +233,8 @@ describe('GET templates', () => {
       }
     };
     expect(response).toEqual(expectedResponse);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
     expect(getReviewIssueByTemplateName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
     expect(evaluateEntitlements).toHaveBeenCalledWith([expectedResponse.body], expect.any(Object), mockLoggerInstance);
   });
 
@@ -256,9 +253,7 @@ describe('GET templates', () => {
     expect(response).toEqual({
       statusCode: 404
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
     expect(evaluateEntitlements).not.toHaveBeenCalled();
   });
 
@@ -272,7 +267,6 @@ describe('GET templates', () => {
     expect(response).toEqual({
       statusCode: 404
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(evaluateEntitlements).not.toHaveBeenCalled();
   });
 
@@ -299,9 +293,7 @@ describe('GET templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).not.toHaveBeenCalledWith();
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
     expect(evaluateEntitlements).not.toHaveBeenCalled();
   });
 
@@ -347,9 +339,7 @@ describe('GET templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateByName).toHaveBeenCalledWith({}, fullTemplateName);
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
     expect(mockLoggerInstance.error).toHaveBeenCalledWith(new Error('Response invalid\n  at: body\n    One or more required properties missing: status'));
     expect(evaluateEntitlements).toHaveBeenCalledWith([expectedInputTemplate], expect.any(Object), mockLoggerInstance);
   });
@@ -436,9 +426,7 @@ describe('GET templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
   });
 
   test('TemplateId Scenario : Successful request for "InVerification" template, should return 200, and a link to the Review github issue', async () => {
@@ -479,10 +467,8 @@ describe('GET templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(getReviewIssueByTemplateName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
   });
 
   test('TemplateId Scenario : Successful request for "InVerification" template, should return 200, but no link to github Review issue', async () => {
@@ -518,10 +504,8 @@ describe('GET templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
     expect(getReviewIssueByTemplateName).toHaveBeenCalledWith(fullTemplateName, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"GET templates" executed successfully');
   });
 
   test('TemplateId Scenario : Template does not exist, should return 404', async () => {
@@ -536,9 +520,32 @@ describe('GET templates', () => {
     expect(response).toEqual({
       statusCode: 404
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateById).toHaveBeenCalledWith({}, templateId);
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
+  });
+
+  test('TemplateId Scenario : Malformed templateId, should return 400', async () => {
+    const templateId = 'not-a-valid-object-id';
+    isValidTemplateId.mockReturnValueOnce(false);
+    const response = await action.main({
+      TEMPLATE_REGISTRY_ORG: process.env.TEMPLATE_REGISTRY_ORG,
+      TEMPLATE_REGISTRY_REPOSITORY: process.env.TEMPLATE_REGISTRY_REPOSITORY,
+      templateId,
+      __ow_method: HTTP_METHOD
+    });
+    expect(response).toEqual({
+      error: {
+        statusCode: 400,
+        body: {
+          errors: [
+            {
+              code: utils.ERR_RC_INCORRECT_REQUEST,
+              message: `The "templateId" parameter "${templateId}" is not a valid template id.`
+            }
+          ]
+        }
+      }
+    });
+    expect(findTemplateById).not.toHaveBeenCalled();
   });
 
   // eslint-disable-next-line jest/no-focused-tests
@@ -554,9 +561,7 @@ describe('GET templates', () => {
     expect(response).toEqual({
       statusCode: 404
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "GET templates"');
     expect(findTemplateById).not.toHaveBeenCalledWith({}, templateId);
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"GET templates" executed successfully');
   });
 
   test('Request with authorization header', async () => {
@@ -586,5 +591,16 @@ describe('GET templates', () => {
       METRICS_URL
     });
     expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
+  });
+
+  test('Logs Start-API and End-API tagged with x-request-id when the header is present', async () => {
+    findTemplateByName.mockReturnValue(null);
+    await action.main({
+      templateName: 'app-builder-template',
+      __ow_method: HTTP_METHOD,
+      __ow_headers: { 'x-request-id': REQUEST_ID }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Start-API endpoint=%s x-request-id=%s', ENDPOINT, REQUEST_ID);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('End-API endpoint=%s statusCode=%s durationMs=%s x-request-id=%s', ENDPOINT, 404, expect.any(Number), REQUEST_ID);
   });
 });

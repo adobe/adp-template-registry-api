@@ -46,6 +46,8 @@ beforeEach(() => {
 });
 
 const HTTP_METHOD = 'post';
+const REQUEST_ID = 'test-request-id';
+const ENDPOINT = 'POST /templates';
 const POST_PARAM_NAME = 'name';
 const POST_PARAM_LINKS = 'links';
 const POST_PARAM_LINKS_GITHUB = 'github';
@@ -159,8 +161,6 @@ describe('POST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 
   test('Incorrect POST payload, should return 400', async () => {
@@ -213,10 +213,8 @@ describe('POST templates', () => {
     expect(response).toEqual({
       statusCode: 409
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
     expect(findTemplateByName).toHaveBeenCalledWith({}, TEMPLATE_NAME);
-    expect(mockLoggerInstance.info).not.toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 
   test('Adding new template, should return 500 due to incorrect response', async () => {
@@ -311,7 +309,6 @@ describe('POST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, process.env.IMS_URL);
     expect(findTemplateByName).toHaveBeenCalledWith({}, TEMPLATE_NAME);
     expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
@@ -322,7 +319,6 @@ describe('POST templates', () => {
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 
   test('Adding new developer console template, should return 200', async () => {
@@ -389,7 +385,6 @@ describe('POST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
@@ -418,7 +413,6 @@ describe('POST templates', () => {
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 
   test('Adding new developer console template without apis, should return 200', async () => {
@@ -479,7 +473,6 @@ describe('POST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
@@ -501,7 +494,6 @@ describe('POST templates', () => {
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 
   test('Adding new developer console template with additional fields, should return 200', async () => {
@@ -585,7 +577,6 @@ describe('POST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
@@ -623,7 +614,6 @@ describe('POST templates', () => {
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 
   test('Adding new developer console template with only one additional field, should return 200', async () => {
@@ -690,7 +680,6 @@ describe('POST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
     expect(generateAccessToken).toHaveBeenCalledWith(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, mockLoggerInstance);
     expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
@@ -719,7 +708,6 @@ describe('POST templates', () => {
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 
   test('Do not allow null name param', async () => {
@@ -942,7 +930,6 @@ describe('POST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
     expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
     expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
@@ -980,7 +967,6 @@ describe('POST templates', () => {
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 
   test('Adding new developer console template with more additional fields, no credentials, should return 200', async () => {
@@ -1075,7 +1061,6 @@ describe('POST templates', () => {
         }
       }
     });
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Calling "POST templates"');
     expect(validateAccessToken).toHaveBeenCalledWith(IMS_ACCESS_TOKEN, process.env.IMS_URL, IMS_CLIENT_ID);
     expect(findTemplateByName).toHaveBeenCalledWith({}, DEVELOPER_CONSOLE_TEMPLATE_NAME);
     expect(addTemplate).toHaveBeenCalledWith({ MONGODB_NAME: undefined, MONGODB_URI: undefined }, {
@@ -1112,7 +1097,6 @@ describe('POST templates', () => {
     });
     // TODO: Uncomment the following after integrating with App Builder templates again
     // expect(createReviewIssue).toHaveBeenCalledWith(TEMPLATE_NAME, TEMPLATE_GITHUB_REPO, process.env.ACCESS_TOKEN_GITHUB, process.env.TEMPLATE_REGISTRY_ORG, process.env.TEMPLATE_REGISTRY_REPOSITORY);
-    expect(mockLoggerInstance.info).toHaveBeenCalledWith('"POST templates" executed successfully');
   });
 
   test('Should set metrics URL', async () => {
@@ -1121,5 +1105,13 @@ describe('POST templates', () => {
       METRICS_URL
     });
     expect(setMetricsUrl).toHaveBeenCalledWith(METRICS_URL, 'recordtemplateregistrymetrics');
+  });
+
+  test('Logs Start-API and End-API tagged with x-request-id when the header is present', async () => {
+    await action.main({
+      __ow_headers: { 'x-request-id': REQUEST_ID }
+    });
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('Start-API endpoint=%s x-request-id=%s', ENDPOINT, REQUEST_ID);
+    expect(mockLoggerInstance.info).toHaveBeenCalledWith('End-API endpoint=%s statusCode=%s durationMs=%s x-request-id=%s', ENDPOINT, 401, expect.any(Number), REQUEST_ID);
   });
 });

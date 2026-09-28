@@ -19,6 +19,7 @@ const consoleLib = require('@adobe/aio-lib-console');
 const { incBatchCounter } = require('@adobe/aio-metrics-client');
 const { getTokenData } = require('@adobe/aio-lib-ims');
 const { setMetricsUrl, incErrorCounterMetrics } = require('../../metrics');
+const { withRequestLogging } = require('../../loggingUtils');
 
 const HTTP_METHOD = 'post';
 const ENDPOINT = 'POST /templates';
@@ -68,9 +69,7 @@ const serializeRequestBody = (params) => {
  * @returns {object} response
  */
 async function main (params) {
-  // create a Logger
   const logger = Core.Logger('main', { level: params.LOG_LEVEL || 'info' });
-
   const imsUrl = params.IMS_URL;
   const imsClientId = params.IMS_CLIENT_ID;
 
@@ -85,9 +84,6 @@ async function main (params) {
   }
 
   try {
-    // 'info' is the default level if not set
-    logger.info('Calling "POST templates"');
-
     // log parameters, only if params.LOG_LEVEL === 'debug'
     logger.debug(stringParameters(params));
 
@@ -222,7 +218,6 @@ async function main (params) {
       throw new Error(resError.toString());
     }
 
-    logger.info('"POST templates" executed successfully');
     return {
       statusCode: 200,
       body: res.body
@@ -236,4 +231,4 @@ async function main (params) {
   }
 }
 
-exports.main = main;
+exports.main = withRequestLogging(ENDPOINT, main);
