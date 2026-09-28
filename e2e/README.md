@@ -25,6 +25,8 @@
 npm run e2e
 ```
 
+By default the suite targets the deployed API (`TEMPLATE_REGISTRY_API_URL`). To run it against a local server instead, use `E2E_TARGET=local` — see [docs/running-locally.md](../docs/running-locally.md).
+
 ## Test overview
 
 The tests cover:
