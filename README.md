@@ -45,6 +45,10 @@ The output of the second command should provide you with the base URL for callin
 
 > Note: It can take up to five minutes for the API configuration to be fully setup and ready for use
 
+## Running locally
+
+To run the service on your machine with `aio app dev` and point the E2E suite at it, see [docs/running-locally.md](docs/running-locally.md).
+
 ## Run Unit Tests
 
 `npm test`

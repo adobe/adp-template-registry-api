@@ -1,4 +1,4 @@
-
+#
 # package directories
 node_modules
 jspm_packages
@@ -46,3 +46,9 @@ logs
 .yalc
 yalc.lock
 .claude
+
+# Dev-only: `aio app dev` runs each action from its source directory but does not
+# apply the deployment-time `include` entries in app.config.yaml. The Enforcer
+# calls in actions/templates/*/index.js load `./template-registry-api.json`, so
+# local symlinks provide the spec at that cwd-relative path without duplicating it.
+actions/templates/*/template-registry-api.json

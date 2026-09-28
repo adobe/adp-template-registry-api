@@ -30,26 +30,128 @@ if (missing.length > 0) {
 }
 
 /**
+ * Resolves all target-specific configuration in one place.
+ *
+ * Default target is the deployed API Gateway (stage/prod), which maps REST paths
+ * and HTTP methods to actions: GET /templates -> list, POST /templates -> create,
+ * GET|PUT|DELETE /templates/{id} -> get|put|delete.
+ *
+ * Set E2E_TARGET=local to hit a local server instead. It has no
+ * gateway, so each action is exposed as a raw web action at `<base>/<action-name>`
+ * and `{id}` path params are not extracted — item ops therefore pass templateId as
+ * a query param. A dedicated undici dispatcher trusts `aio app dev`'s self-signed
+ * cert (dist/dev-keys) — scoped to these requests only, so real environments keep
+ * full TLS verification. Override the dev URL with E2E_LOCAL_URL if needed.
+ *
+ * @returns {{
+ *   local: boolean,
+ *   dispatcher: (import('undici').Dispatcher|undefined),
+ *   collectionUrl: (op: 'list'|'create') => string,
+ *   itemUrl: (op: 'get'|'update'|'delete', id: string) => string
+ * }} target configuration
+ */
+function resolveTarget () {
+  const local = process.env.E2E_TARGET === 'local';
+  const baseUrl = local
+    ? (process.env.E2E_LOCAL_URL || 'https://localhost:9080/api/v1/web/template-registry-api')
+    : TEMPLATE_REGISTRY_API_URL;
+
+  // Local only: a closable dispatcher that trusts the self-signed dev cert. It is
+  // passed per request (so it does not weaken TLS globally) and closed in afterAll
+  // (so its keep-alive sockets don't linger as open handles). undefined for real
+  // environments, which then use the default global dispatcher with full TLS.
+  const { Agent } = require('undici');
+  const dispatcher = local ? new Agent({ connect: { rejectUnauthorized: false } }) : undefined;
+
+  const localAction = { create: 'templates-post', list: 'templates-list', get: 'templates-get', update: 'templates-put', delete: 'templates-delete' };
+
+  return {
+    local,
+    dispatcher,
+    collectionUrl: (op) => local ? `${baseUrl}/${localAction[op]}` : `${baseUrl}/templates`,
+    itemUrl: (op, id) => local
+      ? `${baseUrl}/${localAction[op]}?templateId=${encodeURIComponent(id)}`
+      : `${baseUrl}/templates/${id}`
+  };
+}
+
+const target = resolveTarget();
+
+/**
+ * Logs an outgoing request. All headers are printed except Authorization,
+ * which is omitted to avoid leaking the token.
+ * @param {string} method HTTP method
+ * @param {string} url request URL
+ * @param {object} [headers] request headers (Authorization is skipped)
+ */
+function logRequest (method, url, headers = {}) {
+  const printable = Object.fromEntries(
+    Object.entries(headers).filter(([k]) => k.toLowerCase() !== 'authorization')
+  );
+  console.log(`\n== HTTP REQUEST ==\n${method} ${url}\nHeaders: ${JSON.stringify(printable)}`);
+}
+
+/**
+ * Logs a response.
+ * @param {number} status HTTP status code
+ * @param {string} statusText HTTP status text
+ * @param {*} body parsed body or raw text
+ */
+function logResponse (status, statusText, body) {
+  const printable = typeof body === 'string' ? body : JSON.stringify(body, null, 2);
+  console.log(`-- HTTP RESPONSE --\nStatus: ${status} ${statusText}\nBody: ${printable}\n==================\n`);
+}
+
+/**
+ * Reads a fetch Response body as text and parses it as JSON, falling back to the
+ * raw text when the body is not valid JSON. Also drains the body so the
+ * underlying socket is released.
+ * @param {Response} response fetch response
+ * @returns {Promise<*>} parsed JSON, or the raw text
+ */
+async function parseBody (response) {
+  const rawBody = await response.text();
+  try { return JSON.parse(rawBody); } catch { return rawBody; }
+}
+
+/**
+ * Builds common request headers, tagging each call with a unique x-request-id so
+ * it can be traced through the service logs (e.g. `Start-API ... x-request-id=`).
+ * @param {string} accessToken bearer token to access the API
+ * @returns {object} request headers
+ */
+function requestHeaders (accessToken) {
+  return {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${accessToken}`,
+    'x-request-id': `e2e-test-${uuidv4()}`
+  };
+}
+
+/**
  * @param {string} accessToken - token to access API
  * @param {object} templateData contains name and links
  * @description Creates a new template
  * @returns {object} returns the created template
  */
 async function createTemplate (accessToken, templateData) {
-  const response = await fetch(`${TEMPLATE_REGISTRY_API_URL}/templates`, {
+  const url = target.collectionUrl('create');
+  const headers = requestHeaders(accessToken);
+  logRequest('POST', url, headers);
+  const response = await fetch(url, {
     method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`
-    },
-    body: JSON.stringify(templateData)
+    headers,
+    body: JSON.stringify(templateData),
+    dispatcher: target.dispatcher
   });
+
+  const data = await parseBody(response);
+  logResponse(response.status, response.statusText, data);
 
   if (!response.ok) {
     throw new Error(`createTemplate: HTTP error! status: ${response.status} - ${response.statusText}`);
   }
 
-  const data = await response.json();
   return { data, status: response.status };
 }
 
@@ -61,20 +163,23 @@ async function createTemplate (accessToken, templateData) {
  * @returns {object} returns the updated template
  */
 async function updateTemplate (accessToken, templateId, updateTemplateData) {
-  const response = await fetch(`${TEMPLATE_REGISTRY_API_URL}/templates/${templateId}`, {
+  const url = target.itemUrl('update', templateId);
+  const headers = requestHeaders(accessToken);
+  logRequest('PUT', url, headers);
+  const response = await fetch(url, {
     method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`
-    },
-    body: JSON.stringify(updateTemplateData)
+    headers,
+    body: JSON.stringify(updateTemplateData),
+    dispatcher: target.dispatcher
   });
+
+  const data = await parseBody(response);
+  logResponse(response.status, response.statusText, data);
 
   if (!response.ok) {
     throw new Error(`updateTemplate: HTTP error! status: ${response.status} - ${response.statusText}`);
   }
 
-  const data = await response.json();
   return { data, status: response.status };
 }
 
@@ -85,20 +190,22 @@ async function updateTemplate (accessToken, templateId, updateTemplateData) {
  * @returns {object} returns the template
  */
 async function getTemplate (accessToken, templateId) {
-  const url = `${TEMPLATE_REGISTRY_API_URL}/templates/${templateId}`;
+  const url = target.itemUrl('get', templateId);
+  const headers = requestHeaders(accessToken);
+  logRequest('GET', url, headers);
   const response = await fetch(url, {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`
-    }
+    headers,
+    dispatcher: target.dispatcher
   });
+
+  const data = await parseBody(response);
+  logResponse(response.status, response.statusText, data);
 
   if (!response.ok) {
     return { data: {}, status: response.status, error: response.statusText };
   }
 
-  const data = await response.json();
   return { data, status: response.status };
 }
 
@@ -109,21 +216,22 @@ async function getTemplate (accessToken, templateId) {
  * @returns {Array} returns the templates
  */
 async function getTemplates (accessToken, queryParams) {
-  const url = `${TEMPLATE_REGISTRY_API_URL}/templates`;
-
-  const urlObj = new URL(url);
+  const urlObj = new URL(target.collectionUrl('list'));
   const params = new URLSearchParams(queryParams);
-  urlObj.search = params.toString();
+  // preserve any query already on the URL (none today, but keeps it robust)
+  for (const [k, v] of params) urlObj.searchParams.set(k, v);
 
+  const headers = requestHeaders(accessToken);
+  logRequest('GET', urlObj.toString(), headers);
   const response = await fetch(urlObj.toString(), {
     method: 'GET',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`
-    }
+    headers,
+    dispatcher: target.dispatcher
   });
 
-  const data = await response.json();
+  const data = await parseBody(response);
+  logResponse(response.status, response.statusText, data);
+
   return { data, status: response.status };
 }
 
@@ -134,13 +242,20 @@ async function getTemplates (accessToken, queryParams) {
  * @returns {object} returns the response
  */
 async function deleteTemplate (accessToken, templateId) {
-  const response = await fetch(`${TEMPLATE_REGISTRY_API_URL}/templates/${templateId}`, {
+  const url = target.itemUrl('delete', templateId);
+  const headers = requestHeaders(accessToken);
+  logRequest('DELETE', url, headers);
+  const response = await fetch(url, {
     method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${accessToken}`
-    }
+    headers,
+    dispatcher: target.dispatcher
   });
+
+  // parseBody also drains the body so the underlying TLS socket is released;
+  // leaving it unread keeps the connection alive and trips Jest's open-handle
+  // detector. Callers only read `.status`, which stays available.
+  const data = await parseBody(response);
+  logResponse(response.status, response.statusText, data);
 
   return response;
 }
@@ -162,6 +277,11 @@ describe('E2E Tests', () => {
 
   beforeAll(async () => {
     accessToken = accessToken ?? await generateAccessToken(IMS_AUTH_CODE, IMS_CLIENT_ID, IMS_CLIENT_SECRET, IMS_SCOPES, console);
+  });
+
+  afterAll(async () => {
+    // Close the local dispatcher so its keep-alive sockets don't linger as open handles.
+    if (target.dispatcher) await target.dispatcher.close();
   });
 
   describe('Template Registry API - E2E Tests', () => {
@@ -358,7 +478,12 @@ describe('E2E Tests', () => {
     });
   });
 
-  describe('Template Registry API - Performance Testing', () => {
+  // Performance/concurrency tests need the deployed API Gateway (isolated action
+  // containers). `aio app dev` is a single-process dev server that mutates global
+  // process.env/cwd per request, so concurrent load clobbers requests (400s /
+  // ECONNRESET). Skip these locally; they still run against stage/prod.
+  const describePerf = target.local ? describe.skip : describe;
+  describePerf('Template Registry API - Performance Testing', () => {
     const numRequests = 25;
     const responseTime = 3000;
 
