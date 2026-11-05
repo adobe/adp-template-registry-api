@@ -70,3 +70,43 @@ jobs:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           METRICS_URL: ${{ secrets.METRICS_URL }}
         run: aio app deploy
+
+  e2e-tests:
+    # Verifies the newly deployed code on Stage by running the full e2e suite.
+    # NOTE: Stage only for now. The scheduled "Smoke Tests" workflow had been disabled for all
+    # environments (reason unknown), so tests are not re-introduced against Production yet.
+    # Once Stage runs prove stable, extend this job to Production (e.g. `npm run test:smoke`).
+    needs: deploy
+    if: ${{ (inputs.environment || github.event_name == 'release' && 'Production' || github.event_name == 'push' && 'Stage') == 'Stage' }}
+    environment: Stage
+    name: E2E tests on Stage
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Use Node.js 22
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm i --package-lock --package-lock-only && npm ci
+      - name: Run e2e tests
+        env:
+          E2E_TARGET: stage
+          IMS_URL: ${{ secrets.IMS_URL }}
+          IMS_CLIENT_ID: ${{ secrets.IMS_CLIENT_ID }}
+          IMS_CLIENT_SECRET: ${{ secrets.IMS_CLIENT_SECRET }}
+          IMS_AUTH_CODE: ${{ secrets.IMS_AUTH_CODE }}
+          IMS_SCOPES: ${{ secrets.IMS_SCOPES }}
+          TEMPLATE_REGISTRY_API_URL: ${{ secrets.TEMPLATE_REGISTRY_API_URL }}
+        run: npm run e2e
+      - name: Slack Notification
+        if: ${{ failure() }}
+        uses: rtCamp/action-slack-notify@v2
+        env:
+          SLACK_WEBHOOK: ${{ secrets.SLACK_WEBHOOK }}
+          SLACK_TITLE: Stage Template Registry E2E Tests Failed
+          SLACK_MESSAGE: 'Post-deploy e2e tests failed on Stage for ${{ github.sha }}.\n Run: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}\n Runbook: https://git.corp.adobe.com/CNA/runbooks/tree/main/runbooks/template-registry-smoke-tests-failure.md'
+          SLACK_COLOR: danger
+          ENABLE_ESCAPES: true

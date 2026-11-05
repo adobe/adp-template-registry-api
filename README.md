@@ -47,7 +47,15 @@ The output of the second command should provide you with the base URL for callin
 
 ## Run Unit Tests
 
-`npm test`
+This repo has several types of automated tests, each backed by a CI workflow under [.github/workflows](.github/workflows):
+
+| Test type | How to run locally | Purpose | CI workflow |
+|---|---|---|---|
+| **Unit tests** | `npm test` (lint + `npm run unit-tests`) | Fast, isolated tests (mocked I/O) covering business logic, request/response handling, IMS auth, and utilities. 100% coverage (statements, branches, functions, lines) of `actions/**` is enforced — the run fails below it. Gate every change before merge. | [`node.js.yml`](.github/workflows/node.js.yml) runs on every push/PR to `main`; [`daily.yml`](.github/workflows/daily.yml) reruns the full unit suite nightly (`npm install` + tests) to catch drift from upstream dependency changes. |
+| **Smoke tests** | `npm run test:smoke` (requires live env vars, see [`e2e/README.md`](e2e/README.md)) | The subset of the E2E suite tagged `@smoke` in its `describe` name: a production-safe health check of the full console template create → read → list → update → delete lifecycle against the **real, deployed** API. Requests/responses are logged for traceability. | Not run in CI yet. The scheduled Smoke Tests workflow had been disabled in all environments (reason unknown), so tests are not run against Production for now. This will be revisited after observing the Stage e2e runs. |
+| **End-to-end (E2E) tests** | `npm run e2e` (point at a running local or deployed instance, see [`e2e/README.md`](e2e/README.md)) | Broader black-box API tests (in [`e2e/e2e.js`](e2e/e2e.js)) covering CRUD flows, validation, error handling, and performance, run against any reachable environment. | [`deploy-api.yml`](.github/workflows/deploy-api.yml) runs the full suite against Stage after every deploy to Stage (i.e. on each merge to `main`) and posts a Slack alert on failure. |
+
+Other workflows in this repo are operational rather than test suites: [`deploy-api.yml`](.github/workflows/deploy-api.yml) deploys the service/APIs to Stage or Production, and [`dev-mongo-keepalive.yml`](.github/workflows/dev-mongo-keepalive.yml) periodically pings the Dev MongoDB instance to keep it from being paused due to inactivity.
 
 ## Functional Testing
 
